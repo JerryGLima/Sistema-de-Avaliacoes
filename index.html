@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Avaliações - Padrão System</title>
+    <!-- Tailwind CSS para o Design System -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .rich-text-area:empty:before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; display: block; }
+        
+        /* Estilos de Impressão A4 */
+        @page { size: A4; margin: 15mm !important; }
+        @media print {
+            body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none !important; }
+            .print-container { box-shadow: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .page-break { page-break-inside: avoid; }
+            .content-render p, .content-render div { margin: 0; padding: 0; display: inline; }
+            .content-render br { display: block; content: ""; margin-top: 0; }
+        }
+
+        /* Micro-interações */
+        .btn-active:active { transform: scale(0.95); }
+        .card-premium { transition: all 0.3s ease; }
+        .card-premium:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0,0,0,0.04); }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 overflow-x-hidden">
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-md bg-white rounded-[3.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.06)] border border-slate-100 p-12 space-y-12">
+            <div class="text-center space-y-4">
+                <div class="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-blue-100 mx-auto rotate-6">
+                    <i data-lucide="file-text" class="text-white w-12 h-12 -rotate-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
+                    <p class="text-slate-400 font-semibold text-lg mt-1 tracking-tight">Login do Professor</p>
+                </div>
+            </div>
+            <form id="login-form" class="space-y-7">
+                <div id="auth-error" class="hidden bg-red-50 text-red-600 p-5 rounded-3xl text-sm font-bold border border-red-100"></div>
+                <div class="space-y-5">
+                    <div class="relative group">
+                        <i data-lucide="user" class="absolute left-6 top-6 w-5 h-5 text-slate-300"></i>
+                        <input type="email" id="login-email" required class="w-full pl-16 pr-8 py-6 bg-slate-50 border-0 rounded-3xl outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium" placeholder="E-mail">
+                    </div>
+                    <div class="relative group">
+                        <i data-lucide="lock" class="absolute left-6 top-6 w-5 h-5 text-slate-300"></i>
+                        <input type="password" id="login-password" required class="w-full pl-16 pr-8 py-6 bg-slate-50 border-0 rounded-3xl outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium" placeholder="Senha">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-6 bg-slate-950 text-white rounded-[2rem] font-black uppercase text-sm tracking-widest shadow-2xl hover:bg-blue-600 btn-active transition-all">Acessar Sistema</button>
+            </form>
+            <p class="text-center text-[10px] text-slate-300 font-black uppercase tracking-[0.2em]">GitHub Edition • Padrão System</p>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL (Escondido por padrão) -->
+    <div id="app-screen" class="hidden">
+        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 h-24 sticky top-0 z-50 transition-all">
+            <div class="max-w-7xl mx-auto h-full px-8 flex justify-between items-center">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-blue-600 rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-blue-100 rotate-3"><i data-lucide="file-text" class="text-white w-7 h-7"></i></div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-xl font-black text-slate-900 tracking-tight leading-none">Avaliações</h1>
+                        <p id="user-display" class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1.5 flex items-center gap-1.5"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSavedModal()" class="p-4 bg-slate-50 text-slate-500 rounded-[1.25rem] hover:bg-slate-100 btn-active" title="Meus Arquivos"><i data-lucide="folder-open" class="w-6 h-6"></i></button>
+                    <button onclick="saveToCloud()" class="flex items-center gap-2.5 bg-emerald-500 text-white px-7 py-4 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-emerald-100 hover:bg-emerald-600 btn-active transition-all">
+                        <i data-lucide="save" class="w-5 h-5"></i><span class="hidden md:inline">Salvar</span>
+                    </button>
+                    <button onclick="enterPrintMode()" class="bg-slate-950 text-white px-7 py-4 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-600 btn-active transition-all flex items-center gap-2.5">
+                        <i data-lucide="printer" class="w-5 h-5"></i><span class="hidden md:inline">PDF</span>
+                    </button>
+                    <button onclick="handleLogout()" class="p-4 text-red-500 hover:bg-red-50 rounded-[1.25rem] btn-active"><i data-lucide="log-out" class="w-6 h-6"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto p-6 space-y-12 mt-10">
+            <!-- Estrutura -->
+            <section class="bg-white rounded-[3rem] shadow-[0_15px_50px_rgba(0,0,0,0.03)] border border-slate-100 p-10 space-y-10 card-premium">
+                <div class="flex items-center gap-4">
+                    <span class="w-12 h-12 bg-blue-50 text-blue-600 flex items-center justify-center rounded-2xl text-xl font-black">01</span>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Estrutura</h2>
+                </div>
+                <div class="w-full">
+                    <div id="header-upload-container">
+                        <label class="flex flex-col items-center justify-center gap-5 w-full py-16 px-8 border-2 border-dashed border-slate-200 rounded-[2.5rem] cursor-pointer hover:bg-blue-50/50 transition-all text-slate-400 bg-slate-50/50 shadow-inner group">
+                            <div class="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500"><i data-lucide="image" class="w-10 h-10 text-slate-300"></i></div>
+                            <span class="font-black text-slate-600 text-lg uppercase tracking-widest text-center px-4">Carregar Cabeçalho (187mm x 39mm)</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
+                        </label>
+                    </div>
+                    <div id="header-preview-container" class="hidden relative group/img shadow-md rounded-[2rem] overflow-hidden border-8 border-white">
+                        <img id="header-img-preview" src="" class="w-full object-contain">
+                        <button onclick="removeHeader()" class="absolute top-2 right-2 bg-white text-red-500 p-3 rounded-2xl shadow-xl border border-red-50 opacity-0 group-hover/img:opacity-100 transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                    </div>
+                </div>
+                <input type="text" id="assessment-title" class="w-full p-8 bg-slate-50 border-0 rounded-[2rem] outline-none text-center font-black text-3xl text-slate-900 focus:ring-4 focus:ring-blue-100 transition-all shadow-inner uppercase placeholder:text-slate-200" placeholder="Título da Avaliação">
+            </section>
+
+            <!-- Questões -->
+            <div id="questions-container" class="space-y-12 pb-40">
+                <div class="flex items-center gap-4 px-4">
+                    <span class="w-12 h-12 bg-blue-50 text-blue-600 flex items-center justify-center rounded-2xl text-xl font-black">02</span>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Conteúdo</h2>
+                </div>
+                <!-- Questões injetadas aqui -->
+            </div>
+        </main>
+
+        <!-- Dock Menu -->
+        <div class="fixed bottom-10 left-0 right-0 z-40 px-6 no-print">
+            <div class="max-w-3xl mx-auto bg-slate-950/95 backdrop-blur-2xl border border-white/10 p-3 rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.3)] flex justify-between items-center gap-3 overflow-x-auto no-scrollbar">
+                <button onclick="addQuestion('text')" class="flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-blue-600 text-white transition-all px-8 py-5 rounded-[1.75rem] font-black text-[10px] uppercase shrink-0 active:scale-90 group">
+                    <i data-lucide="align-left" class="w-6 h-6 group-hover:scale-110 transition-transform"></i><span>Escrita</span>
+                </button>
+                <button onclick="addQuestion('discursive-list')" class="flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-orange-500 text-white transition-all px-8 py-5 rounded-[1.75rem] font-black text-[10px] uppercase shrink-0 active:scale-90 group">
+                    <i data-lucide="file-text" class="w-6 h-6 group-hover:scale-110 transition-transform"></i><span>Tópicos</span>
+                </button>
+                <button onclick="addQuestion('matching')" class="flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-sky-500 text-white transition-all px-8 py-5 rounded-[1.75rem] font-black text-[10px] uppercase shrink-0 active:scale-90 group">
+                    <i data-lucide="link" class="w-6 h-6 group-hover:scale-110 transition-transform"></i><span>Ligar</span>
+                </button>
+                <button onclick="addQuestion('multiple-choice')" class="flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-emerald-500 text-white transition-all px-8 py-5 rounded-[1.75rem] font-black text-[10px] uppercase shrink-0 active:scale-90 group">
+                    <i data-lucide="check-square" class="w-6 h-6 group-hover:scale-110 transition-transform"></i><span>Marca X</span>
+                </button>
+                <button onclick="addQuestion('true-false')" class="flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-purple-600 text-white transition-all px-8 py-5 rounded-[1.75rem] font-black text-[10px] uppercase shrink-0 active:scale-90 group">
+                    <i data-lucide="list-checks" class="w-7 h-7 group-hover:scale-110 transition-transform"></i><span>V ou F</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RECORTE -->
+    <div id="cropper-modal" class="hidden fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-8">
+        <div class="w-full max-w-4xl bg-white rounded-[4.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="p-12 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                <h3 class="font-black text-3xl text-slate-950 tracking-tighter">Ajustar Imagem</h3>
+                <button onclick="closeCropper()" class="p-4 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-3xl shadow-sm border border-slate-100 transition-all"><i data-lucide="x" class="w-7 h-7"></i></button>
+            </div>
+            <div id="crop-area" class="flex-1 w-full overflow-hidden flex items-center justify-center p-14 bg-slate-100 relative shadow-inner">
+                <canvas id="crop-canvas" class="hidden"></canvas>
+                <div class="relative inline-block touch-none select-none max-w-full max-h-[55vh] shadow-2xl rounded-2xl overflow-hidden bg-white border-[12px] border-white">
+                    <img id="img-to-crop" src="" class="block max-w-full max-h-[55vh] object-contain pointer-events-none">
+                    <div id="crop-rect" class="absolute border-4 border-blue-500 bg-blue-500/10 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] pointer-events-none hidden"></div>
+                </div>
+            </div>
+            <div class="p-10 bg-white flex gap-6 flex-col sm:flex-row shadow-2xl">
+                <button onclick="applyCrop(true)" class="flex-1 py-8 bg-slate-50 text-slate-600 rounded-[2rem] font-black uppercase text-xs tracking-widest hover:bg-slate-100 active:scale-95 transition-all">Imagem Inteira</button>
+                <button onclick="applyCrop(false)" class="flex-1 py-8 bg-blue-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 active:scale-95 transition-all">Aplicar Recorte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ARQUIVOS SALVOS -->
+    <div id="saved-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="w-full max-w-2xl bg-white rounded-[3.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
+                <h3 class="font-black text-2xl text-slate-900 tracking-tight">Suas Avaliações</h3>
+                <button onclick="toggleSavedModal()" class="p-4 bg-white hover:bg-slate-100 rounded-3xl transition-all"><i data-lucide="x" class="w-6 h-6 text-slate-400"></i></button>
+            </div>
+            <div id="saved-list" class="flex-1 overflow-y-auto p-10 space-y-5 no-scrollbar">
+                <!-- Lista injetada aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PREVIEW DE IMPRESSÃO (Apenas Visível no enterPrintMode) -->
+    <div id="print-view" class="hidden"></div>
+
+    <script>
+        // ==========================================
+        // 1. CONFIGURAÇÃO FIREBASE - COLE AQUI
+        // ==========================================
+        const firebaseConfig = { 
+            apiKey : "AIzaSyArNQ2dWrDel38ODodLfIT1v3JToREGgdg" , 
+            authDomain : "gen-lang-client-0109590811.firebaseapp.com" , 
+            ID do projeto : "gen-lang-client-0109590811" , 
+            bucket de armazenamento : "gen-lang-client-0109590811.firebasestorage.app" , 
+            messagingSenderId : " 469349194249" 
+            appId : "1:469349194249:web:a83b7e3cbe442a4930b6d8" 
+        };
+        
+        // Inicializa Firebase (Caso você já tenha as variáveis de ambiente)
+        let initializedConfig;
+        try {
+            initializedConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
+        } catch(e) { initializedConfig = firebaseConfig; }
+
+        firebase.initializeApp(initializedConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const appIdStr = "github-prod-v1";
+
+        // ==========================================
+        // 2. ESTADO DA APLICAÇÃO
+        // ==========================================
+        let currentUser = null;
+        let questions = [];
+        let headerData = { id: null, imagem: null, titulo: '' };
+        let cropState = { questionId: null, optionId: null, startX: 0, startY: 0, isDragging: false };
+
+        // ==========================================
+        // 3. INICIALIZAÇÃO E LOGIN
+        // ==========================================
+        window.onload = () => {
+            lucide.createIcons();
+            
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('app-screen').classList.remove('hidden');
+                    document.getElementById('user-display').innerText = user.email;
+                    loadSavedAssessments();
+                } else {
+                    document.getElementById('login-screen').classList.remove('hidden');
+                    document.getElementById('app-screen').classList.add('hidden');
+                }
+            });
+        };
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const errDiv = document.getElementById('auth-error');
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                errDiv.classList.add('hidden');
+            } catch (err) {
+                errDiv.innerText = "Erro ao entrar. Verifique suas credenciais.";
+                errDiv.classList.remove('hidden');
+            }
+        };
+
+        function handleLogout() {
+            auth.signOut();
+        }
+
+        // ==========================================
+        // 4. GERENCIAMENTO DE QUESTÕES
+        // ==========================================
+        function addQuestion(type) {
+            const q = {
+                id: Date.now().toString(),
+                type: type,
+                textoApoio: '',
+                enunciado: '',
+                imagem: null,
+                imageWidth: 30,
+                opcoes: ['multiple-choice', 'true-false', 'discursive-list', 'matching'].includes(type) ? [
+                    { id: Date.now() + 1, text: '', image: null, matchText: '', type: 'text' },
+                    { id: Date.now() + 2, text: '', image: null, matchText: '', type: 'text' }
+                ] : [],
+                linhas: 3
+            };
+            questions.push(q);
+            renderQuestions();
+        }
+
+        function removeQuestion(id) {
+            questions = questions.filter(q => q.id !== id);
+            renderQuestions();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            // Mantendo os elementos de título fixos
+            container.innerHTML = `
+                <div class="flex items-center justify-between px-4">
+                    <div class="flex items-center gap-4">
+                        <span class="w-12 h-12 bg-blue-50 text-blue-600 flex items-center justify-center rounded-2xl text-xl font-black">02</span>
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Conteúdo</h2>
+                    </div>
+                    <div class="bg-slate-900 text-white px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest">${questions.length} Questões</div>
+                </div>
+            `;
+
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-[3rem] shadow-[0_15px_40px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden group/card border-b-4 border-b-slate-100 hover:border-b-blue-500 transition-all";
+                
+                // Header do Card
+                card.innerHTML = `
+                    <div class="bg-slate-50/80 px-10 py-6 flex justify-between items-center border-b border-slate-50">
+                        <div class="flex items-center gap-5">
+                            <i data-lucide="grip-vertical" class="w-6 h-6 text-slate-300"></i>
+                            <span class="font-black text-slate-900 text-2xl tracking-tighter">Questão ${index + 1}</span>
+                            <span class="bg-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase text-blue-600 border border-blue-100">${q.type}</span>
+                        </div>
+                        <button onclick="removeQuestion('${q.id}')" class="p-3 bg-white text-slate-300 hover:text-red-500 rounded-2xl transition-all"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                    </div>
+                    <div class="p-10 space-y-8">
+                        <div class="space-y-3">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contexto / Apoio</p>
+                            <div id="apoio-${q.id}" class="rich-text-area rich-editor border rounded-2xl p-4 min-h-[60px]" contenteditable="true" data-placeholder="Texto base...">${q.textoApoio}</div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            ${!q.imagem ? `
+                                <label class="flex items-center gap-5 w-full p-6 border-2 border-dashed border-slate-100 rounded-[2rem] cursor-pointer hover:bg-slate-50 transition-all text-slate-400 bg-slate-50/30 group/upload">
+                                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-6 h-6 text-slate-300"></i></div>
+                                    <span class="font-black text-sm text-slate-500 uppercase">Adicionar Imagem Central</span>
+                                    <input type="file" accept="image/*" class="hidden" onchange="uploadImage('${q.id}', null, this)">
+                                </label>
+                            ` : `
+                                <div class="bg-slate-50/50 rounded-[2.5rem] p-8 space-y-6 border border-slate-100">
+                                    <div class="relative flex justify-center group/qimg shadow-xl rounded-3xl overflow-hidden bg-white border-8 border-white">
+                                        <img src="${q.imagem}" style="width: ${q.imageWidth}%">
+                                        <button onclick="removeQuestionImage('${q.id}')" class="absolute top-4 right-4 bg-white text-red-500 p-3 rounded-2xl shadow-2xl border border-red-50 opacity-0 group-hover/qimg:opacity-100 transition-all"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                                    </div>
+                                    <input type="range" min="10" max="100" value="${q.imageWidth}" onchange="updateImageWidth('${q.id}', this.value)" class="w-full h-2 bg-slate-200 rounded-full appearance-none accent-blue-600">
+                                </div>
+                            `}
+                        </div>
+
+                        <div class="space-y-3">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Enunciado da Pergunta</p>
+                            <div id="enunciado-${q.id}" class="rich-text-area rich-editor border rounded-2xl p-4 min-h-[60px]" contenteditable="true" data-placeholder="Pergunta...">${q.enunciado}</div>
+                        </div>
+
+                        <div id="options-${q.id}" class="space-y-4"></div>
+                    </div>
+                `;
+                container.appendChild(card);
+                
+                // Renderizar Opções
+                const optContainer = document.getElementById(`options-${q.id}`);
+                if (['multiple-choice', 'true-false', 'discursive-list', 'matching'].includes(q.type)) {
+                    q.opcoes.forEach((opt, oIdx) => {
+                        const optDiv = document.createElement('div');
+                        optDiv.className = "flex gap-4 group/opt bg-slate-50/30 p-4 rounded-[2rem] border border-slate-100";
+                        optDiv.innerHTML = `
+                            <div class="flex-1 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="w-8 h-8 bg-slate-900 text-white flex items-center justify-center rounded-lg text-xs font-black">${String.fromCharCode(97 + oIdx)}</span>
+                                    <div class="flex bg-white p-1 rounded-lg gap-1 border">
+                                        <button onclick="setOptType('${q.id}', '${opt.id}', 'text')" class="px-3 py-1 rounded-md text-[10px] font-black ${opt.type === 'text' ? 'bg-blue-600 text-white' : 'text-slate-400'}">TEXTO</button>
+                                        <button onclick="setOptType('${q.id}', '${opt.id}', 'image')" class="px-3 py-1 rounded-md text-[10px] font-black ${opt.type === 'image' ? 'bg-blue-600 text-white' : 'text-slate-400'}">FOTO</button>
+                                    </div>
+                                </div>
+                                ${opt.type === 'image' ? `
+                                    <div class="flex justify-center p-4 border-2 border-dashed rounded-2xl bg-white">
+                                        ${!opt.image ? `
+                                            <label class="cursor-pointer text-slate-300 text-center"><i data-lucide="image" class="w-6 h-6 mx-auto"></i><span class="text-[8px] font-black uppercase">Carregar</span><input type="file" accept="image/*" class="hidden" onchange="uploadImage('${q.id}', '${opt.id}', this)"></label>
+                                        ` : `
+                                            <div class="relative"><img src="${opt.image}" class="h-24 rounded-xl"><button onclick="removeOptImage('${q.id}', '${opt.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+                                        `}
+                                    </div>
+                                ` : `
+                                    <input type="text" value="${opt.text}" oninput="updateOptText('${q.id}', '${opt.id}', this.value)" class="w-full p-4 bg-white border-0 rounded-2xl shadow-inner outline-none focus:ring-2 focus:ring-blue-100" placeholder="Conteúdo...">
+                                `}
+                            </div>
+                            ${q.type === 'matching' ? `
+                                <div class="flex-1 pt-11 flex items-center gap-2">
+                                    <i data-lucide="arrow-right-left" class="text-slate-200"></i>
+                                    <input type="text" value="${opt.matchText}" oninput="updateOptMatch('${q.id}', '${opt.id}', this.value)" class="w-full p-4 bg-white border-0 rounded-2xl shadow-inner outline-none focus:ring-2 focus:ring-blue-100" placeholder="Destino...">
+                                </div>
+                            ` : ''}
+                            <button onclick="removeOption('${q.id}', '${opt.id}')" class="p-4 text-slate-300 hover:text-red-500 transition-all mt-10"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        `;
+                        optContainer.appendChild(optDiv);
+                    });
+                    
+                    const addOptBtn = document.createElement('button');
+                    addOptBtn.className = "w-full py-5 border-2 border-dashed border-slate-100 rounded-[2rem] text-blue-500 font-black text-xs uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center justify-center gap-2 mt-4";
+                    addOptBtn.innerHTML = `<i data-lucide="plus" class="w-5 h-5"></i> Adicionar Item`;
+                    addOptBtn.onclick = () => addOption(q.id);
+                    optContainer.appendChild(addOptBtn);
+                }
+
+                if(q.type === 'text') {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = "bg-slate-50 p-6 rounded-3xl border shadow-inner flex items-center justify-between";
+                    rowDiv.innerHTML = `<label class="text-xs font-black text-slate-500 uppercase tracking-widest">Espaço para Resposta:</label>
+                    <input type="number" value="${q.linhas}" onchange="updateLines('${q.id}', this.value)" class="w-20 p-3 bg-white border rounded-xl text-center font-bold text-blue-600">`;
+                    optContainer.appendChild(rowDiv);
+                }
+
+                // Listeners de Rich Text
+                document.getElementById(`apoio-${q.id}`).onblur = (e) => { q.textoApoio = e.target.innerHTML; };
+                document.getElementById(`enunciado-${q.id}`).onblur = (e) => { q.enunciado = e.target.innerHTML; };
+            });
+            
+            lucide.createIcons();
+        }
+
+        function addOption(qId) {
+            const q = questions.find(qu => qu.id === qId);
+            q.opcoes.push({ id: Date.now(), text: '', image: null, matchText: '', type: 'text' });
+            renderQuestions();
+        }
+
+        function removeOption(qId, oId) {
+            const q = questions.find(qu => qu.id === qId);
+            q.opcoes = q.opcoes.filter(o => o.id.toString() !== oId.toString());
+            renderQuestions();
+        }
+
+        function updateOptText(qId, oId, val) { questions.find(qu => qu.id === qId).opcoes.find(o => o.id.toString() === oId.toString()).text = val; }
+        function updateOptMatch(qId, oId, val) { questions.find(qu => qu.id === qId).opcoes.find(o => o.id.toString() === oId.toString()).matchText = val; }
+        function updateLines(qId, val) { questions.find(qu => qu.id === qId).linhas = parseInt(val); }
+        function updateImageWidth(qId, val) { questions.find(qu => qu.id === qId).imageWidth = parseInt(val); renderQuestions(); }
+        function setOptType(qId, oId, type) { questions.find(qu => qu.id === qId).opcoes.find(o => o.id.toString() === oId.toString()).type = type; renderQuestions(); }
+
+        // ==========================================
+        // 5. SISTEMA DE RECORTE (CROP)
+        // ==========================================
+        function uploadImage(qId, oId, input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    cropState.questionId = qId;
+                    cropState.optionId = oId;
+                    document.getElementById('img-to-crop').src = e.target.result;
+                    document.getElementById('cropper-modal').classList.remove('hidden');
+                    initCrop();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function initCrop() {
+            const img = document.getElementById('img-to-crop');
+            const rect = document.getElementById('crop-rect');
+            rect.classList.add('hidden');
+            
+            const container = img.parentElement;
+            container.onmousedown = (e) => {
+                const b = img.getBoundingClientRect();
+                cropState.startX = e.clientX - b.left;
+                cropState.startY = e.clientY - b.top;
+                cropState.isDragging = true;
+                rect.style.left = cropState.startX + 'px';
+                rect.style.top = cropState.startY + 'px';
+                rect.style.width = '0px';
+                rect.style.height = '0px';
+                rect.classList.remove('hidden');
+            };
+
+            container.onmousemove = (e) => {
+                if (!cropState.isDragging) return;
+                const b = img.getBoundingClientRect();
+                const curX = e.clientX - b.left;
+                const curY = e.clientY - b.top;
+                rect.style.width = Math.abs(curX - cropState.startX) + 'px';
+                rect.style.height = Math.abs(curY - cropState.startY) + 'px';
+                rect.style.left = Math.min(curX, cropState.startX) + 'px';
+                rect.style.top = Math.min(curY, cropState.startY) + 'px';
+            };
+
+            container.onmouseup = () => { cropState.isDragging = false; };
+        }
+
+        function applyCrop(full) {
+            const img = document.getElementById('img-to-crop');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (full) {
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx.drawImage(img, 0, 0);
+            } else {
+                const rect = document.getElementById('crop-rect').getBoundingClientRect();
+                const b = img.getBoundingClientRect();
+                const scaleX = img.naturalWidth / b.width;
+                const scaleY = img.naturalHeight / b.height;
+                
+                canvas.width = rect.width * scaleX;
+                canvas.height = rect.height * scaleY;
+                ctx.drawImage(img, (rect.left - b.left) * scaleX, (rect.top - b.top) * scaleY, rect.width * scaleX, rect.height * scaleY, 0, 0, canvas.width, canvas.height);
+            }
+
+            const data = canvas.toDataURL();
+            if (cropState.optionId) {
+                questions.find(q => q.id === cropState.questionId).opcoes.find(o => o.id.toString() === cropState.optionId.toString()).image = data;
+            } else {
+                questions.find(q => q.id === cropState.questionId).imagem = data;
+            }
+            
+            closeCropper();
+            renderQuestions();
+        }
+
+        function closeCropper() {
+            document.getElementById('cropper-modal').classList.add('hidden');
+        }
+
+        function removeQuestionImage(qId) { questions.find(q => q.id === qId).imagem = null; renderQuestions(); }
+        function removeOptImage(qId, oId) { questions.find(q => q.id === qId).opcoes.find(o => o.id.toString() === oId.toString()).image = null; renderQuestions(); }
+
+        // ==========================================
+        // 6. CABEÇALHO
+        // ==========================================
+        function uploadHeader(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    headerData.imagem = e.target.result;
+                    document.getElementById('header-upload-container').classList.add('hidden');
+                    document.getElementById('header-preview-container').classList.remove('hidden');
+                    document.getElementById('header-img-preview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        function removeHeader() {
+            headerData.imagem = null;
+            document.getElementById('header-upload-container').classList.remove('hidden');
+            document.getElementById('header-preview-container').classList.add('hidden');
+        }
+
+        // ==========================================
+        // 7. CLOUD (FIRESTORE)
+        // ==========================================
+        async function saveToCloud() {
+            if (!currentUser) return;
+            headerData.titulo = document.getElementById('assessment-title').value;
+            if (!headerData.titulo) return alert("Dê um título à prova antes de salvar!");
+
+            const docId = headerData.id || Date.now().toString();
+            const ref = db.collection('artifacts').doc(appIdStr).collection('users').doc(currentUser.uid).collection('avaliacoes').doc(docId);
+            
+            await ref.set({
+                id: docId,
+                headerData: headerData,
+                questions: questions,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            headerData.id = docId;
+            alert("Prova salva com sucesso!");
+        }
+
+        function toggleSavedModal() {
+            const m = document.getElementById('saved-modal');
+            m.classList.toggle('hidden');
+            if (!m.classList.contains('hidden')) loadSavedAssessments();
+        }
+
+        async function loadSavedAssessments() {
+            if (!currentUser) return;
+            const ref = db.collection('artifacts').doc(appIdStr).collection('users').doc(currentUser.uid).collection('avaliacoes');
+            const snap = await ref.get();
+            const list = document.getElementById('saved-list');
+            list.innerHTML = '';
+            
+            snap.forEach(doc => {
+                const data = doc.data();
+                const item = document.createElement('div');
+                item.className = "p-8 bg-slate-50/50 rounded-[2.5rem] border border-slate-100 flex justify-between items-center hover:bg-white hover:border-blue-200 transition-all cursor-pointer group shadow-sm";
+                item.innerHTML = `
+                    <div class="flex-1" onclick='loadThisAssessment(${JSON.stringify(data)})'>
+                        <h4 class="font-black text-slate-900 text-xl uppercase tracking-tighter leading-none mb-3">${data.headerData.titulo || 'Sem Título'}</h4>
+                        <span class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black uppercase">${data.questions.length} QUESTÕES</span>
+                    </div>
+                    <button onclick="deleteThisAssessment('${data.id}')" class="p-4 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-2xl"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                `;
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function loadThisAssessment(data) {
+            headerData = data.headerData;
+            questions = data.questions;
+            document.getElementById('assessment-title').value = headerData.titulo;
+            if (headerData.imagem) {
+                document.getElementById('header-upload-container').classList.add('hidden');
+                document.getElementById('header-preview-container').classList.remove('hidden');
+                document.getElementById('header-img-preview').src = headerData.imagem;
+            } else {
+                removeHeader();
+            }
+            renderQuestions();
+            toggleSavedModal();
+        }
+
+        async function deleteThisAssessment(id) {
+            if (!confirm("Deletar esta prova permanentemente?")) return;
+            await db.collection('artifacts').doc(appIdStr).collection('users').doc(currentUser.uid).collection('avaliacoes').doc(id).delete();
+            loadSavedAssessments();
+        }
+
+        // ==========================================
+        // 8. IMPRESSÃO (A4)
+        // ==========================================
+        function enterPrintMode() {
+            const printView = document.getElementById('print-view');
+            const title = document.getElementById('assessment-title').value;
+            
+            let html = `
+                <div class="print-container bg-white text-black mx-auto relative" style="width: 210mm; min-height: 297mm; padding: 15mm; font-family: Arial, sans-serif; font-size: 12pt; color: #000000; line-height: 1.2;">
+                    ${headerData.imagem ? `<div class="mb-2 flex justify-center w-full"><img src="${headerData.imagem}" style="width: 100%; max-width: 187mm"></div>` : ''}
+                    <h2 class="text-center font-bold mb-4 uppercase" style="font-size: 16pt;">${title || 'Avaliação'}</h2>
+                    <div class="space-y-12">
+            `;
+
+            questions.forEach((q, index) => {
+                html += `<div class="page-break w-full">
+                    ${q.textoApoio ? `<div class="mb-1 text-justify content-render">${q.textoApoio}</div>` : ''}
+                    <div class="flex gap-2 mb-1 items-start"><span class="font-bold">${index + 1}.</span><div class="font-medium text-justify content-render">${q.enunciado || '...'}</div></div>
+                    ${q.imagem ? `<div class="my-6 flex justify-center w-full"><img src="${q.imagem}" style="width: ${q.imageWidth}%" class="object-contain"></div>` : ''}
+                    
+                    ${q.type === 'text' ? `<div class="mt-1 space-y-5">${Array(q.linhas).fill('<div class="border-b border-black w-full h-4 opacity-50"></div>').join('')}</div>` : ''}
+                    
+                    ${['multiple-choice', 'true-false', 'discursive-list'].includes(q.type) ? `<div class="mt-1 space-y-2 ml-5">${q.opcoes.map((o, i) => `
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-start gap-2">
+                                <span class="font-bold">${q.type === 'true-false' ? String.fromCharCode(97 + i) + ') (      )' : String.fromCharCode(97 + i) + ')'}</span>
+                                <div class="flex flex-col gap-2">
+                                    ${o.type === 'image' && o.image ? `<img src="${o.image}" class="max-h-32 object-contain self-start">` : `<span>${o.text}</span>`}
+                                </div>
+                            </div>
+                            ${q.type === 'discursive-list' ? '<div class="border-b border-black w-full h-3 opacity-30 mt-2"></div>' : ''}
+                        </div>
+                    `).join('')}</div>` : ''}
+
+                    ${q.type === 'matching' ? `<div class="mt-6 space-y-6 ml-5 max-w-xl">${q.opcoes.map((o, i) => `
+                        <div class="flex justify-between items-center gap-8">
+                            <div class="flex items-center gap-4 flex-1">
+                                <span class="font-bold">${String.fromCharCode(97 + i)})</span>
+                                <div class="flex-1 flex justify-center">${o.type === 'image' ? `<img src="${o.image}" class="w-20 h-20 object-contain p-1 border">` : `<span>${o.text}</span>`}</div>
+                            </div>
+                            <div class="flex items-center gap-4 flex-1"><div class="w-4 h-4 border-2 border-black rounded-full shrink-0"></div><span class="border-b border-dotted border-black flex-1 text-center pb-0.5">${o.matchText}</span></div>
+                        </div>
+                    `).join('')}</div>` : ''}
+                </div>`;
+            });
+
+            html += `</div></div>`;
+            printView.innerHTML = html;
+            window.print();
+        }
+    </script>
+</body>
+</html>
