@@ -137,152 +137,166 @@
                 </div>
                 <div id="header-preview-container" class="hidden relative group shadow-lg rounded-2xl overflow-hidden border-4 border-white">
                     <img id="header-img-preview" src="" class="w-full object-contain">
-                    <button onclick="removeHeader()" class="absolute top-3 right-3 bg-white text-red-500 p-2.5 rounded-xl shadow-lg border border-red-50 opacity-0 group-hover:opacity-100 transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <button onclick="removeHeader()" class="absolute top-3 right-3 bg-white text-red-500 p-3 rounded-2xl shadow-xl border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </div>
-            <div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-3">Título da Prova *</p>
-                <input type="text" id="assessment-title" placeholder="Ex: Avaliação de Matemática - 3º Bimestre" class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50">
-            </div>
+            <input type="text" id="assessment-title" class="w-full p-7 bg-slate-50 border-2 border-transparent focus:border-blue-300 rounded-2xl outline-none text-center font-black text-3xl text-slate-900 uppercase tracking-tight transition-all shadow-inner" placeholder="TÍTULO DA PROVA">
         </section>
-
-        <section class="bg-white rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-slate-100 p-8 space-y-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-sm font-black">02</span>
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Questões</h2>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="addQuestion('text')" class="flex items-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 btn-active text-xs font-bold uppercase"><i data-lucide="type" class="w-4 h-4"></i><span class="hidden sm:inline">Escrita</span></button>
-                    <button onclick="addQuestion('multiple-choice')" class="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 btn-active text-xs font-bold uppercase"><i data-lucide="list" class="w-4 h-4"></i><span class="hidden sm:inline">Múltipla</span></button>
-                    <button onclick="addQuestion('true-false')" class="flex items-center gap-1.5 px-3 py-2 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 btn-active text-xs font-bold uppercase"><i data-lucide="check-square" class="w-4 h-4"></i><span class="hidden sm:inline">V/F</span></button>
-                    <button onclick="addQuestion('discursive-list')" class="flex items-center gap-1.5 px-3 py-2 bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-100 btn-active text-xs font-bold uppercase"><i data-lucide="list-checks" class="w-4 h-4"></i><span class="hidden sm:inline">Tópicos</span></button>
-                    <button onclick="addQuestion('matching')" class="flex items-center gap-1.5 px-3 py-2 bg-sky-50 text-sky-600 rounded-xl hover:bg-sky-100 btn-active text-xs font-bold uppercase"><i data-lucide="link-2" class="w-4 h-4"></i><span class="hidden sm:inline">Ligar</span></button>
-                </div>
-            </div>
-            <div id="questions-container" class="space-y-6"></div>
-        </section>
+        <div id="questions-container" class="space-y-6"></div>
     </main>
-</div>
 
-<!-- PREVIEW / PRINT -->
-<div id="print-view" class="hidden fixed inset-0 bg-slate-100 overflow-auto p-6 flex flex-col items-center pt-20">
-    <div id="print-toolbar" class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 p-4 flex justify-between items-center z-40">
-        <h2 class="font-black text-slate-900">Visualização</h2>
-        <div class="flex gap-2">
-            <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl font-bold text-sm hover:bg-violet-700"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
-            <button onclick="exitPreviewMode()" class="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-300"><i data-lucide="x" class="w-4 h-4"></i>Fechar</button>
+    <!-- Dock -->
+    <div class="fixed bottom-8 left-0 right-0 z-40 px-4">
+        <div class="max-w-2xl mx-auto bg-slate-950/95 backdrop-blur-xl border border-white/10 p-2.5 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex justify-between items-center gap-2 overflow-x-auto no-scrollbar">
+            <button onclick="addQuestion('text')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-blue-600 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="align-left" class="w-5 h-5"></i><span>Escrita</span></button>
+            <button onclick="addQuestion('discursive-list')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-orange-500 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="file-text" class="w-5 h-5"></i><span>Tópicos</span></button>
+            <button onclick="addQuestion('matching')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-sky-500 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="link" class="w-5 h-5"></i><span>Ligar</span></button>
+            <button onclick="addQuestion('multiple-choice')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-emerald-500 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="check-square" class="w-5 h-5"></i><span>Marca X</span></button>
+            <button onclick="addQuestion('true-false')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-purple-600 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="list-checks" class="w-5 h-5"></i><span>V ou F</span></button>
         </div>
     </div>
-    <div id="print-content" class="max-w-2xl w-full"></div>
 </div>
 
-<!-- MODAL HISTÓRICO -->
-<div id="saved-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-40">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 flex justify-between items-center">
+<!-- PREVIEW -->
+<div id="print-view" class="hidden fixed inset-0 z-[100] bg-zinc-900 overflow-y-auto">
+    <div id="print-toolbar" class="fixed top-5 left-0 right-0 z-50 flex justify-center gap-3 px-4 flex-wrap">
+        <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
+        <button onclick="generatePDF()" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Gerar PDF</button>
+        <button onclick="printDirect()" class="bg-violet-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-violet-700 btn-active flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
+    </div>
+    <div id="print-content" class="pt-24 pb-16 flex flex-col items-center gap-8"></div>
+</div>
+
+<!-- CROP -->
+<div id="cropper-modal" class="hidden fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6">
+    <div class="w-full max-w-3xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-8 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="font-black text-2xl text-slate-900">Ajustar Imagem</h3>
+            <button onclick="closeCropper()" class="p-3 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-2xl"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div id="crop-area" class="flex-1 overflow-hidden flex items-center justify-center p-10 bg-slate-100">
+            <div class="relative inline-block touch-none select-none shadow-2xl rounded-xl overflow-hidden bg-white border-8 border-white" style="max-width:100%;max-height:50vh">
+                <img id="img-to-crop" src="" class="block max-w-full object-contain pointer-events-none" style="max-height:50vh">
+                <div id="crop-rect" class="absolute border-4 border-blue-500 bg-blue-500/10 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] pointer-events-none hidden"></div>
+            </div>
+        </div>
+        <div class="p-8 flex gap-4">
+            <button onclick="applyCrop(true)" class="flex-1 py-5 bg-slate-100 text-slate-700 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-200">Imagem Inteira</button>
+            <button onclick="applyCrop(false)" class="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 flex items-center justify-center gap-3"><i data-lucide="check" class="w-5 h-5"></i>Cortar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SALVOS -->
+<div id="saved-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-6">
+    <div class="w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div class="p-8 border-b border-slate-100 flex justify-between items-center">
             <div>
-                <h3 class="text-2xl font-black text-white">Provas Salvas</h3>
-                <p id="saved-count" class="text-blue-100 text-sm font-bold mt-1">Carregando...</p>
+                <h3 class="font-black text-2xl text-slate-900">Minhas Provas</h3>
+                <p id="saved-count" class="text-xs text-slate-400 font-medium mt-1"></p>
             </div>
-            <button onclick="toggleSavedModal()" class="text-white hover:bg-blue-500 p-2 rounded-xl transition-all"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <button onclick="toggleSavedModal()" class="p-3 hover:bg-slate-100 rounded-2xl"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
         </div>
-        <div id="saved-list" class="overflow-y-auto flex-1 p-6 space-y-3"></div>
-    </div>
-</div>
-
-<!-- MODAL CROP -->
-<div id="cropper-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl">
-        <div class="p-8 space-y-6">
-            <h3 class="text-2xl font-black text-slate-900">Ajustar Imagem</h3>
-            <div class="relative bg-slate-100 rounded-2xl overflow-hidden" style="max-height:400px">
-                <img id="img-to-crop" src="" style="width:100%;height:auto;cursor:crosshair">
-                <div id="crop-rect" class="hidden absolute border-2 border-blue-500" style="background:rgba(59,130,246,0.1)"></div>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="applyCrop(true)" class="flex-1 py-4 bg-slate-100 text-slate-700 rounded-xl font-black uppercase text-sm hover:bg-slate-200">Usar Completa</button>
-                <button onclick="applyCrop(false)" class="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black uppercase text-sm hover:bg-blue-700">Usar Seleção</button>
-                <button onclick="closeCropper()" class="flex-1 py-4 bg-red-50 text-red-600 rounded-xl font-black uppercase text-sm hover:bg-red-100">Cancelar</button>
-            </div>
-        </div>
+        <div id="saved-list" class="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar"></div>
     </div>
 </div>
 
 <!-- COLOR PICKER -->
-<div id="color-picker-popup" class="hidden fixed bg-white rounded-2xl shadow-2xl p-4 z-50 border border-slate-200" style="display:none">
-    <div class="grid grid-cols-6 gap-2">
-        <button onclick="applyColor('#dc2626')" class="w-8 h-8 bg-red-600 rounded-lg hover:ring-2 ring-offset-2 ring-red-400"></button>
-        <button onclick="applyColor('#ea580c')" class="w-8 h-8 bg-orange-600 rounded-lg hover:ring-2 ring-offset-2 ring-orange-400"></button>
-        <button onclick="applyColor('#ca8a04')" class="w-8 h-8 bg-yellow-600 rounded-lg hover:ring-2 ring-offset-2 ring-yellow-400"></button>
-        <button onclick="applyColor('#16a34a')" class="w-8 h-8 bg-green-600 rounded-lg hover:ring-2 ring-offset-2 ring-green-400"></button>
-        <button onclick="applyColor('#2563eb')" class="w-8 h-8 bg-blue-600 rounded-lg hover:ring-2 ring-offset-2 ring-blue-400"></button>
-        <button onclick="applyColor('#7c3aed')" class="w-8 h-8 bg-violet-600 rounded-lg hover:ring-2 ring-offset-2 ring-violet-400"></button>
+<div id="color-picker-popup" class="hidden fixed z-[200] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4" style="min-width:220px">
+    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Cor do Texto</p>
+    <div class="grid grid-cols-8 gap-1.5" id="color-swatches"></div>
+    <div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2">
+        <input type="color" id="custom-color-input" class="w-8 h-8 rounded-lg border border-slate-200 cursor-pointer p-0.5">
+        <span class="text-xs text-slate-500">Cor personalizada</span>
     </div>
 </div>
 
 <script>
 // =============================================
-// FIREBASE CONFIG
+// FIREBASE
 // =============================================
-const firebaseConfig={apiKey:"AIzaSyDJvnHNvVJXyMQQhFRIKNaHEKVdqHKxLQE",authDomain:"manus-artifacts.firebaseapp.com",projectId:"manus-artifacts",storageBucket:"manus-artifacts.appspot.com",messagingSenderId:"1094046635988",appId:"1:1094046635988:web:d6c1c8f8c5c2e6a3b2c1d4e5"};
+const firebaseConfig = {
+    apiKey:"AIzaSyArNQ2dWrDel38ODodLfIT1v3JToREGgdg",
+    authDomain:"gen-lang-client-0109590811.firebaseapp.com",
+    projectId:"gen-lang-client-0109590811",
+    storageBucket:"gen-lang-client-0109590811.firebasestorage.app",
+    messagingSenderId:"469349194249",
+    appId:"1:469349194249:web:a83b7e3cbe442a4930b6d8"
+};
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
-const DB_COL='assessment-system';
+const auth = firebase.auth();
+const db = firebase.firestore();
+const DB_COL = "sistema-avaliacoes-v5";
 
 // =============================================
 // TOAST
 // =============================================
-function showToast(msg,type='info',duration=3000){
-    const container=document.getElementById('toast-container');
-    const toast=document.createElement('div');
-    toast.className=`toast ${type}`;
-    toast.innerHTML=`<span>${msg}</span>`;
-    container.appendChild(toast);
-    if(duration>0) setTimeout(()=>{
-        toast.style.animation='toastOut 0.3s forwards';
-        setTimeout(()=>toast.remove(),300);
-    },duration);
+function showToast(msg, type='success', dur=3500) {
+    const icons={success:'check-circle',error:'alert-circle',info:'info',warning:'alert-triangle'};
+    const cont=document.getElementById('toast-container');
+    const t=document.createElement('div');
+    t.className=`toast ${type}`;
+    t.innerHTML=`<i data-lucide="${icons[type]}" style="width:18px;height:18px;flex-shrink:0"></i><span>${msg}</span>`;
+    cont.appendChild(t);
+    lucide.createIcons({nodes:[t]});
+    setTimeout(()=>{t.style.animation='toastOut .35s ease forwards';setTimeout(()=>t.remove(),350);},dur);
 }
 
 // =============================================
 // COLOR PICKER
 // =============================================
-let currentColorEditorId=null;
-function showColorPicker(editorId,btn){
-    currentColorEditorId=editorId;
-    const picker=document.getElementById('color-picker-popup');
-    const rect=btn.getBoundingClientRect();
-    picker.style.left=(rect.left+window.scrollX)+'px';
-    picker.style.top=(rect.bottom+window.scrollY+8)+'px';
-    picker.style.display='block';
+const PALETTE=['#000000','#1e293b','#334155','#64748b','#94a3b8','#cbd5e1','#ffffff',
+    '#dc2626','#ea580c','#d97706','#16a34a','#0284c7','#7c3aed','#db2777',
+    '#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899',
+    '#fca5a5','#fdba74','#fde68a','#86efac','#93c5fd','#c4b5fd','#f9a8d4'];
+let _colorEditorId=null;
+
+function initColorPicker(){
+    const sw=document.getElementById('color-swatches');
+    PALETTE.forEach(c=>{
+        const b=document.createElement('button');
+        b.style.cssText=`width:22px;height:22px;border-radius:50%;background:${c};border:2px solid ${c==='#ffffff'?'#e2e8f0':c};cursor:pointer;transition:transform .15s`;
+        b.title=c;
+        b.onmouseenter=()=>b.style.transform='scale(1.25)';
+        b.onmouseleave=()=>b.style.transform='scale(1)';
+        b.onmousedown=(e)=>{e.preventDefault();applyColor(c);};
+        sw.appendChild(b);
+    });
+    document.getElementById('custom-color-input').oninput=(e)=>applyColor(e.target.value);
+    document.addEventListener('mousedown',(e)=>{
+        if(!document.getElementById('color-picker-popup').contains(e.target)&&!e.target.closest('[data-color-trigger]'))
+            document.getElementById('color-picker-popup').classList.add('hidden');
+    });
 }
-function applyColor(color){
-    if(!currentColorEditorId)return;
-    document.execCommand('foreColor',false,color);
-    document.getElementById('color-picker-popup').style.display='none';
+function showColorPicker(editorId,trigger){
+    _colorEditorId=editorId;
+    const popup=document.getElementById('color-picker-popup');
+    popup.classList.remove('hidden');
+    const r=trigger.getBoundingClientRect();
+    const top=r.bottom+8;
+    const left=Math.max(8,Math.min(r.left,window.innerWidth-228));
+    popup.style.top=top+'px'; popup.style.left=left+'px';
 }
-document.addEventListener('click',(e)=>{
-    const picker=document.getElementById('color-picker-popup');
-    if(!e.target.closest('[data-color-trigger]')&&!e.target.closest('#color-picker-popup')){
-        picker.style.display='none';
-    }
-});
-function initColorPicker(){}
+function applyColor(c){
+    if(!_colorEditorId)return;
+    const el=document.getElementById(_colorEditorId);
+    if(el){el.focus();document.execCommand('foreColor',false,c);}
+    document.getElementById('color-picker-popup').classList.add('hidden');
+}
 
 // =============================================
-// TOOLBAR
+// TOOLBAR DE FORMATAÇÃO
 // =============================================
 function makeToolbar(editorId){
     const tb=document.createElement('div');
     tb.className='fmt-toolbar';
-    const btns=[
-        {label:'<strong>B</strong>',cmd:'bold',title:'Negrito'},
-        {label:'<em>I</em>',cmd:'italic',title:'Itálico'},
-        {label:'<u>U</u>',cmd:'underline',title:'Sublinhado'}
+    const buttons=[
+        {cmd:'bold',label:'<b>N</b>',title:'Negrito'},
+        {cmd:'italic',label:'<i>I</i>',title:'Itálico'},
+        {cmd:'underline',label:'<u>S</u>',title:'Sublinhado'},
+        {cmd:'strikeThrough',label:'<s style="text-decoration:line-through">R</s>',title:'Riscado'},
     ];
-    btns.forEach(b=>{
+    buttons.forEach(b=>{
         const btn=document.createElement('button');
         btn.type='button';
         btn.className='fmt-btn';
@@ -369,7 +383,14 @@ function removeQuestion(id){
 
 function renderQuestions(){
     const container=document.getElementById('questions-container');
-    container.innerHTML='';
+    container.innerHTML=`
+        <div class="flex items-center justify-between px-4">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-sm font-black">02</span>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Questões</h2>
+            </div>
+            <div class="bg-slate-900 text-white px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">${questions.length} ITENS</div>
+        </div>`;
 
     const TL={text:'Escrita Livre','multiple-choice':'Múltipla Escolha','true-false':'Verdadeiro / Falso','discursive-list':'Tópicos',matching:'Ligar Colunas'};
     const TC={text:'blue','multiple-choice':'emerald','true-false':'purple','discursive-list':'orange',matching:'sky'};
@@ -426,7 +447,8 @@ function renderQuestions(){
                             ?`<div class="flex justify-center bg-white rounded-xl p-4 border-2 border-dashed border-slate-200">
                                 ${!opt.image
                                     ?`<label class="cursor-pointer text-slate-300 flex flex-col items-center gap-2"><i data-lucide="image" class="w-8 h-8"></i><span class="text-[9px] font-black uppercase tracking-widest">Escolher Foto</span><input type="file" accept="image/*" class="hidden" onchange="startCrop('${q.id}','${opt.id}',this)"></label>`
-                                    :`<div class="relative"><img src="${opt.image}" class="h-28 w-auto rounded-lg object-contain"><button onclick="removeOptImage('${q.id}','${opt.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white p-2 rounded-full shadow-lg"><i data-lucide="x" class="w-3 h-3"></i></button></div>`}</div>`
+                                    :`<div class="relative"><img src="${opt.image}" class="h-28 w-auto rounded-lg object-contain"><button onclick="removeOptImage('${q.id}','${opt.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white p-2 rounded-full shadow-lg"><i data-lucide="x" class="w-3 h-3"></i></button></div>`}
+                              </div>`
                             :`<input type="text" value="${escH(opt.text)}" oninput="updateOptText('${q.id}','${opt.id}',this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50" placeholder="Resposta...">`}
                         </div>
                         ${q.type==='matching'?`<div class="flex items-center gap-2"><i data-lucide="arrow-right" class="w-4 h-4 text-blue-400 shrink-0"></i><input type="text" value="${escH(opt.matchText)}" oninput="updateOptMatch('${q.id}','${opt.id}',this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50" placeholder="Ligar a..."></div>`:''}
@@ -528,7 +550,7 @@ function removeHeader(){headerData.imagem=null;document.getElementById('header-u
 function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();showToast('Nova prova iniciada','info');}
 
 // =============================================
-// SALVAR - CORRIGIDO
+// SALVAR
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
@@ -536,26 +558,26 @@ async function saveToCloud(){
     if(!title){showToast('Digite um título','warning');return;}
     headerData.titulo=title;
     const btn=document.getElementById('btn-save');
+    // Guardar estado original como HTML estático (sem depender de lucide re-render)
     btn.disabled=true;
-    
-    // Mostrar ícone de carregamento
     btn.innerHTML=`<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full loader" style="display:inline-block"></div><span class="hidden sm:inline ml-1">Salvando...</span>`;
-    
     const docId=headerData.id||Date.now().toString();
     try{
         await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set({id:docId,headerData,questions,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
         headerData.id=docId;
-        
-        // Mostrar notificação de sucesso
+        // Mostrar estado de sucesso no botão brevemente
+        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Salvo!</span>`;
+        btn.style.background='#065f46';
         showToast('✓ Prova salva com sucesso!','success');
-        
-        // Restaurar botão original
-        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline">Salvar</span>`;
-        btn.disabled=false;
+        setTimeout(()=>{
+            btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
+            btn.style.background='';
+            btn.disabled=false;
+        },2000);
     }catch(e){
         console.error(e);
         showToast('Erro ao salvar. Tente novamente.','error');
-        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline">Salvar</span>`;
+        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
         btn.disabled=false;
     }
 }
@@ -629,7 +651,7 @@ function buildQuestaoHTML(q,index){
     if(q.type==='text'){
         const n=Math.max(1,parseInt(q.linhas)||4);
         h+=`<div style="margin-top:4pt;">`;
-        for(let i=0;i<n;i++)h+=`<div style="border-bottom:0.5pt solid #000;height:16pt;margin-bottom:3pt;"></div>`;
+        for(let i=0;i<n;i++)h+=`<div style="border-bottom:0.8pt solid #999;height:20pt;width:100%;"></div>`;
         h+=`</div>`;
     }
     if(['multiple-choice','true-false','discursive-list'].includes(q.type)){
@@ -655,6 +677,7 @@ function buildQuestaoHTML(q,index){
                 `<span style="border-bottom:1pt solid #000;flex:1;padding-bottom:2pt;">${opt.text||''}</span>`}</div>
                 <div style="flex:1;display:flex;align-items:center;gap:4pt;">
                     <span style="width:9pt;height:9pt;border:1.5pt solid #000;border-radius:50%;display:inline-block;flex-shrink:0;"></span>
+                    <span style="border-bottom:1pt solid #000;flex:1;padding-bottom:2pt;">${opt.matchText||''}</span>
                 </div>
             </div>`;
         });
@@ -666,11 +689,11 @@ function buildQuestaoHTML(q,index){
 
 // =============================================
 // BUILD PÁGINA A4 COMPLETA
-// Cabeçalho somente na primeira página
+// Cada página tem o cabeçalho + corpo
 // =============================================
 function buildPageHTML(bodyContent, isFirst){
     const title=document.getElementById('assessment-title').value.trim();
-    const headerImgHTML=headerData.imagem&&isFirst
+    const headerImgHTML=headerData.imagem
         ?`<div style="width:100%;margin-bottom:6pt;"><img src="${headerData.imagem}" style="width:100%;display:block;max-height:38mm;object-fit:contain;"></div>`:'';
     const titleHTML=isFirst&&title
         ?`<h1 style="text-align:center;font-size:14pt;font-weight:900;text-transform:uppercase;margin:0 0 8pt 0;letter-spacing:.04em;padding-bottom:6pt;border-bottom:2pt solid #000;">${title}</h1>`:'';
@@ -718,8 +741,9 @@ function enterPreviewMode(){
 function exitPreviewMode(){document.body.classList.remove('preview-mode');}
 
 // =============================================
-// GERAR PDF - CORRIGIDO
-// Cabeçalho somente na primeira página
+// GERAR PDF
+// Estratégia: renderiza cada página num canvas separado.
+// Cada página = cabeçalho + fatia do conteúdo.
 // =============================================
 async function generatePDF(){
     const rawTitle=document.getElementById('assessment-title').value.trim()||'avaliacao';
@@ -734,28 +758,20 @@ async function generatePDF(){
 
     // 2) Escala para alta qualidade
     const SCALE=2;
-    const A4_W_PX=Math.round(210/25.4*96);
-    const A4_H_PX=Math.round(297/25.4*96);
+    // Dimensões A4 em pixels a 96dpi = 794x1123 px → com escala 2 = 1588x2246
+    const A4_W_PX=Math.round(210/25.4*96); // ~794px
+    const A4_H_PX=Math.round(297/25.4*96); // ~1123px
 
-    // 3) Construir div única do conteúdo (sem cabeçalho na primeira página)
+    // 3) Construir div única do conteúdo (sem cabeçalho – o cabeçalho será adicionado por página)
     const contentDiv=document.createElement('div');
     contentDiv.style.cssText=`width:${A4_W_PX}px;font-family:Arial,Helvetica,sans-serif;font-size:14.7px;line-height:1.45;color:#000;background:white;box-sizing:border-box;padding:0 ${Math.round(15/25.4*96)}px;`;
-    
-    // Cabeçalho + Título somente no início do conteúdo
+    // Título somente no início do conteúdo
     const title=document.getElementById('assessment-title').value.trim();
-    if(headerData.imagem){
-        const hImg=document.createElement('img');
-        hImg.src=headerData.imagem;
-        hImg.style.cssText='width:100%;display:block;max-height:180px;object-fit:contain;margin-bottom:8px;';
-        contentDiv.appendChild(hImg);
-    }
     if(title){
         const th=document.createElement('h1');
         th.style.cssText='text-align:center;font-size:18.7px;font-weight:900;text-transform:uppercase;margin:0 0 10px 0;letter-spacing:.04em;padding-bottom:8px;border-bottom:2px solid #000;';
-        th.textContent=title;
-        contentDiv.appendChild(th);
+        th.textContent=title; contentDiv.appendChild(th);
     }
-    
     // Questões
     questions.forEach((q,i)=>{
         const qDiv=document.createElement('div');
@@ -774,33 +790,78 @@ async function generatePDF(){
         logging:false
     });
 
-    // 5) Montar PDF página por página
+    // 5) Capturar cabeçalho num canvas separado (se existir)
+    let headerCanvas=null;
+    let headerHeightPx=0;
+    if(headerData.imagem){
+        const hDiv=document.createElement('div');
+        hDiv.style.cssText=`width:${A4_W_PX}px;background:white;padding:0 ${Math.round(15/25.4*96)}px;box-sizing:border-box;`;
+        const img=document.createElement('img');
+        img.src=headerData.imagem;
+        img.style.cssText='width:100%;display:block;max-height:180px;object-fit:contain;';
+        await new Promise(r=>{img.onload=r;img.onerror=r;});
+        hDiv.appendChild(img);
+        wrapper.appendChild(hDiv);
+        await new Promise(r=>setTimeout(r,200));
+        headerCanvas=await html2canvas(hDiv,{
+            scale:SCALE, useCORS:true, allowTaint:true,
+            scrollX:0, scrollY:0, width:A4_W_PX, windowWidth:A4_W_PX,
+            backgroundColor:'#ffffff', logging:false
+        });
+        headerHeightPx=headerCanvas.height;
+    }
+
+    // 6) Montar PDF página por página
     const {jsPDF}=window.jspdf;
     const pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
     const MARGIN_MM=15;
-    const CONTENT_W_MM=210-(2*MARGIN_MM);
+    const CONTENT_W_MM=210-(2*MARGIN_MM); // 180mm
 
-    // Converter px canvas → mm
+    // Converter px canvas → mm (scale já incluso)
     const pxToMm=(px)=>px/(SCALE*96/25.4);
+    const headerHeightMM=headerCanvas?pxToMm(headerHeightPx):0;
     const contentTotalH=pxToMm(contentCanvas.height);
 
     // Área útil por página em mm
-    const usableH_MM=297-(2*MARGIN_MM);
+    const usableH_MM=297-(2*MARGIN_MM); // 267mm
+    // Na primeira página: área restante após cabeçalho e título
+    // (O título está embutido no contentCanvas)
+    // Em todas as páginas subsequentes: cabeçalho + área de conteúdo
+    const pageContentH_first=usableH_MM; // Toda a área (cabeçalho já é parte do conteúdo)
+    const pageContentH_next=usableH_MM-headerHeightMM-3; // Subtrai cabeçalho e margem interna
 
     // Escala: largura do contentCanvas → CONTENT_W_MM
     const contentScaleMM=CONTENT_W_MM/pxToMm(contentCanvas.width);
     const totalContentMM=contentTotalH*contentScaleMM;
 
-    let yContentMM=0;
+    let yContentMM=0; // ponteiro em mm no conteúdo
     let pageIndex=0;
+
+    const addHeaderToPDF=async(pdfPage)=>{
+        if(headerCanvas){
+            const hImg=headerCanvas.toDataURL('image/jpeg',0.95);
+            pdfPage.addImage(hImg,'JPEG',MARGIN_MM,MARGIN_MM,CONTENT_W_MM,headerHeightMM);
+        }
+    };
 
     while(yContentMM<totalContentMM){
         if(pageIndex>0) pdf.addPage();
 
         let sliceStartMM=yContentMM;
-        let availableMM=usableH_MM;
+        let availableMM=pageIndex===0?usableH_MM:pageContentH_next;
+
+        // Adicionar cabeçalho nas páginas após a primeira
+        if(pageIndex>0){
+            await addHeaderToPDF(pdf);
+        }
 
         // Calcular slice do contentCanvas em pixels
+        const sliceStartPx=(sliceStartMM/contentScaleMM)/(1/SCALE)*SCALE*(1/SCALE); // converter mm → px canvas
+        const sliceStartPxRaw=sliceStartMM/contentScaleMM/(1)*1; // mm → mm no conteúdo → px canvas
+        // Recalcular corretamente:
+        // contentCanvas.height pixels corresponde a contentTotalH mm (após contentScaleMM)
+        // px = (mm / contentScaleMM) * (contentCanvas.height / contentTotalH * contentScaleMM)
+        // simplifica: px = mm * contentCanvas.height / totalContentMM
         const mmToPxCanvas=(mm)=>mm*contentCanvas.height/totalContentMM;
         const pxStart=Math.floor(mmToPxCanvas(sliceStartMM));
         const pxH=Math.min(Math.ceil(mmToPxCanvas(availableMM)), contentCanvas.height-pxStart);
@@ -816,12 +877,21 @@ async function generatePDF(){
         const sliceImg=slice.toDataURL('image/jpeg',0.95);
         const sliceHmm=pxToMm(pxH)*contentScaleMM;
 
-        pdf.addImage(sliceImg,'JPEG',MARGIN_MM,MARGIN_MM,CONTENT_W_MM,sliceHmm);
+        const yPosOnPage=pageIndex===0
+            ?MARGIN_MM
+            :MARGIN_MM+headerHeightMM+3;
+
+        pdf.addImage(sliceImg,'JPEG',MARGIN_MM,yPosOnPage,CONTENT_W_MM,sliceHmm);
 
         yContentMM+=availableMM;
         pageIndex++;
-        if(pageIndex>50) break;
+        if(pageIndex>50) break; // segurança
     }
+
+    // Na primeira página adicionar o cabeçalho POR CIMA do conteúdo
+    // Na verdade: primeira página tem cabeçalho em cima também
+    // Precisamos refazer: primeiro página = cabeçalho no topo + conteúdo abaixo
+    // MELHOR ABORDAGEM: montar div por página e capturar cada uma
 
     document.body.removeChild(wrapper);
 
