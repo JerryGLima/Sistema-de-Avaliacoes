@@ -723,7 +723,8 @@ async function deleteAssessment(docId,idx){
 // BUILD HTML DA QUESTÃO
 // =============================================
 function buildQuestaoHTML(q,index){
-    let h=`<div class="q-block" style="margin-bottom:11pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
+    // AQUI FOI ALTERADO: margin-bottom passou de 11pt para 28pt
+    let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
     if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
         h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
     }
@@ -797,15 +798,14 @@ async function createPaginatedDOM() {
     const container = document.createElement('div');
     container.className = 'flex flex-col gap-8 items-center w-full';
 
-    // Cria um container invisível provisório para o navegador calcular a altura exata
     const measureWrapper = document.createElement('div');
     measureWrapper.style.cssText = 'position:fixed; left:-9999px; top:0; visibility:hidden;';
     document.body.appendChild(measureWrapper);
 
     const mmDiv = document.createElement('div');
-    mmDiv.style.height = '267mm'; // Altura segura subtraindo as margens de 15mm do topo e base
+    mmDiv.style.height = '267mm'; 
     measureWrapper.appendChild(mmDiv);
-    const safeHeightPx = mmDiv.getBoundingClientRect().height - 5; // buffer
+    const safeHeightPx = mmDiv.getBoundingClientRect().height - 5; 
     measureWrapper.removeChild(mmDiv);
 
     let sheets = [];
@@ -821,13 +821,12 @@ async function createPaginatedDOM() {
         sheet.appendChild(content);
         
         sheets.push({ sheet, content });
-        measureWrapper.appendChild(sheet); // joga pro DOM invisivel pra calcular
+        measureWrapper.appendChild(sheet); 
         return { sheet, content };
     }
 
     let { sheet, content } = newSheet();
 
-    // 1. Injeta Cabeçalho e Título
     if(headerData.imagem){
         const img = document.createElement('img');
         img.src = headerData.imagem;
@@ -844,7 +843,6 @@ async function createPaginatedDOM() {
         content.appendChild(h1);
     }
 
-    // 2. Injeta Questões com verificação de estouro
     for(let i=0; i<questions.length; i++){
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = buildQuestaoHTML(questions[i], i);
@@ -855,7 +853,7 @@ async function createPaginatedDOM() {
 
         if(content.getBoundingClientRect().height > safeHeightPx) {
             const qCount = content.querySelectorAll('.q-block').length;
-            if(qCount > 1) { // Só move se houver mais de uma questão na página (evita loop)
+            if(qCount > 1) { 
                 content.removeChild(qNode);
                 const next = newSheet();
                 sheet = next.sheet;
@@ -866,7 +864,6 @@ async function createPaginatedDOM() {
         }
     }
 
-    // 3. Finalização: Injeta o "X / Y" estritamente no rodapé direito e transporta as folhas para o container oficial
     const totalPages = sheets.length;
     sheets.forEach((s, index) => {
         const footer = document.createElement('div');
@@ -898,7 +895,7 @@ async function enterPreviewMode(){
 
 function exitPreviewMode(){
     document.body.classList.remove('preview-mode');
-    document.getElementById('print-content').innerHTML = ''; // Limpa a memória
+    document.getElementById('print-content').innerHTML = ''; 
 }
 
 // =============================================
@@ -908,7 +905,6 @@ async function generatePDF(fromPreview = false){
     const rawTitle = document.getElementById('assessment-title').value.trim() || 'avaliacao';
     const filename = rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '.pdf';
 
-    // Se o usuário clicou direto em Gerar PDF sem ir pra visualização, forçamos o modo preview para renderizar o layout perfeito
     if(!fromPreview) {
         await enterPreviewMode();
     }
@@ -925,7 +921,6 @@ async function generatePDF(fromPreview = false){
         for(let i=0; i<pages.length; i++){
             if(i > 0) pdf.addPage();
             
-            // Removemos a sombra apenas temporariamente para a "foto"
             const originalShadow = pages[i].style.boxShadow;
             pages[i].style.boxShadow = 'none';
             
@@ -937,7 +932,7 @@ async function generatePDF(fromPreview = false){
                 backgroundColor: '#ffffff'
             });
             
-            pages[i].style.boxShadow = originalShadow; // Devolve a sombra
+            pages[i].style.boxShadow = originalShadow; 
             
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
@@ -962,7 +957,6 @@ async function printDirect(){
     await enterPreviewMode();
     setTimeout(()=>{
         window.print();
-        // Não fechamos o preview automático aqui caso o usuário queira checar como ficou na tela
     }, 800);
 }
 
