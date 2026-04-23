@@ -43,7 +43,7 @@
         .preview-mode #app-screen{display:none!important}
         .preview-mode #print-view{display:block!important}
 
-        /* A4 SHEET RIGIDA (Renderização Exata do PDF) */
+        /* A4 SHEET RIGIDA */
         .a4-sheet{
             width: 210mm;
             height: 297mm;
@@ -56,14 +56,14 @@
             box-shadow: 0 10px 40px rgba(0,0,0,.35);
             position: relative;
             overflow: hidden;
-            margin-bottom: 20px; /* Espaço entre folhas na tela */
+            margin-bottom: 20px;
         }
         .a4-sheet *{box-sizing:border-box}
         .q-block{page-break-inside:avoid;break-inside:avoid}
 
-        /* PRINT (Remove bordas falsas e tira dados nativos do chrome) */
+        /* PRINT */
         @media print{
-            @page { size: A4 portrait; margin: 0; } /* MARGIN 0 BLOQUEIA DATA E URL DO NAVEGADOR */
+            @page { size: A4 portrait; margin: 0; }
             *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
             body,html{margin:0;padding:0;background:white}
             #app-screen,#login-screen,#print-toolbar,#toast-container,#color-picker-popup{display:none!important}
@@ -91,7 +91,7 @@
             </div>
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -331,7 +331,7 @@ let cropState={questionId:null,optionId:null,startX:0,startY:0,isDragging:false}
 let allAssessments=[];
 
 // =============================================
-// AUTH (COM MELHORIA DE UX PARA ARQUIVOS)
+// AUTH E INICIALIZAÇÃO
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -343,22 +343,36 @@ document.getElementById('login-form').onsubmit=async(e)=>{
     try{await auth.signInWithEmailAndPassword(email,pass);}
     catch{err.innerText='E-mail ou senha incorretos.';err.classList.remove('hidden');sp.classList.add('hidden');}
 };
+
+// Garantia de Sincronia: Carrega as provas SÓ APÓS o usuário estar confirmado pelo Firebase
 auth.onAuthStateChanged(user=>{
     if(user){
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
         
-        // Passando "true" para abrir a gaveta automaticamente se houver arquivos
+        // O "true" indica que ele deve abrir a gaveta automaticamente se encontrar provas
         loadSavedAssessments(true); 
         initColorPicker();
     }else{
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
+        // Limpa o estado local ao deslogar para não dar conflito no próximo login
+        questions=[];
+        headerData={id:null,imagem:null,titulo:''};
+        allAssessments=[];
+        document.getElementById('assessment-title').value='';
+        removeHeader();
+        renderQuestions();
     }
     lucide.createIcons();
 });
-function handleLogout(){auth.signOut();showToast('Sessão encerrada','info');}
+
+function handleLogout(){
+    if(!confirm('Tem certeza que deseja sair?')) return;
+    auth.signOut();
+    showToast('Sessão encerrada','info');
+}
 
 // =============================================
 // QUESTÕES
@@ -672,11 +686,12 @@ async function saveToCloud(){
 // =============================================
 // HISTÓRICO COM ABERTURA AUTOMÁTICA
 // =============================================
-function toggleSavedModal(){const m=document.getElementById('saved-modal');const h=m.classList.contains('hidden');m.classList.toggle('hidden');if(h)loadSavedAssessments();}
+function toggleSavedModal(){const m=document.getElementById('saved-modal');const h=m.classList.contains('hidden');m.classList.toggle('hidden');if(h)loadSavedAssessments(false);}
 
-// A função agora recebe "autoOpen"
+// Função atualizada para garantir sincronia com a autenticação
 async function loadSavedAssessments(autoOpen = false){
-    if(!auth.currentUser)return;
+    if(!auth.currentUser) return; // Trava: não faz nada se não tiver ID confirmado
+    
     const list=document.getElementById('saved-list');
     list.innerHTML='<div class="flex justify-center py-8"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent loader"></div></div>';
     try{
@@ -686,6 +701,7 @@ async function loadSavedAssessments(autoOpen = false){
         if(snap.empty){
             list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova salva ainda</p></div>';
             lucide.createIcons();
+            // Se autoOpen for true, mas estiver vazio, não mostra a tela de arquivos
             return;
         }
         
@@ -716,7 +732,7 @@ async function loadSavedAssessments(autoOpen = false){
             list.appendChild(item);
         });
 
-        // MELHORIA DE UX: Abre a gaveta automaticamente se for chamado pelo login inicial
+        // Só abre a modal se a flag autoOpen estiver ativa (ou seja, se veio do auth.onAuthStateChanged)
         if(autoOpen && allAssessments.length > 0) {
             document.getElementById('saved-modal').classList.remove('hidden');
         }
@@ -737,7 +753,7 @@ function loadAssessmentByIndex(idx){
 }
 async function deleteAssessment(docId,idx){
     if(!confirm('Excluir esta prova permanentemente?'))return;
-    try{await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();showToast('Prova excluída','warning');loadSavedAssessments(true);}
+    try{await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();showToast('Prova excluída','warning');loadSavedAssessments(false);}
     catch{showToast('Erro ao excluir','error');}
 }
 
