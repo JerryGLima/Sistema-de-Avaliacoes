@@ -497,7 +497,7 @@ function buildImgZone(q){
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // =============================================
-// CROP
+// CROP COM COMPRESSÃO AUTOMÁTICA
 // =============================================
 function startCrop(qId,oId,input){
     const file=input.files[0];if(!file)return;
@@ -514,36 +514,84 @@ function initCropInternal(){
     cont.onmousemove=(e)=>{if(!cropState.isDragging)return;const b=img.getBoundingClientRect();const cx=e.clientX-b.left,cy=e.clientY-b.top;rect.style.width=Math.abs(cx-cropState.startX)+'px';rect.style.height=Math.abs(cy-cropState.startY)+'px';rect.style.left=Math.min(cx,cropState.startX)+'px';rect.style.top=Math.min(cy,cropState.startY)+'px';};
     cont.onmouseup=()=>cropState.isDragging=false;
 }
+
 function applyCrop(full){
     const img=document.getElementById('img-to-crop');
     const c=document.createElement('canvas');
     const ctx=c.getContext('2d');
-    if(full){c.width=img.naturalWidth;c.height=img.naturalHeight;ctx.drawImage(img,0,0);}
-    else{const rE=document.getElementById('crop-rect').getBoundingClientRect();const b=img.getBoundingClientRect();const sx=img.naturalWidth/b.width,sy=img.naturalHeight/b.height;c.width=rE.width*sx;c.height=rE.height*sy;ctx.drawImage(img,(rE.left-b.left)*sx,(rE.top-b.top)*sy,rE.width*sx,rE.height*sy,0,0,c.width,c.height);}
-    const data=c.toDataURL('image/jpeg',0.88);
+    
+    let targetW, targetH, srcX=0, srcY=0, srcW=img.naturalWidth, srcH=img.naturalHeight;
+    
+    if(!full){
+        const rE=document.getElementById('crop-rect').getBoundingClientRect();
+        const b=img.getBoundingClientRect();
+        const sx=img.naturalWidth/b.width, sy=img.naturalHeight/b.height;
+        srcX = (rE.left-b.left)*sx;
+        srcY = (rE.top-b.top)*sy;
+        srcW = rE.width*sx;
+        srcH = rE.height*sy;
+    }
+
+    // Filtro anti-peso: Nenhuma imagem terá mais que 1000px de altura/largura
+    targetW = srcW; targetH = srcH;
+    const MAX_DIM = 1000;
+    if(targetW > MAX_DIM || targetH > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH);
+        targetW *= ratio; targetH *= ratio;
+    }
+
+    c.width = targetW; c.height = targetH;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, targetW, targetH);
+    ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetW, targetH);
+    
+    const data=c.toDataURL('image/jpeg',0.85); // Mantém qualidade excelente, mas remove muito peso
+    
     const q=questions.find(qu=>qu.id===cropState.questionId);
     if(cropState.optionId)q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data;
     else q.imagem=data;
     closeCropper();renderQuestions();
 }
+
 function closeCropper(){document.getElementById('cropper-modal').classList.add('hidden');}
 function removeQuestionImage(qId){questions.find(q=>q.id===qId).imagem=null;renderQuestions();}
 function removeOptImage(qId,oId){questions.find(q=>q.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).image=null;renderQuestions();}
 
 // =============================================
-// CABEÇALHO
+// CABEÇALHO COM COMPRESSÃO AUTOMÁTICA
 // =============================================
 function uploadHeader(input){
     const file=input.files[0];if(!file)return;
     const r=new FileReader();
-    r.onload=(e)=>{headerData.imagem=e.target.result;document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=e.target.result;showToast('Cabeçalho carregado!','success');};
+    r.onload=(e)=>{
+        const img = new Image();
+        img.onload = () => {
+            const c = document.createElement('canvas');
+            const MAX_W = 1200; // Proteção contra imagens panorâmicas gigantes de celular
+            let w = img.width, h = img.height;
+            if(w > MAX_W) { h *= MAX_W/w; w = MAX_W; }
+            
+            c.width = w; c.height = h;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            
+            headerData.imagem = c.toDataURL('image/jpeg', 0.85);
+            document.getElementById('header-upload-container').classList.add('hidden');
+            document.getElementById('header-preview-container').classList.remove('hidden');
+            document.getElementById('header-img-preview').src = headerData.imagem;
+            showToast('Cabeçalho carregado!','success');
+        };
+        img.src = e.target.result;
+    };
     r.readAsDataURL(file);
 }
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
 function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();showToast('Nova prova iniciada','info');}
 
 // =============================================
-// SALVAR
+// SALVAR BLINDADO (Com Timeout e Higienização)
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
@@ -551,14 +599,26 @@ async function saveToCloud(){
     if(!title){showToast('Digite um título','warning');return;}
     headerData.titulo=title;
     const btn=document.getElementById('btn-save');
-    // Guardar estado original como HTML estático (sem depender de lucide re-render)
+    
     btn.disabled=true;
     btn.innerHTML=`<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full loader" style="display:inline-block"></div><span class="hidden sm:inline ml-1">Salvando...</span>`;
     const docId=headerData.id||Date.now().toString();
+    
     try{
-        await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set({id:docId,headerData,questions,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        // 1. Cronômetro de segurança contra Loop infinito (máximo 15 segundos)
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
+        
+        // 2. Limpeza profunda dos dados (evita que lixo do editor HTML quebre o Firestore)
+        const payload = JSON.parse(JSON.stringify({id:docId, headerData, questions}));
+        payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+
+        // 3. Corrida de promessas (Salvar vs Cronômetro)
+        await Promise.race([
+            db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload),
+            timeout
+        ]);
+        
         headerData.id=docId;
-        // Mostrar estado de sucesso no botão brevemente
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Salvo!</span>`;
         btn.style.background='#065f46';
         showToast('✓ Prova salva com sucesso!','success');
@@ -569,7 +629,11 @@ async function saveToCloud(){
         },2000);
     }catch(e){
         console.error(e);
-        showToast('Erro ao salvar. Tente novamente.','error');
+        if(e.message === 'TIMEOUT') {
+            showToast('Tempo esgotado. A internet falhou ou imagens muito pesadas.','error');
+        } else {
+            showToast('Erro ao salvar no servidor.','error');
+        }
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
         btn.disabled=false;
     }
@@ -722,20 +786,17 @@ async function generatePDF(){
     document.body.appendChild(wrapper);
 
     // 2. Calcula a área segura interna de uma página A4 (em pixels do navegador atual)
-    // 297mm - 15mm (top) - 15mm (bottom) = 267mm úteis
     const mmDiv = document.createElement('div');
     mmDiv.style.height = '267mm';
     wrapper.appendChild(mmDiv);
-    const SAFE_HEIGHT_PX = mmDiv.getBoundingClientRect().height - 5; // 5px de folga extra
+    const SAFE_HEIGHT_PX = mmDiv.getBoundingClientRect().height - 5; 
     wrapper.removeChild(mmDiv);
 
-    // Função auxiliar para gerar um contêiner A4 em branco no DOM
     function createPage() {
         const page = document.createElement('div');
         page.className = 'a4-sheet-pdf';
         page.style.cssText = 'width:210mm; height:297mm; background:white; font-family:Arial,Helvetica,sans-serif; font-size:11pt; line-height:1.45; color:#000; box-sizing:border-box; padding:15mm; position:relative; overflow:hidden; box-shadow:none;';
         
-        // Contêiner flexível interno para podermos medir onde a altura "bate"
         const content = document.createElement('div');
         page.appendChild(content);
         return { page, content };
@@ -744,7 +805,6 @@ async function generatePDF(){
     let { page, content } = createPage();
     wrapper.appendChild(page);
 
-    // 3. Monta o Cabeçalho (apenas na Página 1)
     if(headerData.imagem){
         const img = document.createElement('img');
         img.src = headerData.imagem;
@@ -759,10 +819,8 @@ async function generatePDF(){
         content.appendChild(h1);
     }
 
-    // Dá um fôlego para o navegador desenhar imagens base64 no DOM invisível
     await new Promise(r => setTimeout(r, 400));
 
-    // 4. Injeta as questões verificando o limite de cada folha
     for(let i=0; i<questions.length; i++){
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = buildQuestaoHTML(questions[i], i);
@@ -770,32 +828,25 @@ async function generatePDF(){
         
         content.appendChild(qNode);
 
-        // Se tiver imagem na questão, precisa aguardar décimos de segundo pro DOM calcular a altura
         if(questions[i].imagem || (questions[i].opcoes && questions[i].opcoes.some(o => o.type==='image'))) {
             await new Promise(r => setTimeout(r, 50));
         }
 
-        // Verifica se a altura total dos itens dentro desta página estourou o limite de 267mm (SAFE_HEIGHT_PX)
         if(content.getBoundingClientRect().height > SAFE_HEIGHT_PX) {
-            // Garante que não é um loop infinito (se a questão sozinha for maior que a folha inteira, ela tem que ficar lá)
             const qCount = content.querySelectorAll('.q-block').length;
             if(qCount > 1) {
-                // Tira a questão que fez estourar da página atual
                 content.removeChild(qNode);
                 
-                // Gera uma página 100% nova
                 const newObj = createPage();
                 page = newObj.page;
                 content = newObj.content;
                 wrapper.appendChild(page);
 
-                // Coloca a questão inteira no começo da nova folha
                 content.appendChild(qNode);
             }
         }
     }
 
-    // 5. Captura as páginas que já estão separadas fisicamente no HTML e exporta para o jsPDF
     try {
         const pages = wrapper.querySelectorAll('.a4-sheet-pdf');
         const { jsPDF } = window.jspdf;
@@ -806,7 +857,6 @@ async function generatePDF(){
         for(let i=0; i<pages.length; i++){
             if(i > 0) pdf.addPage();
             
-            // O html2canvas agora vai bater uma foto apenas de um A4 exato com conteúdo que cabe
             const canvas = await html2canvas(pages[i], {
                 scale: 2, 
                 useCORS: true,
@@ -825,7 +875,6 @@ async function generatePDF(){
         console.error("Erro na geração de PDF:", e);
         showToast('Erro ao gerar PDF. Verifique o console.','error');
     } finally {
-        // Limpa a sujeira que o DOM invisível causou
         document.body.removeChild(wrapper);
     }
 }
