@@ -43,31 +43,39 @@
         .preview-mode #app-screen{display:none!important}
         .preview-mode #print-view{display:block!important}
 
-        /* A4 */
+        /* A4 SHEET RIGIDA (Renderização Exata do PDF) */
         .a4-sheet{
-            width:210mm;
-            background:white;
-            font-family:Arial,Helvetica,sans-serif;
-            font-size:11pt;
-            line-height:1.45;
-            color:#000;
-            box-sizing:border-box;
-            box-shadow:0 0 40px rgba(0,0,0,.35);
+            width: 210mm;
+            height: 297mm;
+            background: white;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            line-height: 1.45;
+            color: #000;
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0,0,0,.35);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px; /* Espaço entre folhas na tela */
         }
         .a4-sheet *{box-sizing:border-box}
-        .a4-header-zone{padding:15mm 15mm 0 15mm;width:100%}
-        .a4-body{padding:8pt 15mm 15mm 15mm}
         .q-block{page-break-inside:avoid;break-inside:avoid}
 
-        /* PRINT */
+        /* PRINT (Remove bordas falsas e tira dados nativos do chrome) */
         @media print{
+            @page { size: A4 portrait; margin: 0; } /* MARGIN 0 BLOQUEIA DATA E URL DO NAVEGADOR */
             *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
             body,html{margin:0;padding:0;background:white}
             #app-screen,#login-screen,#print-toolbar,#toast-container,#color-picker-popup{display:none!important}
             #print-view{display:block!important;position:static!important;background:white!important;overflow:visible!important;padding:0!important}
             #print-content{padding:0!important;margin:0!important;display:block!important}
-            .a4-sheet{box-shadow:none!important;width:100%!important;margin:0!important}
-            .q-block{page-break-inside:avoid;break-inside:avoid}
+            
+            .a4-sheet{
+                box-shadow:none!important;
+                margin:0!important;
+                page-break-after: always;
+            }
+            .a4-sheet:last-child { page-break-after: auto; }
         }
     </style>
 </head>
@@ -157,8 +165,8 @@
 <div id="print-view" class="hidden fixed inset-0 z-[100] bg-zinc-900 overflow-y-auto">
     <div id="print-toolbar" class="fixed top-5 left-0 right-0 z-50 flex justify-center gap-3 px-4 flex-wrap">
         <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
-        <button onclick="generatePDF()" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Gerar PDF</button>
-        <button onclick="printDirect()" class="bg-violet-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-violet-700 btn-active flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
+        <button onclick="generatePDF(true)" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Gerar PDF</button>
+        <button onclick="window.print()" class="bg-violet-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-violet-700 btn-active flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
     </div>
     <div id="print-content" class="pt-24 pb-16 flex flex-col items-center gap-8"></div>
 </div>
@@ -421,7 +429,6 @@ function renderQuestions(){
                 const od=document.createElement('div');
                 od.className='bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3';
                 
-                // Validação de segurança para opções antigas quebradas
                 const hasValidOptImg = opt.image && opt.image.length > 100;
                 
                 od.innerHTML=`
@@ -478,7 +485,6 @@ function renderQuestions(){
 }
 
 function buildImgZone(q){
-    // Filtro de segurança: strings menores que 100 caracteres não são imagens válidas (ex: 'data:,')
     const hasValidImg = q.imagem && q.imagem.length > 100;
     
     if(!hasValidImg)return`<label class="flex items-center gap-4 w-full p-5 border-2 border-dashed border-slate-100 rounded-2xl cursor-pointer hover:bg-blue-50/50 hover:border-blue-200 transition-all bg-slate-50/30"><div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-6 h-6 text-slate-300"></i></div><span class="font-bold text-sm uppercase tracking-widest text-slate-400">Incluir Imagem</span><input type="file" accept="image/*" class="hidden" onchange="startCrop('${q.id}',null,this)"></label>`;
@@ -510,8 +516,6 @@ function startCrop(qId,oId,input){
         cropState.questionId=qId;
         cropState.optionId=oId;
         const img = document.getElementById('img-to-crop');
-        
-        // Só abre o modal DEPOIS de confirmar que o navegador decodificou a imagem
         img.onload = () => {
             document.getElementById('cropper-modal').classList.remove('hidden');
             initCropInternal();
@@ -519,14 +523,14 @@ function startCrop(qId,oId,input){
         img.src=e.target.result;
     };
     r.readAsDataURL(file);
-    input.value = ''; // Reseta para permitir escolher o mesmo arquivo de novo se errar
+    input.value = '';
 }
 
 function initCropInternal(){
     const img=document.getElementById('img-to-crop');
     const rect=document.getElementById('crop-rect');
     rect.classList.add('hidden');
-    rect.style.width = '0px'; rect.style.height = '0px'; // Zera sempre ao abrir
+    rect.style.width = '0px'; rect.style.height = '0px'; 
     const cont=img.parentElement;
     cont.onmousedown=(e)=>{const b=img.getBoundingClientRect();cropState.startX=e.clientX-b.left;cropState.startY=e.clientY-b.top;cropState.isDragging=true;rect.style.cssText=`left:${cropState.startX}px;top:${cropState.startY}px;width:0;height:0`;rect.classList.remove('hidden');};
     cont.onmousemove=(e)=>{if(!cropState.isDragging)return;const b=img.getBoundingClientRect();const cx=e.clientX-b.left,cy=e.clientY-b.top;rect.style.width=Math.abs(cx-cropState.startX)+'px';rect.style.height=Math.abs(cy-cropState.startY)+'px';rect.style.left=Math.min(cx,cropState.startX)+'px';rect.style.top=Math.min(cy,cropState.startY)+'px';};
@@ -538,11 +542,7 @@ function applyCrop(full){
     const rect=document.getElementById('crop-rect');
     const rE=rect.getBoundingClientRect();
     
-    // Trava de segurança: Se clicou em "Cortar", mas a altura ou largura é zero (não desenhou nada na tela)
-    // Muda automaticamente a intenção para "Imagem Inteira" para não salvar uma imagem corrompida.
-    if(!full && (rE.width === 0 || rE.height === 0)) {
-        full = true;
-    }
+    if(!full && (rE.width === 0 || rE.height === 0)) { full = true; }
 
     const c=document.createElement('canvas');
     const ctx=c.getContext('2d');
@@ -565,11 +565,7 @@ function applyCrop(full){
         targetW *= ratio; targetH *= ratio;
     }
 
-    // Proteção final: se por algum milagre o canvas for 0, encerra e não salva lixo.
-    if(targetW <= 0 || targetH <= 0) {
-        closeCropper();
-        return;
-    }
+    if(targetW <= 0 || targetH <= 0) { closeCropper(); return; }
 
     c.width = targetW; c.height = targetH;
     ctx.fillStyle = "#ffffff";
@@ -733,7 +729,6 @@ function buildQuestaoHTML(q,index){
     }
     h+=`<div style="display:flex;gap:5pt;margin-bottom:3pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;">${q.enunciado||'...'}</div></div>`;
     
-    // Verificador de Segurança para o PDF
     const hasValidImg = q.imagem && q.imagem.length > 100;
     if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;"></div>`;
     
@@ -781,34 +776,7 @@ function buildQuestaoHTML(q,index){
 }
 
 // =============================================
-// PREVIEW
-// =============================================
-function buildPreviewHTML(){
-    const title=document.getElementById('assessment-title').value.trim();
-    const headerImgHTML=headerData.imagem
-        ?`<div style="width:100%;margin-bottom:8pt;"><img src="${headerData.imagem}" style="width:100%;display:block;max-height:40mm;object-fit:contain;"></div>`
-        :'';
-    const titleHTML=title
-        ?`<h1 style="text-align:center;font-size:14pt;font-weight:900;text-transform:uppercase;margin:0 0 10pt 0;letter-spacing:.04em;padding-bottom:6pt;border-bottom:2pt solid #000;">${title}</h1>`
-        :'';
-    const questoesHTML=questions.map((q,i)=>buildQuestaoHTML(q,i)).join('');
-
-    return `<div class="a4-sheet" style="width:210mm;min-height:297mm;background:white;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.45;color:#000;box-sizing:border-box;box-shadow:0 0 40px rgba(0,0,0,.35);padding:15mm;">
-        ${headerImgHTML}
-        ${titleHTML}
-        ${questoesHTML}
-    </div>`;
-}
-
-function enterPreviewMode(){
-    document.getElementById('print-content').innerHTML=buildPreviewHTML();
-    document.body.classList.add('preview-mode');
-    window.scrollTo(0,0);
-}
-function exitPreviewMode(){document.body.classList.remove('preview-mode');}
-
-// =============================================
-// HELPER PARA AGUARDAR IMAGENS CARREGAREM
+// NOVO MOTOR DE PAGINAÇÃO (DOM)
 // =============================================
 async function waitForImagesToLoad(element) {
     const images = Array.from(element.querySelectorAll('img'));
@@ -818,54 +786,53 @@ async function waitForImagesToLoad(element) {
         if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
         return new Promise(resolve => {
             img.onload = resolve;
-            img.onerror = resolve; // Continua mesmo se der erro, pra não travar
+            img.onerror = resolve; 
         });
     }));
-    
     await new Promise(r => setTimeout(r, 50));
 }
 
-// =============================================
-// GERAR PDF 
-// =============================================
-async function generatePDF(){
-    const rawTitle=document.getElementById('assessment-title').value.trim()||'avaliacao';
-    const filename=rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'')+'.pdf';
+// Cria blocos HTML A4 com paginação que servem de "preview" perfeita e origem do PDF
+async function createPaginatedDOM() {
+    const container = document.createElement('div');
+    container.className = 'flex flex-col gap-8 items-center w-full';
 
-    showToast('Gerando PDF... processando imagens...','info',10000);
-
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed; left:-9999px; top:0; z-index:-100; opacity:0; pointer-events:none;';
-    document.body.appendChild(wrapper);
+    // Cria um container invisível provisório para o navegador calcular a altura exata
+    const measureWrapper = document.createElement('div');
+    measureWrapper.style.cssText = 'position:fixed; left:-9999px; top:0; visibility:hidden;';
+    document.body.appendChild(measureWrapper);
 
     const mmDiv = document.createElement('div');
-    mmDiv.style.height = '267mm';
-    wrapper.appendChild(mmDiv);
-    const SAFE_HEIGHT_PX = mmDiv.getBoundingClientRect().height - 5; 
-    wrapper.removeChild(mmDiv);
+    mmDiv.style.height = '267mm'; // Altura segura subtraindo as margens de 15mm do topo e base
+    measureWrapper.appendChild(mmDiv);
+    const safeHeightPx = mmDiv.getBoundingClientRect().height - 5; // buffer
+    measureWrapper.removeChild(mmDiv);
 
-    function createPage() {
-        const page = document.createElement('div');
-        page.className = 'a4-sheet-pdf';
-        page.style.cssText = 'width:210mm; height:297mm; background:white; font-family:Arial,Helvetica,sans-serif; font-size:11pt; line-height:1.45; color:#000; box-sizing:border-box; padding:15mm; position:relative; overflow:hidden; box-shadow:none;';
+    let sheets = [];
+    let currentSheet, currentContent;
+
+    function newSheet() {
+        const sheet = document.createElement('div');
+        sheet.className = 'a4-sheet';
+        sheet.style.padding = '15mm';
         
         const content = document.createElement('div');
-        page.appendChild(content);
-        return { page, content };
+        content.style.width = '100%';
+        sheet.appendChild(content);
+        
+        sheets.push({ sheet, content });
+        measureWrapper.appendChild(sheet); // joga pro DOM invisivel pra calcular
+        return { sheet, content };
     }
 
-    let { page, content } = createPage();
-    wrapper.appendChild(page);
+    let { sheet, content } = newSheet();
 
+    // 1. Injeta Cabeçalho e Título
     if(headerData.imagem){
         const img = document.createElement('img');
+        img.src = headerData.imagem;
         img.style.cssText = 'width:100%; display:block; max-height:40mm; object-fit:contain; margin-bottom:8pt;';
-        
-        await new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve;
-            img.src = headerData.imagem;
-        });
+        await new Promise(r => { img.onload=r; img.onerror=r; });
         content.appendChild(img);
     }
     
@@ -877,32 +844,79 @@ async function generatePDF(){
         content.appendChild(h1);
     }
 
+    // 2. Injeta Questões com verificação de estouro
     for(let i=0; i<questions.length; i++){
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = buildQuestaoHTML(questions[i], i);
         const qNode = tempDiv.firstElementChild;
-        
         content.appendChild(qNode);
-        await waitForImagesToLoad(qNode); 
 
-        if(content.getBoundingClientRect().height > SAFE_HEIGHT_PX) {
+        await waitForImagesToLoad(qNode);
+
+        if(content.getBoundingClientRect().height > safeHeightPx) {
             const qCount = content.querySelectorAll('.q-block').length;
-            if(qCount > 1) {
+            if(qCount > 1) { // Só move se houver mais de uma questão na página (evita loop)
                 content.removeChild(qNode);
-                
-                const newObj = createPage();
-                page = newObj.page;
-                content = newObj.content;
-                wrapper.appendChild(page);
-
+                const next = newSheet();
+                sheet = next.sheet;
+                content = next.content;
                 content.appendChild(qNode);
-                await waitForImagesToLoad(qNode); 
+                await waitForImagesToLoad(qNode);
             }
         }
     }
 
+    // 3. Finalização: Injeta o "X / Y" estritamente no rodapé direito e transporta as folhas para o container oficial
+    const totalPages = sheets.length;
+    sheets.forEach((s, index) => {
+        const footer = document.createElement('div');
+        footer.style.cssText = 'position: absolute; bottom: 15mm; right: 15mm; font-size: 9pt; font-weight: 700; color: #000; font-family: Arial, sans-serif;';
+        footer.textContent = `${index + 1} / ${totalPages}`;
+        s.sheet.appendChild(footer);
+        
+        container.appendChild(s.sheet);
+    });
+
+    document.body.removeChild(measureWrapper);
+    return container;
+}
+
+// =============================================
+// PREVIEW VISUAL RENDERIZADA
+// =============================================
+async function enterPreviewMode(){
+    document.body.classList.add('preview-mode');
+    window.scrollTo(0,0);
+    
+    const printContent = document.getElementById('print-content');
+    printContent.innerHTML = '<div class="text-white flex flex-col items-center gap-4 mt-20"><div class="loader w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" style="animation: spinner 1s linear infinite"></div><p class="font-bold text-sm uppercase tracking-widest text-slate-400">Processando e paginando prova...</p></div>';
+    
+    const paginatedDOM = await createPaginatedDOM();
+    printContent.innerHTML = '';
+    printContent.appendChild(paginatedDOM);
+}
+
+function exitPreviewMode(){
+    document.body.classList.remove('preview-mode');
+    document.getElementById('print-content').innerHTML = ''; // Limpa a memória
+}
+
+// =============================================
+// GERAR PDF (Via Preview)
+// =============================================
+async function generatePDF(fromPreview = false){
+    const rawTitle = document.getElementById('assessment-title').value.trim() || 'avaliacao';
+    const filename = rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '.pdf';
+
+    // Se o usuário clicou direto em Gerar PDF sem ir pra visualização, forçamos o modo preview para renderizar o layout perfeito
+    if(!fromPreview) {
+        await enterPreviewMode();
+    }
+
+    showToast('Gerando PDF da prova...','info',10000);
+    const pages = document.getElementById('print-content').querySelectorAll('.a4-sheet');
+
     try {
-        const pages = wrapper.querySelectorAll('.a4-sheet-pdf');
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfW = pdf.internal.pageSize.getWidth();
@@ -910,6 +924,10 @@ async function generatePDF(){
 
         for(let i=0; i<pages.length; i++){
             if(i > 0) pdf.addPage();
+            
+            // Removemos a sombra apenas temporariamente para a "foto"
+            const originalShadow = pages[i].style.boxShadow;
+            pages[i].style.boxShadow = 'none';
             
             const canvas = await html2canvas(pages[i], {
                 scale: 2, 
@@ -919,24 +937,34 @@ async function generatePDF(){
                 backgroundColor: '#ffffff'
             });
             
+            pages[i].style.boxShadow = originalShadow; // Devolve a sombra
+            
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
         }
 
         pdf.save(filename);
-        showToast('✓ PDF gerado perfeitamente!','success');
+        showToast('✓ PDF gerado com paginação perfeita!','success');
+        
+        if(!fromPreview) exitPreviewMode();
+
     } catch(e) {
         console.error("Erro na geração de PDF:", e);
-        showToast('Erro ao gerar PDF. Verifique o console.','error');
-    } finally {
-        document.body.removeChild(wrapper);
+        showToast('Erro ao gerar PDF. Verifique sua conexão.','error');
+        if(!fromPreview) exitPreviewMode();
     }
 }
 
 // =============================================
-// IMPRIMIR
+// IMPRIMIR DIRETO DO NAVEGADOR
 // =============================================
-function printDirect(){enterPreviewMode();setTimeout(()=>{window.print();exitPreviewMode();},600);}
+async function printDirect(){
+    await enterPreviewMode();
+    setTimeout(()=>{
+        window.print();
+        // Não fechamos o preview automático aqui caso o usuário queira checar como ficou na tela
+    }, 800);
+}
 
 // =============================================
 // HELPERS
