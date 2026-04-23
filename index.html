@@ -75,7 +75,6 @@
 
 <div id="toast-container"></div>
 
-<!-- LOGIN -->
 <div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
     <div class="w-full max-w-md bg-white rounded-[3rem] shadow-[0_30px_80px_rgba(0,0,0,0.08)] border border-slate-100 p-12 space-y-10">
         <div class="text-center space-y-4">
@@ -98,7 +97,6 @@
     </div>
 </div>
 
-<!-- APP -->
 <div id="app-screen" class="hidden min-h-screen">
     <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 h-20 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto h-full px-4 flex justify-between items-center gap-2">
@@ -145,7 +143,6 @@
         <div id="questions-container" class="space-y-6"></div>
     </main>
 
-    <!-- Dock -->
     <div class="fixed bottom-8 left-0 right-0 z-40 px-4">
         <div class="max-w-2xl mx-auto bg-slate-950/95 backdrop-blur-xl border border-white/10 p-2.5 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex justify-between items-center gap-2 overflow-x-auto no-scrollbar">
             <button onclick="addQuestion('text')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-blue-600 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="align-left" class="w-5 h-5"></i><span>Escrita</span></button>
@@ -157,7 +154,6 @@
     </div>
 </div>
 
-<!-- PREVIEW -->
 <div id="print-view" class="hidden fixed inset-0 z-[100] bg-zinc-900 overflow-y-auto">
     <div id="print-toolbar" class="fixed top-5 left-0 right-0 z-50 flex justify-center gap-3 px-4 flex-wrap">
         <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
@@ -167,7 +163,6 @@
     <div id="print-content" class="pt-24 pb-16 flex flex-col items-center gap-8"></div>
 </div>
 
-<!-- CROP -->
 <div id="cropper-modal" class="hidden fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6">
     <div class="w-full max-w-3xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div class="p-8 border-b border-slate-100 flex justify-between items-center">
@@ -187,7 +182,6 @@
     </div>
 </div>
 
-<!-- MODAL SALVOS -->
 <div id="saved-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-6">
     <div class="w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         <div class="p-8 border-b border-slate-100 flex justify-between items-center">
@@ -201,7 +195,6 @@
     </div>
 </div>
 
-<!-- COLOR PICKER -->
 <div id="color-picker-popup" class="hidden fixed z-[200] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4" style="min-width:220px">
     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Cor do Texto</p>
     <div class="grid grid-cols-8 gap-1.5" id="color-swatches"></div>
@@ -689,7 +682,6 @@ function buildQuestaoHTML(q,index){
 
 // =============================================
 // BUILD PÁGINA A4 COMPLETA
-// Cada página tem o cabeçalho + corpo
 // =============================================
 function buildPageHTML(bodyContent, isFirst){
     const title=document.getElementById('assessment-title').value.trim();
@@ -710,9 +702,7 @@ function buildPageHTML(bodyContent, isFirst){
 }
 
 // =============================================
-// PREVIEW — uma única sheet para tela e impressão
-// Cabeçalho só na 1ª página. Para impressão, o browser
-// usa as margens @page e pagina o conteúdo automaticamente.
+// PREVIEW
 // =============================================
 function buildPreviewHTML(){
     const title=document.getElementById('assessment-title').value.trim();
@@ -724,8 +714,6 @@ function buildPreviewHTML(){
         :'';
     const questoesHTML=questions.map((q,i)=>buildQuestaoHTML(q,i)).join('');
 
-    // Estrutura: uma única div A4 com tudo dentro.
-    // Para tela: aparece como folha. Para impressão: browser pagina.
     return `<div class="a4-sheet" style="width:210mm;min-height:297mm;background:white;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.45;color:#000;box-sizing:border-box;box-shadow:0 0 40px rgba(0,0,0,.35);padding:15mm;">
         ${headerImgHTML}
         ${titleHTML}
@@ -741,167 +729,68 @@ function enterPreviewMode(){
 function exitPreviewMode(){document.body.classList.remove('preview-mode');}
 
 // =============================================
-// GERAR PDF
-// Estratégia: renderiza cada página num canvas separado.
-// Cada página = cabeçalho + fatia do conteúdo.
+// GERAR PDF (Revisado para evitar cortes)
 // =============================================
 async function generatePDF(){
     const rawTitle=document.getElementById('assessment-title').value.trim()||'avaliacao';
     const filename=rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'')+'.pdf';
 
-    showToast('Gerando PDF… por favor aguarde','info',10000);
+    showToast('Gerando PDF... por favor aguarde','info',10000);
 
-    // 1) Criar wrapper oculto fora da tela
-    const wrapper=document.createElement('div');
-    wrapper.style.cssText='position:fixed;left:-9999px;top:0;z-index:-100;pointer-events:none;';
+    // Criar um wrapper oculto para extração visual perfeita sem piscar a tela
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-100;pointer-events:none;';
+    wrapper.innerHTML = buildPreviewHTML();
     document.body.appendChild(wrapper);
 
-    // 2) Escala para alta qualidade
-    const SCALE=2;
-    // Dimensões A4 em pixels a 96dpi = 794x1123 px → com escala 2 = 1588x2246
-    const A4_W_PX=Math.round(210/25.4*96); // ~794px
-    const A4_H_PX=Math.round(297/25.4*96); // ~1123px
+    const element = wrapper.querySelector('.a4-sheet');
+    element.style.boxShadow = 'none'; // Remove sombra no PDF
 
-    // 3) Construir div única do conteúdo (sem cabeçalho – o cabeçalho será adicionado por página)
-    const contentDiv=document.createElement('div');
-    contentDiv.style.cssText=`width:${A4_W_PX}px;font-family:Arial,Helvetica,sans-serif;font-size:14.7px;line-height:1.45;color:#000;background:white;box-sizing:border-box;padding:0 ${Math.round(15/25.4*96)}px;`;
-    // Título somente no início do conteúdo
-    const title=document.getElementById('assessment-title').value.trim();
-    if(title){
-        const th=document.createElement('h1');
-        th.style.cssText='text-align:center;font-size:18.7px;font-weight:900;text-transform:uppercase;margin:0 0 10px 0;letter-spacing:.04em;padding-bottom:8px;border-bottom:2px solid #000;';
-        th.textContent=title; contentDiv.appendChild(th);
-    }
-    // Questões
-    questions.forEach((q,i)=>{
-        const qDiv=document.createElement('div');
-        qDiv.innerHTML=buildQuestaoHTML(q,i);
-        contentDiv.appendChild(qDiv.firstElementChild);
-    });
-    wrapper.appendChild(contentDiv);
-    await new Promise(r=>setTimeout(r,300));
+    try {
+        // Pausa breve para o navegador injetar e processar imagens base64/DOM corretamente
+        await new Promise(r => setTimeout(r, 500));
 
-    // 4) Capturar conteúdo completo num canvas
-    const contentCanvas=await html2canvas(contentDiv,{
-        scale:SCALE, useCORS:true, allowTaint:true,
-        scrollX:0, scrollY:0,
-        width:A4_W_PX, windowWidth:A4_W_PX,
-        backgroundColor:'#ffffff',
-        logging:false
-    });
-
-    // 5) Capturar cabeçalho num canvas separado (se existir)
-    let headerCanvas=null;
-    let headerHeightPx=0;
-    if(headerData.imagem){
-        const hDiv=document.createElement('div');
-        hDiv.style.cssText=`width:${A4_W_PX}px;background:white;padding:0 ${Math.round(15/25.4*96)}px;box-sizing:border-box;`;
-        const img=document.createElement('img');
-        img.src=headerData.imagem;
-        img.style.cssText='width:100%;display:block;max-height:180px;object-fit:contain;';
-        await new Promise(r=>{img.onload=r;img.onerror=r;});
-        hDiv.appendChild(img);
-        wrapper.appendChild(hDiv);
-        await new Promise(r=>setTimeout(r,200));
-        headerCanvas=await html2canvas(hDiv,{
-            scale:SCALE, useCORS:true, allowTaint:true,
-            scrollX:0, scrollY:0, width:A4_W_PX, windowWidth:A4_W_PX,
-            backgroundColor:'#ffffff', logging:false
+        const canvas = await html2canvas(element, {
+            scale: 2, // Maior resolução
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            backgroundColor: '#ffffff'
         });
-        headerHeightPx=headerCanvas.height;
-    }
 
-    // 6) Montar PDF página por página
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
-    const MARGIN_MM=15;
-    const CONTENT_W_MM=210-(2*MARGIN_MM); // 180mm
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
 
-    // Converter px canvas → mm (scale já incluso)
-    const pxToMm=(px)=>px/(SCALE*96/25.4);
-    const headerHeightMM=headerCanvas?pxToMm(headerHeightPx):0;
-    const contentTotalH=pxToMm(contentCanvas.height);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
 
-    // Área útil por página em mm
-    const usableH_MM=297-(2*MARGIN_MM); // 267mm
-    // Na primeira página: área restante após cabeçalho e título
-    // (O título está embutido no contentCanvas)
-    // Em todas as páginas subsequentes: cabeçalho + área de conteúdo
-    const pageContentH_first=usableH_MM; // Toda a área (cabeçalho já é parte do conteúdo)
-    const pageContentH_next=usableH_MM-headerHeightMM-3; // Subtrai cabeçalho e margem interna
+        // Mantém a proporção real calculada
+        const imgHeight = (canvasHeight * pdfWidth) / canvasWidth;
+        let heightLeft = imgHeight;
+        let position = 0;
 
-    // Escala: largura do contentCanvas → CONTENT_W_MM
-    const contentScaleMM=CONTENT_W_MM/pxToMm(contentCanvas.width);
-    const totalContentMM=contentTotalH*contentScaleMM;
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-    let yContentMM=0; // ponteiro em mm no conteúdo
-    let pageIndex=0;
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
 
-    const addHeaderToPDF=async(pdfPage)=>{
-        if(headerCanvas){
-            const hImg=headerCanvas.toDataURL('image/jpeg',0.95);
-            pdfPage.addImage(hImg,'JPEG',MARGIN_MM,MARGIN_MM,CONTENT_W_MM,headerHeightMM);
-        }
-    };
-
-    while(yContentMM<totalContentMM){
-        if(pageIndex>0) pdf.addPage();
-
-        let sliceStartMM=yContentMM;
-        let availableMM=pageIndex===0?usableH_MM:pageContentH_next;
-
-        // Adicionar cabeçalho nas páginas após a primeira
-        if(pageIndex>0){
-            await addHeaderToPDF(pdf);
+        // Realiza o "slice" automático de páginas se o conteúdo ultrapassar 1 A4
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight; 
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
         }
 
-        // Calcular slice do contentCanvas em pixels
-        const sliceStartPx=(sliceStartMM/contentScaleMM)/(1/SCALE)*SCALE*(1/SCALE); // converter mm → px canvas
-        const sliceStartPxRaw=sliceStartMM/contentScaleMM/(1)*1; // mm → mm no conteúdo → px canvas
-        // Recalcular corretamente:
-        // contentCanvas.height pixels corresponde a contentTotalH mm (após contentScaleMM)
-        // px = (mm / contentScaleMM) * (contentCanvas.height / contentTotalH * contentScaleMM)
-        // simplifica: px = mm * contentCanvas.height / totalContentMM
-        const mmToPxCanvas=(mm)=>mm*contentCanvas.height/totalContentMM;
-        const pxStart=Math.floor(mmToPxCanvas(sliceStartMM));
-        const pxH=Math.min(Math.ceil(mmToPxCanvas(availableMM)), contentCanvas.height-pxStart);
-
-        if(pxH<=0) break;
-
-        // Criar slice canvas
-        const slice=document.createElement('canvas');
-        slice.width=contentCanvas.width;
-        slice.height=pxH;
-        slice.getContext('2d').drawImage(contentCanvas,0,pxStart,contentCanvas.width,pxH,0,0,contentCanvas.width,pxH);
-
-        const sliceImg=slice.toDataURL('image/jpeg',0.95);
-        const sliceHmm=pxToMm(pxH)*contentScaleMM;
-
-        const yPosOnPage=pageIndex===0
-            ?MARGIN_MM
-            :MARGIN_MM+headerHeightMM+3;
-
-        pdf.addImage(sliceImg,'JPEG',MARGIN_MM,yPosOnPage,CONTENT_W_MM,sliceHmm);
-
-        yContentMM+=availableMM;
-        pageIndex++;
-        if(pageIndex>50) break; // segurança
-    }
-
-    // Na primeira página adicionar o cabeçalho POR CIMA do conteúdo
-    // Na verdade: primeira página tem cabeçalho em cima também
-    // Precisamos refazer: primeiro página = cabeçalho no topo + conteúdo abaixo
-    // MELHOR ABORDAGEM: montar div por página e capturar cada uma
-
-    document.body.removeChild(wrapper);
-
-    // Tentar salvar
-    try{
         pdf.save(filename);
         showToast('PDF gerado com sucesso!','success');
-    }catch(e){
-        console.error(e);
-        showToast('PDF gerado! Verifique seus downloads.','success');
+    } catch(e) {
+        console.error("Erro na geração de PDF:", e);
+        showToast('Erro ao gerar PDF.','error');
+    } finally {
+        document.body.removeChild(wrapper);
     }
 }
 
