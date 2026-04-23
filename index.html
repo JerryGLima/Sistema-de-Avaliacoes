@@ -632,10 +632,10 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO (inline, para o PDF)
+// BUILD HTML DA QUESTÃO
 // =============================================
 function buildQuestaoHTML(q,index){
-    let h=`<div class="q-block" style="margin-bottom:11pt;page-break-inside:avoid;break-inside:avoid;">`;
+    let h=`<div class="q-block" style="margin-bottom:11pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
     if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
         h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
     }
@@ -681,27 +681,6 @@ function buildQuestaoHTML(q,index){
 }
 
 // =============================================
-// BUILD PÁGINA A4 COMPLETA
-// =============================================
-function buildPageHTML(bodyContent, isFirst){
-    const title=document.getElementById('assessment-title').value.trim();
-    const headerImgHTML=headerData.imagem
-        ?`<div style="width:100%;margin-bottom:6pt;"><img src="${headerData.imagem}" style="width:100%;display:block;max-height:38mm;object-fit:contain;"></div>`:'';
-    const titleHTML=isFirst&&title
-        ?`<h1 style="text-align:center;font-size:14pt;font-weight:900;text-transform:uppercase;margin:0 0 8pt 0;letter-spacing:.04em;padding-bottom:6pt;border-bottom:2pt solid #000;">${title}</h1>`:'';
-
-    return `<div class="a4-sheet" style="width:210mm;background:white;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.45;color:#000;box-sizing:border-box;">
-        <div style="padding:15mm 15mm 0 15mm;">
-            ${headerImgHTML}
-            ${titleHTML}
-        </div>
-        <div style="padding:6pt 15mm 15mm 15mm;">
-            ${bodyContent}
-        </div>
-    </div>`;
-}
-
-// =============================================
 // PREVIEW
 // =============================================
 function buildPreviewHTML(){
@@ -729,67 +708,124 @@ function enterPreviewMode(){
 function exitPreviewMode(){document.body.classList.remove('preview-mode');}
 
 // =============================================
-// GERAR PDF (Revisado para evitar cortes)
+// GERAR PDF (Novo Sistema Inteligente de DOM)
 // =============================================
 async function generatePDF(){
     const rawTitle=document.getElementById('assessment-title').value.trim()||'avaliacao';
     const filename=rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'')+'.pdf';
 
-    showToast('Gerando PDF... por favor aguarde','info',10000);
+    showToast('Gerando PDF... calculando páginas...','info',10000);
 
-    // Criar um wrapper oculto para extração visual perfeita sem piscar a tela
+    // 1. Cria um wrapper invisível para montar as páginas separadas (DOM Paginated)
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-100;pointer-events:none;';
-    wrapper.innerHTML = buildPreviewHTML();
+    wrapper.style.cssText = 'position:fixed; left:-9999px; top:0; z-index:-100; opacity:0; pointer-events:none;';
     document.body.appendChild(wrapper);
 
-    const element = wrapper.querySelector('.a4-sheet');
-    element.style.boxShadow = 'none'; // Remove sombra no PDF
+    // 2. Calcula a área segura interna de uma página A4 (em pixels do navegador atual)
+    // 297mm - 15mm (top) - 15mm (bottom) = 267mm úteis
+    const mmDiv = document.createElement('div');
+    mmDiv.style.height = '267mm';
+    wrapper.appendChild(mmDiv);
+    const SAFE_HEIGHT_PX = mmDiv.getBoundingClientRect().height - 5; // 5px de folga extra
+    wrapper.removeChild(mmDiv);
 
+    // Função auxiliar para gerar um contêiner A4 em branco no DOM
+    function createPage() {
+        const page = document.createElement('div');
+        page.className = 'a4-sheet-pdf';
+        page.style.cssText = 'width:210mm; height:297mm; background:white; font-family:Arial,Helvetica,sans-serif; font-size:11pt; line-height:1.45; color:#000; box-sizing:border-box; padding:15mm; position:relative; overflow:hidden; box-shadow:none;';
+        
+        // Contêiner flexível interno para podermos medir onde a altura "bate"
+        const content = document.createElement('div');
+        page.appendChild(content);
+        return { page, content };
+    }
+
+    let { page, content } = createPage();
+    wrapper.appendChild(page);
+
+    // 3. Monta o Cabeçalho (apenas na Página 1)
+    if(headerData.imagem){
+        const img = document.createElement('img');
+        img.src = headerData.imagem;
+        img.style.cssText = 'width:100%; display:block; max-height:40mm; object-fit:contain; margin-bottom:8pt;';
+        content.appendChild(img);
+    }
+    const titleText = document.getElementById('assessment-title').value.trim();
+    if(titleText){
+        const h1 = document.createElement('h1');
+        h1.style.cssText = 'text-align:center; font-size:14pt; font-weight:900; text-transform:uppercase; margin:0 0 10pt 0; letter-spacing:.04em; padding-bottom:6pt; border-bottom:2pt solid #000;';
+        h1.textContent = titleText;
+        content.appendChild(h1);
+    }
+
+    // Dá um fôlego para o navegador desenhar imagens base64 no DOM invisível
+    await new Promise(r => setTimeout(r, 400));
+
+    // 4. Injeta as questões verificando o limite de cada folha
+    for(let i=0; i<questions.length; i++){
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = buildQuestaoHTML(questions[i], i);
+        const qNode = tempDiv.firstElementChild;
+        
+        content.appendChild(qNode);
+
+        // Se tiver imagem na questão, precisa aguardar décimos de segundo pro DOM calcular a altura
+        if(questions[i].imagem || (questions[i].opcoes && questions[i].opcoes.some(o => o.type==='image'))) {
+            await new Promise(r => setTimeout(r, 50));
+        }
+
+        // Verifica se a altura total dos itens dentro desta página estourou o limite de 267mm (SAFE_HEIGHT_PX)
+        if(content.getBoundingClientRect().height > SAFE_HEIGHT_PX) {
+            // Garante que não é um loop infinito (se a questão sozinha for maior que a folha inteira, ela tem que ficar lá)
+            const qCount = content.querySelectorAll('.q-block').length;
+            if(qCount > 1) {
+                // Tira a questão que fez estourar da página atual
+                content.removeChild(qNode);
+                
+                // Gera uma página 100% nova
+                const newObj = createPage();
+                page = newObj.page;
+                content = newObj.content;
+                wrapper.appendChild(page);
+
+                // Coloca a questão inteira no começo da nova folha
+                content.appendChild(qNode);
+            }
+        }
+    }
+
+    // 5. Captura as páginas que já estão separadas fisicamente no HTML e exporta para o jsPDF
     try {
-        // Pausa breve para o navegador injetar e processar imagens base64/DOM corretamente
-        await new Promise(r => setTimeout(r, 500));
-
-        const canvas = await html2canvas(element, {
-            scale: 2, // Maior resolução
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            backgroundColor: '#ffffff'
-        });
-
+        const pages = wrapper.querySelectorAll('.a4-sheet-pdf');
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
 
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-
-        // Mantém a proporção real calculada
-        const imgHeight = (canvasHeight * pdfWidth) / canvasWidth;
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
-
-        // Realiza o "slice" automático de páginas se o conteúdo ultrapassar 1 A4
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight; 
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-            heightLeft -= pdfHeight;
+        for(let i=0; i<pages.length; i++){
+            if(i > 0) pdf.addPage();
+            
+            // O html2canvas agora vai bater uma foto apenas de um A4 exato com conteúdo que cabe
+            const canvas = await html2canvas(pages[i], {
+                scale: 2, 
+                useCORS: true,
+                allowTaint: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
         }
 
         pdf.save(filename);
-        showToast('PDF gerado com sucesso!','success');
+        showToast('✓ PDF gerado perfeitamente!','success');
     } catch(e) {
         console.error("Erro na geração de PDF:", e);
-        showToast('Erro ao gerar PDF.','error');
+        showToast('Erro ao gerar PDF. Verifique o console.','error');
     } finally {
+        // Limpa a sujeira que o DOM invisível causou
         document.body.removeChild(wrapper);
     }
 }
