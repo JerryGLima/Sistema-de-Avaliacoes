@@ -43,7 +43,7 @@
         .preview-mode #app-screen{display:none!important}
         .preview-mode #print-view{display:block!important}
 
-        /* A4 SHEET RIGIDA (Renderização Exata do PDF) */
+        /* A4 SHEET RIGIDA */
         .a4-sheet{
             width: 210mm;
             height: 297mm;
@@ -56,14 +56,14 @@
             box-shadow: 0 10px 40px rgba(0,0,0,.35);
             position: relative;
             overflow: hidden;
-            margin-bottom: 20px; /* Espaço entre folhas na tela */
+            margin-bottom: 20px;
         }
         .a4-sheet *{box-sizing:border-box}
         .q-block{page-break-inside:avoid;break-inside:avoid}
 
-        /* PRINT (Remove bordas falsas e tira dados nativos do chrome) */
+        /* PRINT */
         @media print{
-            @page { size: A4 portrait; margin: 0; } /* MARGIN 0 BLOQUEIA DATA E URL DO NAVEGADOR */
+            @page { size: A4 portrait; margin: 0; }
             *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
             body,html{margin:0;padding:0;background:white}
             #app-screen,#login-screen,#print-toolbar,#toast-container,#color-picker-popup{display:none!important}
@@ -429,7 +429,7 @@ function renderQuestions(){
                 const od=document.createElement('div');
                 od.className='bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3';
                 
-                const hasValidOptImg = opt.image && opt.image.length > 100;
+                const hasValidOptImg = opt.image && opt.image.length > 30;
                 
                 od.innerHTML=`
                     <div class="flex items-center justify-between">
@@ -485,13 +485,13 @@ function renderQuestions(){
 }
 
 function buildImgZone(q){
-    const hasValidImg = q.imagem && q.imagem.length > 100;
+    const hasValidImg = q.imagem && q.imagem.length > 30;
     
     if(!hasValidImg)return`<label class="flex items-center gap-4 w-full p-5 border-2 border-dashed border-slate-100 rounded-2xl cursor-pointer hover:bg-blue-50/50 hover:border-blue-200 transition-all bg-slate-50/30"><div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-6 h-6 text-slate-300"></i></div><span class="font-bold text-sm uppercase tracking-widest text-slate-400">Incluir Imagem</span><input type="file" accept="image/*" class="hidden" onchange="startCrop('${q.id}',null,this)"></label>`;
     
     return`<div class="bg-slate-50 rounded-2xl p-6 space-y-5 border border-slate-100">
         <div class="relative flex justify-center group rounded-xl overflow-hidden border-4 border-white bg-white shadow-md">
-            <img src="${q.imagem}" style="width:${q.imageWidth}%" class="object-contain">
+            <img src="${q.imagem}" style="width:${q.imageWidth}%" class="object-contain" crossorigin="anonymous">
             <button onclick="removeQuestionImage('${q.id}')" class="absolute top-3 right-3 bg-white text-red-500 p-2.5 rounded-xl shadow-lg border border-red-50 opacity-0 group-hover:opacity-100 transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         </div>
         <div class="max-w-xs mx-auto space-y-2">
@@ -507,7 +507,8 @@ function buildImgZone(q){
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // =============================================
-// CROP COM CORREÇÃO DE EDGE-CASE E COMPRESSÃO
+// NÍVEL 1: SUPER COMPRESSÃO DE DADOS 
+// (Filtro para salvar direto no banco grátis sem estourar 1MB)
 // =============================================
 function startCrop(qId,oId,input){
     const file=input.files[0];if(!file)return;
@@ -559,7 +560,9 @@ function applyCrop(full){
     }
 
     targetW = srcW; targetH = srcH;
-    const MAX_DIM = 1000;
+    
+    // COMPRESSÃO AGRESSIVA PARA QUESTÕES: Máximo de 600px de altura ou largura
+    const MAX_DIM = 600; 
     if(targetW > MAX_DIM || targetH > MAX_DIM) {
         const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH);
         targetW *= ratio; targetH *= ratio;
@@ -572,7 +575,8 @@ function applyCrop(full){
     ctx.fillRect(0, 0, targetW, targetH);
     ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetW, targetH);
     
-    const data=c.toDataURL('image/jpeg',0.85); 
+    // COMPRESSÃO AGRESSIVA DE QUALIDADE: 0.65 reduz incrivelmente o tamanho do texto salvo
+    const data=c.toDataURL('image/jpeg', 0.65); 
     
     const q=questions.find(qu=>qu.id===cropState.questionId);
     if(cropState.optionId)q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data;
@@ -586,7 +590,7 @@ function removeQuestionImage(qId){questions.find(q=>q.id===qId).imagem=null;rend
 function removeOptImage(qId,oId){questions.find(q=>q.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).image=null;renderQuestions();}
 
 // =============================================
-// CABEÇALHO
+// CABEÇALHO (SUPER COMPRESSÃO)
 // =============================================
 function uploadHeader(input){
     const file=input.files[0];if(!file)return;
@@ -595,7 +599,9 @@ function uploadHeader(input){
         const img = new Image();
         img.onload = () => {
             const c = document.createElement('canvas');
-            const MAX_W = 1200; 
+            
+            // COMPRESSÃO DE CABEÇALHO: Reduzido para largura máxima de 800px
+            const MAX_W = 800; 
             let w = img.width, h = img.height;
             if(w > MAX_W) { h *= MAX_W/w; w = MAX_W; }
             
@@ -605,7 +611,8 @@ function uploadHeader(input){
             ctx.fillRect(0, 0, w, h);
             ctx.drawImage(img, 0, 0, w, h);
             
-            headerData.imagem = c.toDataURL('image/jpeg', 0.85);
+            // COMPRESSÃO DE QUALIDADE PARA CABEÇALHO: 0.65
+            headerData.imagem = c.toDataURL('image/jpeg', 0.65);
             document.getElementById('header-upload-container').classList.add('hidden');
             document.getElementById('header-preview-container').classList.remove('hidden');
             document.getElementById('header-img-preview').src = headerData.imagem;
@@ -619,12 +626,12 @@ function removeHeader(){headerData.imagem=null;document.getElementById('header-u
 function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();showToast('Nova prova iniciada','info');}
 
 // =============================================
-// SALVAR
+// SALVAR BLINDADO E RÁPIDO NO BANCO TEXTUAL
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
     const title=document.getElementById('assessment-title').value.trim();
-    if(!title){showToast('Digite um título','warning');return;}
+    if(!title){showToast('Digite um título para a prova','warning');return;}
     headerData.titulo=title;
     const btn=document.getElementById('btn-save');
     
@@ -633,10 +640,13 @@ async function saveToCloud(){
     const docId=headerData.id||Date.now().toString();
     
     try{
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
+        // Alterado de 15s para 30s para dar mais fôlego à internet oscilante
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 30000));
+        
         const payload = JSON.parse(JSON.stringify({id:docId, headerData, questions}));
         payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
+        // O Firebase Database recebe os dados comprimidos e salva super rápido
         await Promise.race([
             db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload),
             timeout
@@ -646,17 +656,19 @@ async function saveToCloud(){
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Salvo!</span>`;
         btn.style.background='#065f46';
         showToast('✓ Prova salva com sucesso!','success');
+        
         setTimeout(()=>{
             btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
             btn.style.background='';
             btn.disabled=false;
         },2000);
+
     }catch(e){
         console.error(e);
         if(e.message === 'TIMEOUT') {
             showToast('Tempo esgotado. A internet falhou ou imagens muito pesadas.','error');
         } else {
-            showToast('Erro ao salvar no servidor.','error');
+            showToast('Erro ao salvar no servidor. Verifique a internet.','error');
         }
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
         btn.disabled=false;
@@ -723,15 +735,14 @@ async function deleteAssessment(docId,idx){
 // BUILD HTML DA QUESTÃO
 // =============================================
 function buildQuestaoHTML(q,index){
-    // AQUI FOI ALTERADO: margin-bottom passou de 11pt para 28pt
     let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
     if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
         h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
     }
     h+=`<div style="display:flex;gap:5pt;margin-bottom:3pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;">${q.enunciado||'...'}</div></div>`;
     
-    const hasValidImg = q.imagem && q.imagem.length > 100;
-    if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;"></div>`;
+    const hasValidImg = q.imagem && q.imagem.length > 30;
+    if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
     
     if(q.type==='text'){
         const n=Math.max(1,parseInt(q.linhas)||4);
@@ -744,11 +755,11 @@ function buildQuestaoHTML(q,index){
         q.opcoes.forEach((opt,i)=>{
             const l=String.fromCharCode(97+i);
             const p=q.type==='true-false'?`${l}) (     )`:(`${l})`);
-            const optImgValid = opt.type==='image' && opt.image && opt.image.length > 100;
+            const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
             
             h+=`<div style="display:flex;align-items:flex-start;gap:4pt;margin-bottom:${q.type==='discursive-list'?'1pt':'3pt'};">
                 <span style="font-weight:700;white-space:nowrap;">${p}</span>
-                <div style="flex:1;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;">`:opt.text||''}</div>
+                <div style="flex:1;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
             </div>`;
             if(q.type==='discursive-list')h+=`<div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
         });
@@ -758,11 +769,11 @@ function buildQuestaoHTML(q,index){
         h+=`<div style="margin-top:5pt;margin-left:12pt;">`;
         q.opcoes.forEach((opt,i)=>{
             const l=String.fromCharCode(97+i);
-            const optImgValid = opt.type==='image' && opt.image && opt.image.length > 100;
+            const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
 
             h+=`<div style="display:flex;align-items:center;gap:8pt;margin-bottom:7pt;">
                 <div style="flex:1;display:flex;align-items:center;gap:4pt;"><span style="font-weight:700;">${l})</span>
-                ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;">`:
+                ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
                 `<span style="border-bottom:1pt solid #000;flex:1;padding-bottom:2pt;">${opt.text||''}</span>`}</div>
                 <div style="flex:1;display:flex;align-items:center;gap:4pt;">
                     <span style="width:9pt;height:9pt;border:1.5pt solid #000;border-radius:50%;display:inline-block;flex-shrink:0;"></span>
@@ -793,7 +804,6 @@ async function waitForImagesToLoad(element) {
     await new Promise(r => setTimeout(r, 50));
 }
 
-// Cria blocos HTML A4 com paginação que servem de "preview" perfeita e origem do PDF
 async function createPaginatedDOM() {
     const container = document.createElement('div');
     container.className = 'flex flex-col gap-8 items-center w-full';
@@ -831,6 +841,7 @@ async function createPaginatedDOM() {
         const img = document.createElement('img');
         img.src = headerData.imagem;
         img.style.cssText = 'width:100%; display:block; max-height:40mm; object-fit:contain; margin-bottom:8pt;';
+        img.crossOrigin = "anonymous";
         await new Promise(r => { img.onload=r; img.onerror=r; });
         content.appendChild(img);
     }
