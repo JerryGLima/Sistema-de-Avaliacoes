@@ -91,7 +91,7 @@
             </div>
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -331,7 +331,7 @@ let cropState={questionId:null,optionId:null,startX:0,startY:0,isDragging:false}
 let allAssessments=[];
 
 // =============================================
-// AUTH E INICIALIZAÇÃO
+// AUTH (COM CORREÇÃO DA CONDIÇÃO DE CORRIDA)
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -344,20 +344,18 @@ document.getElementById('login-form').onsubmit=async(e)=>{
     catch{err.innerText='E-mail ou senha incorretos.';err.classList.remove('hidden');sp.classList.add('hidden');}
 };
 
-// Garantia de Sincronia: Carrega as provas SÓ APÓS o usuário estar confirmado pelo Firebase
 auth.onAuthStateChanged(user=>{
     if(user){
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
         
-        // O "true" indica que ele deve abrir a gaveta automaticamente se encontrar provas
-        loadSavedAssessments(true); 
+        // Passa a ID do usuário ativamente para evitar falha no F5
+        loadSavedAssessments(user.uid, true); 
         initColorPicker();
     }else{
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
-        // Limpa o estado local ao deslogar para não dar conflito no próximo login
         questions=[];
         headerData={id:null,imagem:null,titulo:''};
         allAssessments=[];
@@ -684,24 +682,34 @@ async function saveToCloud(){
 }
 
 // =============================================
-// HISTÓRICO COM ABERTURA AUTOMÁTICA
+// HISTÓRICO COM CORREÇÃO DE CORRIDA (RACE CONDITION)
 // =============================================
-function toggleSavedModal(){const m=document.getElementById('saved-modal');const h=m.classList.contains('hidden');m.classList.toggle('hidden');if(h)loadSavedAssessments(false);}
+function toggleSavedModal(){
+    const m=document.getElementById('saved-modal');
+    const h=m.classList.contains('hidden');
+    m.classList.toggle('hidden');
+    // Ao clicar no botão, usamos null para forçar o sistema a ler a variável global do Firebase
+    if(h) loadSavedAssessments(null, false);
+}
 
-// Função atualizada para garantir sincronia com a autenticação
-async function loadSavedAssessments(autoOpen = false){
-    if(!auth.currentUser) return; // Trava: não faz nada se não tiver ID confirmado
+// Função reformulada para aceitar a ID diretamente do Auth (bypass race condition)
+async function loadSavedAssessments(uid = null, autoOpen = false){
+    // Resolve a identidade. Se o uid vier vazio, ele tenta usar o do currentUser global
+    const currentUid = uid || (auth.currentUser ? auth.currentUser.uid : null);
+    
+    // Se, mesmo assim, o sistema não souber quem é, ele cancela silenciosamente sem quebrar
+    if(!currentUid) return; 
     
     const list=document.getElementById('saved-list');
     list.innerHTML='<div class="flex justify-center py-8"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent loader"></div></div>';
+    
     try{
-        const snap=await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').orderBy('updatedAt','desc').get();
+        const snap=await db.collection('artifacts').doc(DB_COL).collection('users').doc(currentUid).collection('avaliacoes').orderBy('updatedAt','desc').get();
         allAssessments=[];list.innerHTML='';
         
         if(snap.empty){
             list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova salva ainda</p></div>';
             lucide.createIcons();
-            // Se autoOpen for true, mas estiver vazio, não mostra a tela de arquivos
             return;
         }
         
@@ -732,7 +740,6 @@ async function loadSavedAssessments(autoOpen = false){
             list.appendChild(item);
         });
 
-        // Só abre a modal se a flag autoOpen estiver ativa (ou seja, se veio do auth.onAuthStateChanged)
         if(autoOpen && allAssessments.length > 0) {
             document.getElementById('saved-modal').classList.remove('hidden');
         }
@@ -753,7 +760,11 @@ function loadAssessmentByIndex(idx){
 }
 async function deleteAssessment(docId,idx){
     if(!confirm('Excluir esta prova permanentemente?'))return;
-    try{await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();showToast('Prova excluída','warning');loadSavedAssessments(false);}
+    try{
+        await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();
+        showToast('Prova excluída','warning');
+        loadSavedAssessments(null, false);
+    }
     catch{showToast('Erro ao excluir','error');}
 }
 
