@@ -43,7 +43,7 @@
         .preview-mode #app-screen{display:none!important}
         .preview-mode #print-view{display:block!important}
 
-        /* A4 SHEET RIGIDA */
+        /* A4 SHEET RIGIDA (Renderização Exata do PDF) */
         .a4-sheet{
             width: 210mm;
             height: 297mm;
@@ -56,14 +56,14 @@
             box-shadow: 0 10px 40px rgba(0,0,0,.35);
             position: relative;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* Espaço entre folhas na tela */
         }
         .a4-sheet *{box-sizing:border-box}
         .q-block{page-break-inside:avoid;break-inside:avoid}
 
-        /* PRINT */
+        /* PRINT (Remove bordas falsas e tira dados nativos do chrome) */
         @media print{
-            @page { size: A4 portrait; margin: 0; }
+            @page { size: A4 portrait; margin: 0; } /* MARGIN 0 BLOQUEIA DATA E URL DO NAVEGADOR */
             *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
             body,html{margin:0;padding:0;background:white}
             #app-screen,#login-screen,#print-toolbar,#toast-container,#color-picker-popup{display:none!important}
@@ -91,7 +91,7 @@
             </div>
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -120,7 +120,7 @@
                 <button onclick="newAssessment()" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="plus-circle" class="w-4 h-4"></i><span class="hidden sm:inline">Novo</span></button>
                 <button id="btn-save" onclick="saveToCloud()" class="flex items-center gap-1.5 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-emerald-600 btn-active"><i data-lucide="save" class="w-4 h-4"></i><span class="hidden sm:inline">Salvar</span></button>
                 <button onclick="enterPreviewMode()" class="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 btn-active"><i data-lucide="eye" class="w-4 h-4"></i><span class="hidden sm:inline">Visualizar</span></button>
-                <button onclick="generatePDF()" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
+                <button onclick="generatePDF(true)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
                 <button onclick="printDirect()" class="flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-violet-700 btn-active"><i data-lucide="printer" class="w-4 h-4"></i><span class="hidden md:inline">Imprimir</span></button>
                 <button onclick="handleLogout()" class="p-2.5 text-red-400 hover:bg-red-50 rounded-xl btn-active"><i data-lucide="log-out" class="w-4 h-4"></i></button>
             </div>
@@ -331,7 +331,7 @@ let cropState={questionId:null,optionId:null,startX:0,startY:0,isDragging:false}
 let allAssessments=[];
 
 // =============================================
-// AUTH
+// AUTH (COM MELHORIA DE UX PARA ARQUIVOS)
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -348,7 +348,10 @@ auth.onAuthStateChanged(user=>{
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
-        loadSavedAssessments(); initColorPicker();
+        
+        // Passando "true" para abrir a gaveta automaticamente se houver arquivos
+        loadSavedAssessments(true); 
+        initColorPicker();
     }else{
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
@@ -507,8 +510,7 @@ function buildImgZone(q){
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // =============================================
-// NÍVEL 1: SUPER COMPRESSÃO DE DADOS 
-// (Filtro para salvar direto no banco grátis sem estourar 1MB)
+// CROP COM COMPRESSÃO
 // =============================================
 function startCrop(qId,oId,input){
     const file=input.files[0];if(!file)return;
@@ -560,8 +562,6 @@ function applyCrop(full){
     }
 
     targetW = srcW; targetH = srcH;
-    
-    // COMPRESSÃO AGRESSIVA PARA QUESTÕES: Máximo de 600px de altura ou largura
     const MAX_DIM = 600; 
     if(targetW > MAX_DIM || targetH > MAX_DIM) {
         const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH);
@@ -575,7 +575,6 @@ function applyCrop(full){
     ctx.fillRect(0, 0, targetW, targetH);
     ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetW, targetH);
     
-    // COMPRESSÃO AGRESSIVA DE QUALIDADE: 0.65 reduz incrivelmente o tamanho do texto salvo
     const data=c.toDataURL('image/jpeg', 0.65); 
     
     const q=questions.find(qu=>qu.id===cropState.questionId);
@@ -590,7 +589,7 @@ function removeQuestionImage(qId){questions.find(q=>q.id===qId).imagem=null;rend
 function removeOptImage(qId,oId){questions.find(q=>q.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).image=null;renderQuestions();}
 
 // =============================================
-// CABEÇALHO (SUPER COMPRESSÃO)
+// CABEÇALHO 
 // =============================================
 function uploadHeader(input){
     const file=input.files[0];if(!file)return;
@@ -599,8 +598,6 @@ function uploadHeader(input){
         const img = new Image();
         img.onload = () => {
             const c = document.createElement('canvas');
-            
-            // COMPRESSÃO DE CABEÇALHO: Reduzido para largura máxima de 800px
             const MAX_W = 800; 
             let w = img.width, h = img.height;
             if(w > MAX_W) { h *= MAX_W/w; w = MAX_W; }
@@ -611,7 +608,6 @@ function uploadHeader(input){
             ctx.fillRect(0, 0, w, h);
             ctx.drawImage(img, 0, 0, w, h);
             
-            // COMPRESSÃO DE QUALIDADE PARA CABEÇALHO: 0.65
             headerData.imagem = c.toDataURL('image/jpeg', 0.65);
             document.getElementById('header-upload-container').classList.add('hidden');
             document.getElementById('header-preview-container').classList.remove('hidden');
@@ -626,7 +622,7 @@ function removeHeader(){headerData.imagem=null;document.getElementById('header-u
 function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();showToast('Nova prova iniciada','info');}
 
 // =============================================
-// SALVAR BLINDADO E RÁPIDO NO BANCO TEXTUAL
+// SALVAR BLINDADO E RÁPIDO
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
@@ -640,13 +636,11 @@ async function saveToCloud(){
     const docId=headerData.id||Date.now().toString();
     
     try{
-        // Alterado de 15s para 30s para dar mais fôlego à internet oscilante
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 30000));
         
         const payload = JSON.parse(JSON.stringify({id:docId, headerData, questions}));
         payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
-        // O Firebase Database recebe os dados comprimidos e salva super rápido
         await Promise.race([
             db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload),
             timeout
@@ -676,18 +670,27 @@ async function saveToCloud(){
 }
 
 // =============================================
-// HISTÓRICO
+// HISTÓRICO COM ABERTURA AUTOMÁTICA
 // =============================================
 function toggleSavedModal(){const m=document.getElementById('saved-modal');const h=m.classList.contains('hidden');m.classList.toggle('hidden');if(h)loadSavedAssessments();}
-async function loadSavedAssessments(){
+
+// A função agora recebe "autoOpen"
+async function loadSavedAssessments(autoOpen = false){
     if(!auth.currentUser)return;
     const list=document.getElementById('saved-list');
     list.innerHTML='<div class="flex justify-center py-8"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent loader"></div></div>';
     try{
         const snap=await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').orderBy('updatedAt','desc').get();
         allAssessments=[];list.innerHTML='';
-        if(snap.empty){list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova salva ainda</p></div>';lucide.createIcons();return;}
+        
+        if(snap.empty){
+            list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova salva ainda</p></div>';
+            lucide.createIcons();
+            return;
+        }
+        
         document.getElementById('saved-count').innerText=`${snap.size} prova${snap.size>1?'s':''} salva${snap.size>1?'s':''}`;
+        
         snap.forEach(doc=>{
             const data=doc.data();
             const idx=allAssessments.length;
@@ -712,6 +715,12 @@ async function loadSavedAssessments(){
             </div>`;
             list.appendChild(item);
         });
+
+        // MELHORIA DE UX: Abre a gaveta automaticamente se for chamado pelo login inicial
+        if(autoOpen && allAssessments.length > 0) {
+            document.getElementById('saved-modal').classList.remove('hidden');
+        }
+
     }catch{list.innerHTML='<div class="text-center py-8 text-red-400 font-bold text-sm">Erro ao carregar</div>';}
     lucide.createIcons();
 }
@@ -722,12 +731,13 @@ function loadAssessmentByIndex(idx){
     document.getElementById('assessment-title').value=headerData.titulo||'';
     if(headerData.imagem){document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=headerData.imagem;}
     else removeHeader();
-    renderQuestions();toggleSavedModal();
+    renderQuestions();
+    document.getElementById('saved-modal').classList.add('hidden'); // Fecha a modal ao carregar
     showToast(`"${headerData.titulo}" carregada`,'info');
 }
 async function deleteAssessment(docId,idx){
     if(!confirm('Excluir esta prova permanentemente?'))return;
-    try{await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();showToast('Prova excluída','warning');loadSavedAssessments();}
+    try{await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();showToast('Prova excluída','warning');loadSavedAssessments(true);}
     catch{showToast('Erro ao excluir','error');}
 }
 
