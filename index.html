@@ -124,8 +124,8 @@
                 <i data-lucide="file-text" class="text-white w-9 h-9 -rotate-6"></i>
             </div>
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Sistema de Avaliações</h1>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -145,7 +145,7 @@
             <div class="flex items-center gap-3 shrink-0">
                 <div class="w-11 h-11 bg-blue-600 rounded-[1.1rem] flex items-center justify-center shadow-xl rotate-3"><i data-lucide="file-text" class="text-white w-5 h-5"></i></div>
                 <div class="hidden sm:block">
-                    <h1 class="text-base font-black text-slate-900 tracking-tight leading-none">Editor de Provas</h1>
+                    <h1 class="text-base font-black text-slate-900 tracking-tight leading-none">Sistema de Avaliações</h1>
                     <p id="user-display" class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1"></p>
                 </div>
             </div>
@@ -165,13 +165,13 @@
         <section class="bg-white rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-slate-100 p-8 space-y-8">
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-sm font-black">01</span>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Estrutura</h2>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Cabeçario</h2>
             </div>
             <div>
                 <div id="header-upload-container">
                     <label class="flex flex-col items-center justify-center gap-4 w-full py-12 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-blue-50/50 hover:border-blue-300 transition-all bg-slate-50/50">
                         <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-7 h-7 text-slate-300"></i></div>
-                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Oficial</span>
+                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Padrão/span>
                         <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
                     </label>
                 </div>
@@ -365,7 +365,7 @@ let cropState={questionId:null,optionId:null,startX:0,startY:0,isDragging:false}
 let allAssessments=[];
 
 // =============================================
-// AUTH (COM CORREÇÃO DA CONDIÇÃO DE CORRIDA)
+// AUTH 
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -850,7 +850,6 @@ function buildQuestaoHTML(q,index){
             
             let prefixHTML = '';
             if(q.type === 'multiple-choice' || q.type === 'true-false') {
-                // Quadrado com cantos arredondados (12pt ~ 4.2mm) logo na frente da letra
                 prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span><span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; margin-left:6pt; margin-right:4pt; position:relative; top:2pt;"></span>`;
             } else {
                 prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span>`;
@@ -871,13 +870,10 @@ function buildQuestaoHTML(q,index){
             const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
 
             h+=`<div style="display:flex;align-items:center;gap:15pt;margin-bottom:8pt;">
-                <div style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:4pt;">
-                    <div style="display:flex;align-items:center;gap:4pt;">
-                        <span style="font-weight:700;">${l})</span>
-                        ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
-                        `<span>${opt.text||''}</span>`}
-                    </div>
-                    <span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; flex-shrink:0;"></span>
+                <div style="flex:1;display:flex;align-items:center;gap:4pt;">
+                    <span style="font-weight:700;">${l})</span>
+                    ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
+                    `<span>${opt.text||''}</span>`}
                 </div>
                 <div style="flex:1;display:flex;align-items:center;gap:6pt;">
                     <span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; flex-shrink:0;"></span>
@@ -994,7 +990,7 @@ async function createPaginatedDOM() {
 }
 
 // =============================================
-// PREVIEW VISUAL RENDERIZADA
+// PREVIEW VISUAL RENDERIZADA (NATIVA COM ZOOM)
 // =============================================
 async function enterPreviewMode(){
     document.body.classList.add('preview-mode');
