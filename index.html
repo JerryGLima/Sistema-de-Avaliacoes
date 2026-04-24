@@ -91,8 +91,8 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            align-items: flex-start;
-            min-width: max-content;
+            align-items: flex-start; 
+            min-width: max-content; 
         }
         @media (min-width: 850px) {
             #print-content {
@@ -197,12 +197,13 @@
     </main>
 
     <div class="fixed bottom-8 left-0 right-0 z-40 px-4">
-        <div class="max-w-2xl mx-auto bg-slate-950/95 backdrop-blur-xl border border-white/10 p-2.5 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex justify-between items-center gap-2 overflow-x-auto no-scrollbar">
-            <button onclick="addQuestion('text')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-blue-600 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="align-left" class="w-5 h-5"></i><span>Escrita</span></button>
-            <button onclick="addQuestion('discursive-list')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-orange-500 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="file-text" class="w-5 h-5"></i><span>Tópicos</span></button>
-            <button onclick="addQuestion('matching')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-sky-500 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="link" class="w-5 h-5"></i><span>Ligar</span></button>
-            <button onclick="addQuestion('multiple-choice')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-emerald-500 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="check-square" class="w-5 h-5"></i><span>Marca X</span></button>
-            <button onclick="addQuestion('true-false')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-purple-600 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="list-checks" class="w-5 h-5"></i><span>V ou F</span></button>
+        <div class="max-w-3xl mx-auto bg-slate-950/95 backdrop-blur-xl border border-white/10 p-2.5 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex justify-between items-center gap-2 overflow-x-auto no-scrollbar">
+            <button onclick="addQuestion('text')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-blue-600 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="align-left" class="w-5 h-5"></i><span>Escrita</span></button>
+            <button onclick="addQuestion('discursive-list')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-orange-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="file-text" class="w-5 h-5"></i><span>Tópicos</span></button>
+            <button onclick="addQuestion('fill-in-the-blanks')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-rose-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="edit-3" class="w-5 h-5"></i><span>Completar</span></button>
+            <button onclick="addQuestion('matching')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-sky-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="link" class="w-5 h-5"></i><span>Ligar</span></button>
+            <button onclick="addQuestion('multiple-choice')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-emerald-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="check-square" class="w-5 h-5"></i><span>Marca X</span></button>
+            <button onclick="addQuestion('true-false')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-purple-600 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="list-checks" class="w-5 h-5"></i><span>V ou F</span></button>
         </div>
     </div>
 </div>
@@ -371,10 +372,10 @@ let questions=[];
 let headerData={id:null,imagem:null,titulo:''};
 let cropState={questionId:null,optionId:null};
 let allAssessments=[];
-let cropperInstance = null; // NOVO: Variável global para o Cropper.js
+let cropperInstance = null; 
 
 // =============================================
-// AUTH (COM CORREÇÃO DA CONDIÇÃO DE CORRIDA)
+// AUTH
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -418,13 +419,20 @@ function handleLogout(){
 // QUESTÕES
 // =============================================
 function addQuestion(type){
+    let ops = [];
+    if(['multiple-choice','true-false','discursive-list','matching'].includes(type)){
+        ops = [
+            {id:(Date.now()+1).toString(),text:'',image:null,matchText:'',type:'text'},
+            {id:(Date.now()+2).toString(),text:'',image:null,matchText:'',type:'text'}
+        ];
+    } else if (type === 'fill-in-the-blanks') {
+        ops = [ {id:(Date.now()+1).toString(), text:''} ];
+    }
+    
     const q={
         id:Date.now().toString(), type,
         textoApoio:'', enunciado:'', imagem:null, imageWidth:50,
-        opcoes:['multiple-choice','true-false','discursive-list','matching'].includes(type)?[
-            {id:(Date.now()+1).toString(),text:'',image:null,matchText:'',type:'text'},
-            {id:(Date.now()+2).toString(),text:'',image:null,matchText:'',type:'text'}
-        ]:[],
+        opcoes: ops,
         linhas:4
     };
     questions.push(q); renderQuestions();
@@ -446,11 +454,25 @@ function renderQuestions(){
             <div class="bg-slate-900 text-white px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">${questions.length} ITENS</div>
         </div>`;
 
-    const TL={text:'Escrita Livre','multiple-choice':'Múltipla Escolha','true-false':'Verdadeiro / Falso','discursive-list':'Tópicos',matching:'Ligar Colunas'};
-    const TC={text:'blue','multiple-choice':'emerald','true-false':'purple','discursive-list':'orange',matching:'sky'};
+    const TL={text:'Escrita Livre','multiple-choice':'Múltipla Escolha','true-false':'Verdadeiro / Falso','discursive-list':'Tópicos',matching:'Ligar Colunas','fill-in-the-blanks':'Completar'};
+    const TC={text:'blue','multiple-choice':'emerald','true-false':'purple','discursive-list':'orange',matching:'sky','fill-in-the-blanks':'rose'};
 
     questions.forEach((q,index)=>{
         const color=TC[q.type]||'blue';
+        
+        let apoioLabel = "Texto de Apoio (opcional)";
+        let apoioPlaceholder = "Texto base ou contexto...";
+        let enunLabel = "Enunciado *";
+        let enunPlaceholder = "Digite a pergunta aqui...";
+
+        // Configurações de texto dinâmicas para a nova questão de Completar
+        if(q.type === 'fill-in-the-blanks') {
+            apoioLabel = "Palavras do Quadro (opcional)";
+            apoioPlaceholder = "Ex: Portugal - donatário - terras";
+            enunLabel = "Instrução *";
+            enunPlaceholder = "Ex: Complete os espaços abaixo:";
+        }
+
         const card=document.createElement('div');
         card.className="bg-white rounded-[2.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden";
         card.innerHTML=`
@@ -463,15 +485,15 @@ function renderQuestions(){
             </div>
             <div class="p-8 space-y-7">
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Texto de Apoio (opcional)</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">${apoioLabel}</p>
                     <div id="apoio-tb-${q.id}"></div>
-                    <div id="apoio-${q.id}" class="rich-editor" contenteditable="true" data-placeholder="Texto base ou contexto...">${q.textoApoio}</div>
+                    <div id="apoio-${q.id}" class="rich-editor" contenteditable="true" data-placeholder="${apoioPlaceholder}">${q.textoApoio}</div>
                 </div>
                 <div id="img-zone-${q.id}">${buildImgZone(q)}</div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Enunciado *</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">${enunLabel}</p>
                     <div id="enun-tb-${q.id}"></div>
-                    <div id="enunciado-${q.id}" class="rich-editor" contenteditable="true" data-placeholder="Digite a pergunta aqui...">${q.enunciado}</div>
+                    <div id="enunciado-${q.id}" class="rich-editor" contenteditable="true" data-placeholder="${enunPlaceholder}">${q.enunciado}</div>
                 </div>
                 <div id="options-${q.id}" class="space-y-4"></div>
             </div>`;
@@ -481,6 +503,8 @@ function renderQuestions(){
         document.getElementById(`enun-tb-${q.id}`).appendChild(makeToolbar(`enunciado-${q.id}`));
 
         const optC=document.getElementById(`options-${q.id}`);
+        
+        // Renderização para questões antigas de opções
         if(['multiple-choice','true-false','discursive-list','matching'].includes(q.type)){
             q.opcoes.forEach((opt,oi)=>{
                 const od=document.createElement('div');
@@ -518,6 +542,27 @@ function renderQuestions(){
             ab.onclick=()=>addOption(q.id);
             optC.appendChild(ab);
         }
+        
+        // Renderização para a nova questão de Completar
+        else if (q.type === 'fill-in-the-blanks') {
+            const od = document.createElement('div');
+            od.className = 'bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3';
+            od.innerHTML = `
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5">Texto com Lacunas *</p>
+                <div id="lacunas-tb-${q.id}"></div>
+                <div id="lacunas-${q.id}" class="rich-editor" contenteditable="true" data-placeholder="Cole aqui o texto e use ____ para as lacunas...">${q.opcoes && q.opcoes[0] ? q.opcoes[0].text : ''}</div>
+            `;
+            optC.appendChild(od);
+            document.getElementById(`lacunas-tb-${q.id}`).appendChild(makeToolbar(`lacunas-${q.id}`));
+            const lacEditor = document.getElementById(`lacunas-${q.id}`);
+            lacEditor.oninput = (e) => {
+                if(!q.opcoes) q.opcoes = [];
+                if(!q.opcoes[0]) q.opcoes[0] = {id: Date.now().toString(), text: ''};
+                q.opcoes[0].text = e.target.innerHTML;
+            };
+        }
+        
+        // Renderização para a Escrita
         if(q.type==='text'){
             const rd=document.createElement('div');
             rd.className="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100";
@@ -564,7 +609,7 @@ function buildImgZone(q){
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // =============================================
-// CROP COM CROPPER.JS (OPÇÃO 2 - OTIMIZADO PARA MOBILE)
+// CROP COM CROPPER.JS
 // =============================================
 function startCrop(qId, oId, input){
     const file = input.files[0];
@@ -575,7 +620,6 @@ function startCrop(qId, oId, input){
         cropState.optionId = oId;
         const img = document.getElementById('img-to-crop');
         
-        // Destruir instância antiga se existir para evitar bugs
         if(cropperInstance) {
             cropperInstance.destroy();
             cropperInstance = null;
@@ -584,13 +628,12 @@ function startCrop(qId, oId, input){
         img.onload = () => {
             document.getElementById('cropper-modal').classList.remove('hidden');
             
-            // Inicializar a biblioteca Profissional (Cropper.js)
             cropperInstance = new Cropper(img, {
-                viewMode: 1, // Restringe a caixa de corte aos limites da imagem
-                dragMode: 'move', // Permite mover a imagem toda com o dedo
+                viewMode: 1, 
+                dragMode: 'move', 
                 autoCropArea: 0.8,
                 restore: false,
-                guides: true, // Mostra as linhas de grade de fotografia
+                guides: true, 
                 center: true,
                 highlight: false,
                 cropBoxMovable: true,
@@ -609,11 +652,9 @@ function applyCrop(full){
 
     let canvas;
     if(full) {
-        // Limpa a caixa de seleção para pegar a imagem original toda
         cropperInstance.clear();
     }
     
-    // Obtém a parte selecionada como elemento Canvas
     canvas = cropperInstance.getCroppedCanvas({
         fillColor: '#ffffff',
         imageSmoothingEnabled: true,
@@ -622,7 +663,6 @@ function applyCrop(full){
 
     if(!canvas) { closeCropper(); return; }
 
-    // Mantemos a trava matemática do Ponto Ideal (1000px)
     const MAX_DIM = 1000; 
     let targetW = canvas.width;
     let targetH = canvas.height;
@@ -641,7 +681,6 @@ function applyCrop(full){
     ctx.fillRect(0, 0, targetW, targetH);
     ctx.drawImage(canvas, 0, 0, targetW, targetH);
     
-    // Mantemos a Compressão de Alta Qualidade configurada (0.90)
     const data = finalCanvas.toDataURL('image/jpeg', 0.90); 
     
     const q = questions.find(qu=>qu.id===cropState.questionId);
@@ -709,6 +748,14 @@ function captureEditorContents(){
         const enun=document.getElementById(`enunciado-${q.id}`);
         if(apoio) q.textoApoio=apoio.innerHTML;
         if(enun)  q.enunciado=enun.innerHTML;
+        
+        // NOVO: Captura o conteúdo do novo bloco de lacunas
+        if(q.type === 'fill-in-the-blanks') {
+            const lac = document.getElementById(`lacunas-${q.id}`);
+            if(lac && q.opcoes && q.opcoes[0]) {
+                q.opcoes[0].text = lac.innerHTML;
+            }
+        }
     });
 }
 
@@ -858,65 +905,90 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO
+// BUILD HTML DA QUESTÃO (GERADOR PDF)
 // =============================================
 function buildQuestaoHTML(q,index){
     let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
-    if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
-        h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
-    }
-    h+=`<div style="display:flex;gap:5pt;margin-bottom:3pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;">${q.enunciado||'...'}</div></div>`;
     
-    const hasValidImg = q.imagem && q.imagem.length > 30;
-    if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
-    
-    if(q.type==='text'){
-        const n=Math.max(1,parseInt(q.linhas)||4);
-        h+=`<div style="margin-top:4pt;">`;
-        for(let i=0;i<n;i++)h+=`<div style="border-bottom:0.8pt solid #999;height:20pt;width:100%;"></div>`;
-        h+=`</div>`;
-    }
-    if(['multiple-choice','true-false','discursive-list'].includes(q.type)){
-        h+=`<div style="margin-top:3pt;margin-left:12pt;">`;
-        q.opcoes.forEach((opt,i)=>{
-            const l=String.fromCharCode(97+i);
-            const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
-            
-            let prefixHTML = '';
-            if(q.type === 'multiple-choice' || q.type === 'true-false') {
-                prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span><span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; margin-left:6pt; margin-right:4pt; position:relative; top:2pt;"></span>`;
-            } else {
-                prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span>`;
-            }
-            
-            h+=`<div style="display:flex;align-items:flex-start;gap:4pt;margin-bottom:${q.type==='discursive-list'?'1pt':'5pt'};">
-                ${prefixHTML}
-                <div style="flex:1; padding-top:1pt;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
-            </div>`;
-            if(q.type==='discursive-list')h+=`<div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
-        });
-        h+=`</div>`;
-    }
-    if(q.type==='matching'){
-        h+=`<div style="margin-top:5pt;margin-left:12pt;">`;
-        q.opcoes.forEach((opt,i)=>{
-            const l=String.fromCharCode(97+i);
-            const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
+    // BLOCO EXCLUSIVO DA NOVA QUESTÃO: COMPLETAR LACUNAS
+    if(q.type === 'fill-in-the-blanks') {
+        // Instrução
+        h+=`<div style="display:flex;gap:5pt;margin-bottom:8pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;line-height:1.45;">${q.enunciado||'...'}</div></div>`;
+        
+        // Imagem se existir
+        const hasValidImg = q.imagem && q.imagem.length > 30;
+        if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
+        
+        // Caixa de Palavras (com borda arredondada)
+        if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
+            h+=`<div style="text-align:center; margin:10pt 0 15pt 0;"><div style="display:inline-block; border:1.5pt solid #888; border-radius:15pt; padding:6pt 20pt; font-size:11pt; font-weight:600;">${q.textoApoio}</div></div>`;
+        }
+        
+        // Texto com as lacunas
+        const lacunasText = (q.opcoes && q.opcoes[0] && q.opcoes[0].text) ? q.opcoes[0].text : '';
+        if(lacunasText && lacunasText.replace(/<[^>]*>/g,'').trim()) {
+             h+=`<div style="line-height:2; font-size:11pt; text-align:justify; margin-top:5pt;">${lacunasText}</div>`;
+        }
+    } 
+    // BLOCO DAS OUTRAS QUESTÕES
+    else {
+        if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
+            h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
+        }
+        h+=`<div style="display:flex;gap:5pt;margin-bottom:3pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;">${q.enunciado||'...'}</div></div>`;
+        
+        const hasValidImg = q.imagem && q.imagem.length > 30;
+        if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
+        
+        if(q.type==='text'){
+            const n=Math.max(1,parseInt(q.linhas)||4);
+            h+=`<div style="margin-top:4pt;">`;
+            for(let i=0;i<n;i++)h+=`<div style="border-bottom:0.8pt solid #999;height:20pt;width:100%;"></div>`;
+            h+=`</div>`;
+        }
+        if(['multiple-choice','true-false','discursive-list'].includes(q.type)){
+            h+=`<div style="margin-top:3pt;margin-left:12pt;">`;
+            q.opcoes.forEach((opt,i)=>{
+                const l=String.fromCharCode(97+i);
+                const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
+                
+                let prefixHTML = '';
+                if(q.type === 'multiple-choice' || q.type === 'true-false') {
+                    prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span><span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; margin-left:6pt; margin-right:4pt; position:relative; top:2pt;"></span>`;
+                } else {
+                    prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span>`;
+                }
+                
+                h+=`<div style="display:flex;align-items:flex-start;gap:4pt;margin-bottom:${q.type==='discursive-list'?'1pt':'5pt'};">
+                    ${prefixHTML}
+                    <div style="flex:1; padding-top:1pt;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
+                </div>`;
+                if(q.type==='discursive-list')h+=`<div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
+            });
+            h+=`</div>`;
+        }
+        if(q.type==='matching'){
+            h+=`<div style="margin-top:5pt;margin-left:12pt;">`;
+            q.opcoes.forEach((opt,i)=>{
+                const l=String.fromCharCode(97+i);
+                const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
 
-            h+=`<div style="display:flex;align-items:center;gap:15pt;margin-bottom:8pt;">
-                <div style="flex:1;display:flex;align-items:center;gap:4pt;">
-                    <span style="font-weight:700;">${l})</span>
-                    ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
-                    `<span>${opt.text||''}</span>`}
-                </div>
-                <div style="flex:1;display:flex;align-items:center;gap:6pt;">
-                    <span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; flex-shrink:0;"></span>
-                    <span style="flex:1;">${opt.matchText||''}</span>
-                </div>
-            </div>`;
-        });
-        h+=`</div>`;
+                h+=`<div style="display:flex;align-items:center;gap:15pt;margin-bottom:8pt;">
+                    <div style="flex:1;display:flex;align-items:center;gap:4pt;">
+                        <span style="font-weight:700;">${l})</span>
+                        ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
+                        `<span>${opt.text||''}</span>`}
+                    </div>
+                    <div style="flex:1;display:flex;align-items:center;gap:6pt;">
+                        <span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; flex-shrink:0;"></span>
+                        <span style="flex:1;">${opt.matchText||''}</span>
+                    </div>
+                </div>`;
+            });
+            h+=`</div>`;
+        }
     }
+    
     h+=`</div>`;
     return h;
 }
