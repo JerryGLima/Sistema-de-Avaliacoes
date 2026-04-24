@@ -165,7 +165,7 @@
                 <button onclick="newAssessment()" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="plus-circle" class="w-4 h-4"></i><span class="hidden sm:inline">Novo</span></button>
                 <button id="btn-save" onclick="saveToCloud()" class="flex items-center gap-1.5 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-emerald-600 btn-active"><i data-lucide="save" class="w-4 h-4"></i><span class="hidden sm:inline">Salvar</span></button>
                 <button onclick="enterPreviewMode()" class="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 btn-active"><i data-lucide="eye" class="w-4 h-4"></i><span class="hidden sm:inline">Visualizar</span></button>
-                <button onclick="generatePDF(true)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
+                <button onclick="generatePDF(false)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
                 <button onclick="printDirect()" class="flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-violet-700 btn-active"><i data-lucide="printer" class="w-4 h-4"></i><span class="hidden md:inline">Imprimir</span></button>
                 <button onclick="handleLogout()" class="p-2.5 text-red-400 hover:bg-red-50 rounded-xl btn-active"><i data-lucide="log-out" class="w-4 h-4"></i></button>
             </div>
@@ -933,7 +933,6 @@ function buildQuestaoHTML(q,index){
             h+=`<div style="text-align:center; margin:10pt 0 15pt 0;"><div style="display:inline-block; border:1.5pt solid #888; border-radius:15pt; padding:6pt 20pt; font-size:11pt; font-weight:600;">${q.textoApoio}</div></div>`;
         }
         
-        // Renderização Dinâmica das Lacunas (1 ou Múltiplas)
         if (q.opcoes && q.opcoes.length === 1) {
             const lacunasText = q.opcoes[0].text;
             if(lacunasText && lacunasText.replace(/<[^>]*>/g,'').trim()) {
@@ -942,7 +941,7 @@ function buildQuestaoHTML(q,index){
         } else if (q.opcoes && q.opcoes.length > 1) {
             h += `<div style="margin-top:5pt;">`;
             q.opcoes.forEach((opt, i) => {
-                const l = String.fromCharCode(97+i); // Gera as letras a), b), c)...
+                const l = String.fromCharCode(97+i); 
                 if(opt.text && opt.text.replace(/<[^>]*>/g,'').trim()) {
                     h += `<div style="display:flex; gap:6pt; margin-bottom:8pt; line-height:2; font-size:11pt; text-align:justify;">
                             <span style="font-weight:700;">${l})</span>
@@ -977,15 +976,20 @@ function buildQuestaoHTML(q,index){
                 
                 let prefixHTML = '';
                 if(q.type === 'multiple-choice' || q.type === 'true-false') {
-                    prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span><span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; margin-left:6pt; margin-right:4pt; position:relative; top:2pt;"></span>`;
+                    // Flexbox para alinhar perfeitamente a letra com o quadrado (usando padding-top para alinhar visualmente com o texto)
+                    prefixHTML = `<div style="display:flex; align-items:center; gap:6pt; width:42pt; flex-shrink:0; padding-top:1pt;">
+                        <span style="font-weight:700;">${l})</span>
+                        <span style="display:inline-block; width:14pt; height:14pt; border:1.2pt solid #000; border-radius:3pt;"></span>
+                    </div>`;
                 } else {
-                    prefixHTML = `<span style="font-weight:700;white-space:nowrap;">${l})</span>`;
+                    prefixHTML = `<span style="font-weight:700; width:16pt; flex-shrink:0; padding-top:1pt;">${l})</span>`;
                 }
                 
-                h+=`<div style="display:flex;align-items:flex-start;gap:4pt;margin-bottom:${q.type==='discursive-list'?'1pt':'5pt'};">
+                h+=`<div style="display:flex; align-items:flex-start; gap:4pt; margin-bottom:${q.type==='discursive-list'?'2pt':'6pt'};">
                     ${prefixHTML}
-                    <div style="flex:1; padding-top:1pt;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
+                    <div style="flex:1; line-height: 1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
                 </div>`;
+                
                 if(q.type==='discursive-list')h+=`<div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
             });
             h+=`</div>`;
@@ -996,15 +1000,15 @@ function buildQuestaoHTML(q,index){
                 const l=String.fromCharCode(97+i);
                 const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
 
-                h+=`<div style="display:flex;align-items:center;gap:15pt;margin-bottom:8pt;">
-                    <div style="flex:1;display:flex;align-items:center;gap:4pt;">
-                        <span style="font-weight:700;">${l})</span>
+                h+=`<div style="display:flex;align-items:flex-start;gap:15pt;margin-bottom:8pt;">
+                    <div style="flex:1;display:flex;align-items:flex-start;gap:4pt;">
+                        <span style="font-weight:700; padding-top:1pt;">${l})</span>
                         ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
-                        `<span>${opt.text||''}</span>`}
+                        `<span style="flex:1; padding-top:1pt; line-height:1.45;">${opt.text||''}</span>`}
                     </div>
-                    <div style="flex:1;display:flex;align-items:center;gap:6pt;">
-                        <span style="display:inline-block; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:3pt; flex-shrink:0;"></span>
-                        <span style="flex:1;">${opt.matchText||''}</span>
+                    <div style="flex:1;display:flex;align-items:flex-start;gap:6pt;">
+                        <span style="display:inline-block; width:14pt; height:14pt; border:1.2pt solid #000; border-radius:3pt; flex-shrink:0; margin-top:1.5pt;"></span>
+                        <span style="flex:1; padding-top:1pt; line-height:1.45;">${opt.matchText||''}</span>
                     </div>
                 </div>`;
             });
@@ -1146,7 +1150,10 @@ async function generatePDF(fromPreview = false){
     const filename = rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '.pdf';
 
     if(!fromPreview) {
+        showToast('Preparando documento...', 'info', 2000);
         await enterPreviewMode();
+        // PAUSA ESTRATÉGICA: Dá 800ms para o navegador desenhar a tela antes do html2canvas fotografar (Resolve o bug do PDF branco)
+        await new Promise(r => setTimeout(r, 800)); 
     }
 
     showToast('A gerar PDF da prova...','info',10000);
