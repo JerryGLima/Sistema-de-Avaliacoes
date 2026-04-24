@@ -634,12 +634,25 @@ function removeHeader(){headerData.imagem=null;document.getElementById('header-u
 function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();localStorage.removeItem('last_open_assessment_id');showToast('Nova prova iniciada','info');}
 
 // =============================================
+// CAPTURA EDITORES RICH-TEXT ANTES DE SALVAR
+// =============================================
+function captureEditorContents(){
+    questions.forEach(q=>{
+        const apoio=document.getElementById(`apoio-${q.id}`);
+        const enun=document.getElementById(`enunciado-${q.id}`);
+        if(apoio) q.textoApoio=apoio.innerHTML;
+        if(enun)  q.enunciado=enun.innerHTML;
+    });
+}
+
+
 // SALVAR BLINDADO E RÁPIDO
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
     const title=document.getElementById('assessment-title').value.trim();
     if(!title){showToast('Digite um título para a prova','warning');return;}
+    captureEditorContents();
     headerData.titulo=title;
     const btn=document.getElementById('btn-save');
     
