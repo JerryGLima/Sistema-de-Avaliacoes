@@ -91,7 +91,7 @@
             </div>
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -331,7 +331,7 @@ let cropState={questionId:null,optionId:null,startX:0,startY:0,isDragging:false}
 let allAssessments=[];
 
 // =============================================
-// AUTH (COM CORREÇÃO DA CONDIÇÃO DE CORRIDA)
+// AUTH E SINCRONIA GARANTIDA
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -350,12 +350,14 @@ auth.onAuthStateChanged(user=>{
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
         
-        // Passa a ID do usuário ativamente para evitar falha no F5
+        // Agora passamos o ID do usuário diretamente para ter 100% de certeza que a busca não vai falhar no F5
         loadSavedAssessments(user.uid, true); 
         initColorPicker();
     }else{
+        // Se deslogou (ou antes de logar), esconde as provas e zera a memória
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
+        document.getElementById('saved-modal').classList.add('hidden');
         questions=[];
         headerData={id:null,imagem:null,titulo:''};
         allAssessments=[];
@@ -367,7 +369,7 @@ auth.onAuthStateChanged(user=>{
 });
 
 function handleLogout(){
-    if(!confirm('Tem certeza que deseja sair?')) return;
+    if(!confirm('Tem certeza que deseja sair? As provas não salvas serão perdidas da tela.')) return;
     auth.signOut();
     showToast('Sessão encerrada','info');
 }
@@ -633,8 +635,9 @@ function uploadHeader(input){
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
 function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();showToast('Nova prova iniciada','info');}
 
+
 // =============================================
-// SALVAR BLINDADO E RÁPIDO
+// SALVAR BLINDADO COM "BALANÇA DIGITAL"
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
@@ -648,11 +651,21 @@ async function saveToCloud(){
     const docId=headerData.id||Date.now().toString();
     
     try{
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 30000));
+        const payloadObj = {id:docId, headerData, questions};
+        const payloadString = JSON.stringify(payloadObj);
         
-        const payload = JSON.parse(JSON.stringify({id:docId, headerData, questions}));
+        // BALANÇA DIGITAL: Verifica se o peso da prova passa de 0.9 Megabytes.
+        const sizeMB = new Blob([payloadString]).size / (1024 * 1024);
+        if(sizeMB >= 0.9) {
+            showToast(`Erro: A prova está com ${sizeMB.toFixed(2)} MB. Exclua imagens antigas.`, 'error', 6000);
+            throw new Error('PAYLOAD_TOO_LARGE');
+        }
+
+        const payload = JSON.parse(payloadString);
         payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
+        
         await Promise.race([
             db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload),
             timeout
@@ -672,9 +685,9 @@ async function saveToCloud(){
     }catch(e){
         console.error(e);
         if(e.message === 'TIMEOUT') {
-            showToast('Tempo esgotado. A internet falhou ou imagens muito pesadas.','error');
-        } else {
-            showToast('Erro ao salvar no servidor. Verifique a internet.','error');
+            showToast('Tempo esgotado. A internet falhou.', 'error');
+        } else if (e.message !== 'PAYLOAD_TOO_LARGE') {
+            showToast('Erro ao salvar no servidor. Verifique a internet.', 'error');
         }
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
         btn.disabled=false;
@@ -688,16 +701,15 @@ function toggleSavedModal(){
     const m=document.getElementById('saved-modal');
     const h=m.classList.contains('hidden');
     m.classList.toggle('hidden');
-    // Ao clicar no botão, usamos null para forçar o sistema a ler a variável global do Firebase
+    // Forçamos o sistema a ler a variável do Firebase local
     if(h) loadSavedAssessments(null, false);
 }
 
-// Função reformulada para aceitar a ID diretamente do Auth (bypass race condition)
+// Recebe o ID diretamente para evitar que falhe quando a página sofre F5 rápido
 async function loadSavedAssessments(uid = null, autoOpen = false){
-    // Resolve a identidade. Se o uid vier vazio, ele tenta usar o do currentUser global
     const currentUid = uid || (auth.currentUser ? auth.currentUser.uid : null);
     
-    // Se, mesmo assim, o sistema não souber quem é, ele cancela silenciosamente sem quebrar
+    // Se não souber quem é ainda, cancela e espera o login processar.
     if(!currentUid) return; 
     
     const list=document.getElementById('saved-list');
@@ -763,6 +775,7 @@ async function deleteAssessment(docId,idx){
     try{
         await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();
         showToast('Prova excluída','warning');
+        // Recarrega a aba de forma silenciosa para não dar erro
         loadSavedAssessments(null, false);
     }
     catch{showToast('Erro ao excluir','error');}
