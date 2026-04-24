@@ -39,10 +39,6 @@
         .fmt-btn:hover{background:#e2e8f0;color:#0f172a}
         .fmt-sep{width:1px;height:20px;background:#e2e8f0;margin:0 3px;flex-shrink:0}
 
-        /* PREVIEW */
-        .preview-mode #app-screen{display:none!important}
-        .preview-mode #print-view{display:block!important}
-
         /* A4 SHEET RIGIDA */
         .a4-sheet{
             width: 210mm;
@@ -60,6 +56,44 @@
         }
         .a4-sheet *{box-sizing:border-box}
         .q-block{page-break-inside:avoid;break-inside:avoid}
+
+        /* =========================================
+           MOBILE PREVIEW FIXES (ZOOM & PAN LIVRE)
+           ========================================= */
+        body { overflow-x: hidden; } 
+        
+        body.preview-mode { 
+            overflow: auto !important; 
+            background: #18181b; 
+        }
+        .preview-mode #app-screen { display: none !important; }
+        .preview-mode #print-view {
+            display: block !important;
+            position: absolute !important;
+            top: 0; left: 0; right: 0;
+            min-height: 100vh;
+            z-index: 100;
+            overflow: visible !important;
+        }
+        #print-toolbar {
+            position: fixed; 
+            top: 20px; left: 0; right: 0;
+            z-index: 1000;
+        }
+        #print-content {
+            padding: 100px 20px 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start; /* Alinhado à esquerda no mobile para não cortar borda na rolagem */
+            min-width: max-content; /* Força o body a respeitar a largura da folha A4 */
+        }
+        @media (min-width: 850px) {
+            #print-content {
+                align-items: center; /* Centralizado no PC */
+                min-width: 100%;
+            }
+        }
 
         /* PRINT */
         @media print{
@@ -79,7 +113,7 @@
         }
     </style>
 </head>
-<body class="bg-[#F0F4F8] text-slate-900 overflow-x-hidden">
+<body class="bg-[#F0F4F8] text-slate-900">
 
 <div id="toast-container"></div>
 
@@ -162,13 +196,13 @@
     </div>
 </div>
 
-<div id="print-view" class="hidden fixed inset-0 z-[100] bg-zinc-900 overflow-y-auto">
-    <div id="print-toolbar" class="fixed top-5 left-0 right-0 z-50 flex justify-center gap-3 px-4 flex-wrap">
+<div id="print-view" class="hidden bg-zinc-900">
+    <div id="print-toolbar" class="flex justify-center gap-3 px-4 flex-wrap">
         <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
         <button onclick="generatePDF(true)" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Gerar PDF</button>
         <button onclick="window.print()" class="bg-violet-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-violet-700 btn-active flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
     </div>
-    <div id="print-content" class="pt-24 pb-16 flex flex-col items-center gap-8"></div>
+    <div id="print-content"></div>
 </div>
 
 <div id="cropper-modal" class="hidden fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6">
@@ -350,7 +384,6 @@ auth.onAuthStateChanged(user=>{
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
         
-        // Passa a ID do usuário ativamente para evitar falha no F5
         loadSavedAssessments(user.uid, true); 
         initColorPicker();
     }else{
@@ -645,8 +678,8 @@ function captureEditorContents(){
     });
 }
 
-
-// SALVAR BLINDADO E RÁPIDO
+// =============================================
+// SALVAR BLINDADO COM "BALANÇA DIGITAL"
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
@@ -661,11 +694,20 @@ async function saveToCloud(){
     const docId=headerData.id||Date.now().toString();
     
     try{
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 30000));
+        const payloadObj = {id:docId, headerData, questions};
+        const payloadString = JSON.stringify(payloadObj);
         
-        const payload = JSON.parse(JSON.stringify({id:docId, headerData, questions}));
+        const sizeMB = new Blob([payloadString]).size / (1024 * 1024);
+        if(sizeMB >= 0.9) {
+            showToast(`Erro: A prova está com ${sizeMB.toFixed(2)} MB. Exclua imagens antigas.`, 'error', 6000);
+            throw new Error('PAYLOAD_TOO_LARGE');
+        }
+
+        const payload = JSON.parse(payloadString);
         payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
+        
         await Promise.race([
             db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload),
             timeout
@@ -686,9 +728,9 @@ async function saveToCloud(){
     }catch(e){
         console.error(e);
         if(e.message === 'TIMEOUT') {
-            showToast('Tempo esgotado. A internet falhou ou imagens muito pesadas.','error');
-        } else {
-            showToast('Erro ao salvar no servidor. Verifique a internet.','error');
+            showToast('Tempo esgotado. A internet falhou.', 'error');
+        } else if (e.message !== 'PAYLOAD_TOO_LARGE') {
+            showToast('Erro ao salvar no servidor. Verifique a internet.', 'error');
         }
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
         btn.disabled=false;
@@ -696,22 +738,17 @@ async function saveToCloud(){
 }
 
 // =============================================
-// HISTÓRICO COM CORREÇÃO DE CORRIDA (RACE CONDITION)
+// HISTÓRICO COM CORREÇÃO DE CORRIDA E ABERTURA AUTO
 // =============================================
 function toggleSavedModal(){
     const m=document.getElementById('saved-modal');
     const h=m.classList.contains('hidden');
     m.classList.toggle('hidden');
-    // Ao clicar no botão, usamos null para forçar o sistema a ler a variável global do Firebase
     if(h) loadSavedAssessments(null, false);
 }
 
-// Função reformulada para aceitar a ID diretamente do Auth (bypass race condition)
 async function loadSavedAssessments(uid = null, autoOpen = false){
-    // Resolve a identidade. Se o uid vier vazio, ele tenta usar o do currentUser global
     const currentUid = uid || (auth.currentUser ? auth.currentUser.uid : null);
-    
-    // Se, mesmo assim, o sistema não souber quem é, ele cancela silenciosamente sem quebrar
     if(!currentUid) return; 
     
     const list=document.getElementById('saved-list');
@@ -755,11 +792,9 @@ async function loadSavedAssessments(uid = null, autoOpen = false){
         });
 
         if(autoOpen && allAssessments.length > 0) {
-            // Ao dar F5 logado: carrega automaticamente a última prova salva (mais recente)
-            // sem abrir a modal — comportamento esperado pelo professor
             const lastId = localStorage.getItem('last_open_assessment_id');
             const idx = lastId ? allAssessments.findIndex(a => a.id === lastId) : -1;
-            loadAssessmentByIndex(idx >= 0 ? idx : 0, true); // true = silencioso (sem toast)
+            loadAssessmentByIndex(idx >= 0 ? idx : 0, true); 
         }
 
     }catch{list.innerHTML='<div class="text-center py-8 text-red-400 font-bold text-sm">Erro ao carregar</div>';}
@@ -774,7 +809,6 @@ function loadAssessmentByIndex(idx, silent = false){
     if(headerData.imagem){document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=headerData.imagem;}
     else removeHeader();
     renderQuestions();
-    // Guarda qual prova está aberta para restaurar no próximo F5
     localStorage.setItem('last_open_assessment_id', headerData.id || '');
     document.getElementById('saved-modal').classList.add('hidden');
     if(!silent) showToast(`"${headerData.titulo}" carregada`,'info');
@@ -790,7 +824,7 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO
+// BUILD HTML DA QUESTÃO (REMOVIDO BORDAS DO LIGAR COLUNAS)
 // =============================================
 function buildQuestaoHTML(q,index){
     let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
@@ -832,10 +866,10 @@ function buildQuestaoHTML(q,index){
             h+=`<div style="display:flex;align-items:center;gap:8pt;margin-bottom:7pt;">
                 <div style="flex:1;display:flex;align-items:center;gap:4pt;"><span style="font-weight:700;">${l})</span>
                 ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
-                `<span style="border-bottom:1pt solid #000;flex:1;padding-bottom:2pt;">${opt.text||''}</span>`}</div>
+                `<span style="flex:1;padding-bottom:2pt;">${opt.text||''}</span>`}</div>
                 <div style="flex:1;display:flex;align-items:center;gap:4pt;">
                     <span style="width:9pt;height:9pt;border:1.5pt solid #000;border-radius:50%;display:inline-block;flex-shrink:0;"></span>
-                    <span style="border-bottom:1pt solid #000;flex:1;padding-bottom:2pt;">${opt.matchText||''}</span>
+                    <span style="flex:1;padding-bottom:2pt;">${opt.matchText||''}</span>
                 </div>
             </div>`;
         });
@@ -864,7 +898,7 @@ async function waitForImagesToLoad(element) {
 
 async function createPaginatedDOM() {
     const container = document.createElement('div');
-    container.className = 'flex flex-col gap-8 items-center w-full';
+    container.className = 'flex flex-col gap-8 items-start md:items-center w-full min-w-max';
 
     const measureWrapper = document.createElement('div');
     measureWrapper.style.cssText = 'position:fixed; left:-9999px; top:0; visibility:hidden;';
@@ -948,14 +982,14 @@ async function createPaginatedDOM() {
 }
 
 // =============================================
-// PREVIEW VISUAL RENDERIZADA
+// PREVIEW VISUAL RENDERIZADA (NATIVA COM ZOOM)
 // =============================================
 async function enterPreviewMode(){
     document.body.classList.add('preview-mode');
     window.scrollTo(0,0);
     
     const printContent = document.getElementById('print-content');
-    printContent.innerHTML = '<div class="text-white flex flex-col items-center gap-4 mt-20"><div class="loader w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" style="animation: spinner 1s linear infinite"></div><p class="font-bold text-sm uppercase tracking-widest text-slate-400">Processando e paginando prova...</p></div>';
+    printContent.innerHTML = '<div class="text-white flex flex-col items-center gap-4 mt-20 w-full" style="min-width:100vw"><div class="loader w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" style="animation: spinner 1s linear infinite"></div><p class="font-bold text-sm uppercase tracking-widest text-slate-400">Processando e paginando prova...</p></div>';
     
     const paginatedDOM = await createPaginatedDOM();
     printContent.innerHTML = '';
