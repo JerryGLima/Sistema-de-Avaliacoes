@@ -91,7 +91,7 @@
             </div>
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -331,7 +331,7 @@ let cropState={questionId:null,optionId:null,startX:0,startY:0,isDragging:false}
 let allAssessments=[];
 
 // =============================================
-// AUTH E SINCRONIA GARANTIDA
+// AUTH (COM CORREÇÃO DA CONDIÇÃO DE CORRIDA)
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -350,14 +350,15 @@ auth.onAuthStateChanged(user=>{
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
         
-        // Agora passamos o ID do usuário diretamente para ter 100% de certeza que a busca não vai falhar no F5
-        loadSavedAssessments(user.uid, true); 
+        // Restaura rascunho local se existir (preserva ao F5)
+        const hasDraft = loadDraftLocally();
+        
+        // Passa a ID do usuário ativamente para evitar falha no F5
+        loadSavedAssessments(user.uid, !hasDraft); 
         initColorPicker();
     }else{
-        // Se deslogou (ou antes de logar), esconde as provas e zera a memória
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
-        document.getElementById('saved-modal').classList.add('hidden');
         questions=[];
         headerData={id:null,imagem:null,titulo:''};
         allAssessments=[];
@@ -369,7 +370,7 @@ auth.onAuthStateChanged(user=>{
 });
 
 function handleLogout(){
-    if(!confirm('Tem certeza que deseja sair? As provas não salvas serão perdidas da tela.')) return;
+    if(!confirm('Tem certeza que deseja sair?')) return;
     auth.signOut();
     showToast('Sessão encerrada','info');
 }
@@ -633,16 +634,65 @@ function uploadHeader(input){
     r.readAsDataURL(file);
 }
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
-function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();showToast('Nova prova iniciada','info');}
-
+function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();clearDraftLocally();showToast('Nova prova iniciada','info');}
 
 // =============================================
-// SALVAR BLINDADO COM "BALANÇA DIGITAL"
+// CAPTURA CONTEÚDO DOS EDITORES ANTES DE SALVAR
+// =============================================
+function captureEditorContents(){
+    questions.forEach(q=>{
+        const apoio=document.getElementById(`apoio-${q.id}`);
+        const enun=document.getElementById(`enunciado-${q.id}`);
+        if(apoio) q.textoApoio=apoio.innerHTML;
+        if(enun)  q.enunciado=enun.innerHTML;
+    });
+}
+
+// =============================================
+// RASCUNHO LOCAL (PRESERVA AO F5/LOGOUT)
+// =============================================
+function saveDraftLocally(){
+    try{
+        captureEditorContents();
+        const draft={questions, headerData, title: document.getElementById('assessment-title')?.value||''};
+        localStorage.setItem('draft_assessment', JSON.stringify(draft));
+    }catch(e){console.warn('Draft local falhou:',e);}
+}
+
+function loadDraftLocally(){
+    try{
+        const raw=localStorage.getItem('draft_assessment');
+        if(!raw) return false;
+        const draft=JSON.parse(raw);
+        if(!draft || !draft.questions) return false;
+        questions=draft.questions.map(q=>({...q, opcoes:q.opcoes?q.opcoes.map(o=>({...o})):[]}));
+        headerData={...draft.headerData};
+        const titleEl=document.getElementById('assessment-title');
+        if(titleEl) titleEl.value=draft.title||headerData.titulo||'';
+        if(headerData.imagem){
+            document.getElementById('header-upload-container').classList.add('hidden');
+            document.getElementById('header-preview-container').classList.remove('hidden');
+            document.getElementById('header-img-preview').src=headerData.imagem;
+        } else {
+            removeHeader();
+        }
+        renderQuestions();
+        return true;
+    }catch(e){console.warn('Erro ao restaurar rascunho:',e); return false;}
+}
+
+function clearDraftLocally(){
+    try{ localStorage.removeItem('draft_assessment'); }catch(e){}
+}
+
+// =============================================
+// SALVAR BLINDADO E RÁPIDO
 // =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
     const title=document.getElementById('assessment-title').value.trim();
     if(!title){showToast('Digite um título para a prova','warning');return;}
+    captureEditorContents();
     headerData.titulo=title;
     const btn=document.getElementById('btn-save');
     
@@ -651,27 +701,18 @@ async function saveToCloud(){
     const docId=headerData.id||Date.now().toString();
     
     try{
-        const payloadObj = {id:docId, headerData, questions};
-        const payloadString = JSON.stringify(payloadObj);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 30000));
         
-        // BALANÇA DIGITAL: Verifica se o peso da prova passa de 0.9 Megabytes.
-        const sizeMB = new Blob([payloadString]).size / (1024 * 1024);
-        if(sizeMB >= 0.9) {
-            showToast(`Erro: A prova está com ${sizeMB.toFixed(2)} MB. Exclua imagens antigas.`, 'error', 6000);
-            throw new Error('PAYLOAD_TOO_LARGE');
-        }
-
-        const payload = JSON.parse(payloadString);
+        const payload = JSON.parse(JSON.stringify({id:docId, headerData, questions}));
         payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
-        
         await Promise.race([
             db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload),
             timeout
         ]);
         
         headerData.id=docId;
+        saveDraftLocally();
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Salvo!</span>`;
         btn.style.background='#065f46';
         showToast('✓ Prova salva com sucesso!','success');
@@ -685,9 +726,9 @@ async function saveToCloud(){
     }catch(e){
         console.error(e);
         if(e.message === 'TIMEOUT') {
-            showToast('Tempo esgotado. A internet falhou.', 'error');
-        } else if (e.message !== 'PAYLOAD_TOO_LARGE') {
-            showToast('Erro ao salvar no servidor. Verifique a internet.', 'error');
+            showToast('Tempo esgotado. A internet falhou ou imagens muito pesadas.','error');
+        } else {
+            showToast('Erro ao salvar no servidor. Verifique a internet.','error');
         }
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
         btn.disabled=false;
@@ -701,15 +742,16 @@ function toggleSavedModal(){
     const m=document.getElementById('saved-modal');
     const h=m.classList.contains('hidden');
     m.classList.toggle('hidden');
-    // Forçamos o sistema a ler a variável do Firebase local
+    // Ao clicar no botão, usamos null para forçar o sistema a ler a variável global do Firebase
     if(h) loadSavedAssessments(null, false);
 }
 
-// Recebe o ID diretamente para evitar que falhe quando a página sofre F5 rápido
+// Função reformulada para aceitar a ID diretamente do Auth (bypass race condition)
 async function loadSavedAssessments(uid = null, autoOpen = false){
+    // Resolve a identidade. Se o uid vier vazio, ele tenta usar o do currentUser global
     const currentUid = uid || (auth.currentUser ? auth.currentUser.uid : null);
     
-    // Se não souber quem é ainda, cancela e espera o login processar.
+    // Se, mesmo assim, o sistema não souber quem é, ele cancela silenciosamente sem quebrar
     if(!currentUid) return; 
     
     const list=document.getElementById('saved-list');
@@ -767,6 +809,7 @@ function loadAssessmentByIndex(idx){
     if(headerData.imagem){document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=headerData.imagem;}
     else removeHeader();
     renderQuestions();
+    saveDraftLocally();
     document.getElementById('saved-modal').classList.add('hidden'); // Fecha a modal ao carregar
     showToast(`"${headerData.titulo}" carregada`,'info');
 }
@@ -775,7 +818,6 @@ async function deleteAssessment(docId,idx){
     try{
         await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();
         showToast('Prova excluída','warning');
-        // Recarrega a aba de forma silenciosa para não dar erro
         loadSavedAssessments(null, false);
     }
     catch{showToast('Erro ao excluir','error');}
