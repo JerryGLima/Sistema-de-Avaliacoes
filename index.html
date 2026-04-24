@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Avaliações</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -95,6 +101,11 @@
             }
         }
 
+        /* AJUSTE CROPPER NO MOBILE */
+        .cropper-view-box, .cropper-face { border-radius: 8px; }
+        .cropper-line { background-color: #3b82f6; opacity: 0.5; }
+        .cropper-point { background-color: #3b82f6; }
+
         /* PRINT */
         @media print{
             @page { size: A4 portrait; margin: 0; }
@@ -124,8 +135,8 @@
                 <i data-lucide="file-text" class="text-white w-9 h-9 -rotate-6"></i>
             </div>
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Sistema de Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -145,7 +156,7 @@
             <div class="flex items-center gap-3 shrink-0">
                 <div class="w-11 h-11 bg-blue-600 rounded-[1.1rem] flex items-center justify-center shadow-xl rotate-3"><i data-lucide="file-text" class="text-white w-5 h-5"></i></div>
                 <div class="hidden sm:block">
-                    <h1 class="text-base font-black text-slate-900 tracking-tight leading-none">Sistema de Avaliações</h1>
+                    <h1 class="text-base font-black text-slate-900 tracking-tight leading-none">Editor de Provas</h1>
                     <p id="user-display" class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1"></p>
                 </div>
             </div>
@@ -165,13 +176,13 @@
         <section class="bg-white rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-slate-100 p-8 space-y-8">
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-sm font-black">01</span>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Cabeçario</h2>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Estrutura</h2>
             </div>
             <div>
                 <div id="header-upload-container">
                     <label class="flex flex-col items-center justify-center gap-4 w-full py-12 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-blue-50/50 hover:border-blue-300 transition-all bg-slate-50/50">
                         <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-7 h-7 text-slate-300"></i></div>
-                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Padrão/span>
+                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Oficial</span>
                         <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
                     </label>
                 </div>
@@ -205,21 +216,18 @@
     <div id="print-content"></div>
 </div>
 
-<div id="cropper-modal" class="hidden fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6">
-    <div class="w-full max-w-3xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div class="p-8 border-b border-slate-100 flex justify-between items-center">
-            <h3 class="font-black text-2xl text-slate-900">Ajustar Imagem</h3>
+<div id="cropper-modal" class="hidden fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-4xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col h-[90vh] sm:h-[85vh]">
+        <div class="p-6 sm:p-8 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="font-black text-xl sm:text-2xl text-slate-900">Ajustar Imagem</h3>
             <button onclick="closeCropper()" class="p-3 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-2xl"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        <div id="crop-area" class="flex-1 overflow-hidden flex items-center justify-center p-10 bg-slate-100">
-            <div class="relative inline-block touch-none select-none shadow-2xl rounded-xl overflow-hidden bg-white border-8 border-white" style="max-width:100%;max-height:50vh">
-                <img id="img-to-crop" src="" class="block max-w-full object-contain pointer-events-none" style="max-height:50vh">
-                <div id="crop-rect" class="absolute border-4 border-blue-500 bg-blue-500/10 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] pointer-events-none hidden"></div>
-            </div>
+        <div id="crop-area" class="flex-1 overflow-hidden bg-slate-100 relative">
+            <img id="img-to-crop" src="" style="display: block; max-width: 100%;">
         </div>
-        <div class="p-8 flex gap-4">
-            <button onclick="applyCrop(true)" class="flex-1 py-5 bg-slate-100 text-slate-700 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-200">Imagem Inteira</button>
-            <button onclick="applyCrop(false)" class="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 flex items-center justify-center gap-3"><i data-lucide="check" class="w-5 h-5"></i>Cortar</button>
+        <div class="p-6 sm:p-8 flex gap-4 bg-white border-t border-slate-100">
+            <button onclick="applyCrop(true)" class="flex-1 py-4 sm:py-5 bg-slate-100 text-slate-700 rounded-2xl font-black uppercase text-[10px] sm:text-xs tracking-widest hover:bg-slate-200">Imagem Inteira</button>
+            <button onclick="applyCrop(false)" class="flex-1 py-4 sm:py-5 bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] sm:text-xs tracking-widest hover:bg-blue-700 flex items-center justify-center gap-2 sm:gap-3"><i data-lucide="check" class="w-4 h-4 sm:w-5 sm:h-5"></i>Cortar Imagem</button>
         </div>
     </div>
 </div>
@@ -357,15 +365,16 @@ function makeToolbar(editorId){
 }
 
 // =============================================
-// ESTADO
+// ESTADO E VARIÁVEIS GLOBAIS
 // =============================================
 let questions=[];
 let headerData={id:null,imagem:null,titulo:''};
-let cropState={questionId:null,optionId:null,startX:0,startY:0,isDragging:false};
+let cropState={questionId:null,optionId:null};
 let allAssessments=[];
+let cropperInstance = null; // NOVO: Variável global para o Cropper.js
 
 // =============================================
-// AUTH 
+// AUTH (COM CORREÇÃO DA CONDIÇÃO DE CORRIDA)
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
     e.preventDefault();
@@ -555,81 +564,106 @@ function buildImgZone(q){
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // =============================================
-// CROP COM COMPRESSÃO
+// CROP COM CROPPER.JS (OPÇÃO 2 - OTIMIZADO PARA MOBILE)
 // =============================================
-function startCrop(qId,oId,input){
-    const file=input.files[0];if(!file)return;
-    const r=new FileReader();
-    r.onload=(e)=>{
-        cropState.questionId=qId;
-        cropState.optionId=oId;
+function startCrop(qId, oId, input){
+    const file = input.files[0];
+    if(!file) return;
+    const r = new FileReader();
+    r.onload = (e) => {
+        cropState.questionId = qId;
+        cropState.optionId = oId;
         const img = document.getElementById('img-to-crop');
+        
+        // Destruir instância antiga se existir para evitar bugs
+        if(cropperInstance) {
+            cropperInstance.destroy();
+            cropperInstance = null;
+        }
+
         img.onload = () => {
             document.getElementById('cropper-modal').classList.remove('hidden');
-            initCropInternal();
+            
+            // Inicializar a biblioteca Profissional (Cropper.js)
+            cropperInstance = new Cropper(img, {
+                viewMode: 1, // Restringe a caixa de corte aos limites da imagem
+                dragMode: 'move', // Permite mover a imagem toda com o dedo
+                autoCropArea: 0.8,
+                restore: false,
+                guides: true, // Mostra as linhas de grade de fotografia
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
         };
-        img.src=e.target.result;
+        img.src = e.target.result;
     };
     r.readAsDataURL(file);
     input.value = '';
 }
 
-function initCropInternal(){
-    const img=document.getElementById('img-to-crop');
-    const rect=document.getElementById('crop-rect');
-    rect.classList.add('hidden');
-    rect.style.width = '0px'; rect.style.height = '0px'; 
-    const cont=img.parentElement;
-    cont.onmousedown=(e)=>{const b=img.getBoundingClientRect();cropState.startX=e.clientX-b.left;cropState.startY=e.clientY-b.top;cropState.isDragging=true;rect.style.cssText=`left:${cropState.startX}px;top:${cropState.startY}px;width:0;height:0`;rect.classList.remove('hidden');};
-    cont.onmousemove=(e)=>{if(!cropState.isDragging)return;const b=img.getBoundingClientRect();const cx=e.clientX-b.left,cy=e.clientY-b.top;rect.style.width=Math.abs(cx-cropState.startX)+'px';rect.style.height=Math.abs(cy-cropState.startY)+'px';rect.style.left=Math.min(cx,cropState.startX)+'px';rect.style.top=Math.min(cy,cropState.startY)+'px';};
-    cont.onmouseup=()=>cropState.isDragging=false;
-}
-
 function applyCrop(full){
-    const img=document.getElementById('img-to-crop');
-    const rect=document.getElementById('crop-rect');
-    const rE=rect.getBoundingClientRect();
-    
-    if(!full && (rE.width === 0 || rE.height === 0)) { full = true; }
+    if(!cropperInstance) return;
 
-    const c=document.createElement('canvas');
-    const ctx=c.getContext('2d');
-    
-    let targetW, targetH, srcX=0, srcY=0, srcW=img.naturalWidth, srcH=img.naturalHeight;
-    
-    if(!full){
-        const b=img.getBoundingClientRect();
-        const sx=img.naturalWidth/b.width, sy=img.naturalHeight/b.height;
-        srcX = (rE.left-b.left)*sx;
-        srcY = (rE.top-b.top)*sy;
-        srcW = rE.width*sx;
-        srcH = rE.height*sy;
+    let canvas;
+    if(full) {
+        // Limpa a caixa de seleção para pegar a imagem original toda
+        cropperInstance.clear();
     }
+    
+    // Obtém a parte selecionada como elemento Canvas
+    canvas = cropperInstance.getCroppedCanvas({
+        fillColor: '#ffffff',
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+    });
 
-    targetW = srcW; targetH = srcH;
+    if(!canvas) { closeCropper(); return; }
+
+    // Mantemos a trava matemática do Ponto Ideal (1000px)
     const MAX_DIM = 1000; 
+    let targetW = canvas.width;
+    let targetH = canvas.height;
+
     if(targetW > MAX_DIM || targetH > MAX_DIM) {
         const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH);
-        targetW *= ratio; targetH *= ratio;
+        targetW *= ratio; 
+        targetH *= ratio;
     }
 
-    if(targetW <= 0 || targetH <= 0) { closeCropper(); return; }
-
-    c.width = targetW; c.height = targetH;
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = targetW;
+    finalCanvas.height = targetH;
+    const ctx = finalCanvas.getContext('2d');
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, targetW, targetH);
-    ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetW, targetH);
+    ctx.drawImage(canvas, 0, 0, targetW, targetH);
     
-    const data=c.toDataURL('image/jpeg', 0.90); 
+    // Mantemos a Compressão de Alta Qualidade configurada (0.90)
+    const data = finalCanvas.toDataURL('image/jpeg', 0.90); 
     
-    const q=questions.find(qu=>qu.id===cropState.questionId);
-    if(cropState.optionId)q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data;
-    else q.imagem=data;
+    const q = questions.find(qu=>qu.id===cropState.questionId);
+    if(cropState.optionId) {
+        q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data;
+    } else {
+        q.imagem=data;
+    }
     
-    closeCropper();renderQuestions();
+    closeCropper();
+    renderQuestions();
 }
 
-function closeCropper(){document.getElementById('cropper-modal').classList.add('hidden');}
+function closeCropper(){
+    document.getElementById('cropper-modal').classList.add('hidden');
+    if(cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
+    document.getElementById('img-to-crop').src = '';
+}
+
 function removeQuestionImage(qId){questions.find(q=>q.id===qId).imagem=null;renderQuestions();}
 function removeOptImage(qId,oId){questions.find(q=>q.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).image=null;renderQuestions();}
 
@@ -664,7 +698,7 @@ function uploadHeader(input){
     r.readAsDataURL(file);
 }
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
-function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();localStorage.removeItem('last_open_assessment_id');showToast('Nova prova iniciada','info');}
+function newAssessment(){if(!confirm('Criar nova prova? O conteúdo não guardado será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();localStorage.removeItem('last_open_assessment_id');showToast('Nova prova iniciada','info');}
 
 // =============================================
 // CAPTURA EDITORES RICH-TEXT ANTES DE SALVAR
@@ -690,7 +724,7 @@ async function saveToCloud(){
     const btn=document.getElementById('btn-save');
     
     btn.disabled=true;
-    btn.innerHTML=`<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full loader" style="display:inline-block"></div><span class="hidden sm:inline ml-1">Salvando...</span>`;
+    btn.innerHTML=`<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full loader" style="display:inline-block"></div><span class="hidden sm:inline ml-1">A guardar...</span>`;
     const docId=headerData.id||Date.now().toString();
     
     try{
@@ -699,7 +733,7 @@ async function saveToCloud(){
         
         const sizeMB = new Blob([payloadString]).size / (1024 * 1024);
         if(sizeMB >= 0.9) {
-            showToast(`Erro: A prova está com ${sizeMB.toFixed(2)} MB. Exclua imagens antigas.`, 'error', 6000);
+            showToast(`Erro: A prova tem ${sizeMB.toFixed(2)} MB. Exclua imagens antigas.`, 'error', 6000);
             throw new Error('PAYLOAD_TOO_LARGE');
         }
 
@@ -715,12 +749,12 @@ async function saveToCloud(){
         
         headerData.id=docId;
         localStorage.setItem('last_open_assessment_id', docId);
-        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Salvo!</span>`;
+        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Guardado!</span>`;
         btn.style.background='#065f46';
-        showToast('✓ Prova salva com sucesso!','success');
+        showToast('✓ Prova guardada com sucesso!','success');
         
         setTimeout(()=>{
-            btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
+            btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`;
             btn.style.background='';
             btn.disabled=false;
         },2000);
@@ -730,9 +764,9 @@ async function saveToCloud(){
         if(e.message === 'TIMEOUT') {
             showToast('Tempo esgotado. A internet falhou.', 'error');
         } else if (e.message !== 'PAYLOAD_TOO_LARGE') {
-            showToast('Erro ao salvar no servidor. Verifique a internet.', 'error');
+            showToast('Erro ao guardar no servidor. Verifique a internet.', 'error');
         }
-        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`;
+        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`;
         btn.disabled=false;
     }
 }
@@ -759,12 +793,12 @@ async function loadSavedAssessments(uid = null, autoOpen = false){
         allAssessments=[];list.innerHTML='';
         
         if(snap.empty){
-            list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova salva ainda</p></div>';
+            list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova guardada ainda</p></div>';
             lucide.createIcons();
             return;
         }
         
-        document.getElementById('saved-count').innerText=`${snap.size} prova${snap.size>1?'s':''} salva${snap.size>1?'s':''}`;
+        document.getElementById('saved-count').innerText=`${snap.size} prova${snap.size>1?'s':''} guardada${snap.size>1?'s':''}`;
         
         snap.forEach(doc=>{
             const data=doc.data();
@@ -824,7 +858,7 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO (DESIGN ATUALIZADO: Quadrados Arredondados)
+// BUILD HTML DA QUESTÃO
 // =============================================
 function buildQuestaoHTML(q,index){
     let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
@@ -990,7 +1024,7 @@ async function createPaginatedDOM() {
 }
 
 // =============================================
-// PREVIEW VISUAL RENDERIZADA (NATIVA COM ZOOM)
+// PREVIEW VISUAL RENDERIZADA
 // =============================================
 async function enterPreviewMode(){
     document.body.classList.add('preview-mode');
@@ -1020,7 +1054,7 @@ async function generatePDF(fromPreview = false){
         await enterPreviewMode();
     }
 
-    showToast('Gerando PDF da prova...','info',10000);
+    showToast('A gerar PDF da prova...','info',10000);
     const pages = document.getElementById('print-content').querySelectorAll('.a4-sheet');
 
     try {
@@ -1056,7 +1090,7 @@ async function generatePDF(fromPreview = false){
 
     } catch(e) {
         console.error("Erro na geração de PDF:", e);
-        showToast('Erro ao gerar PDF. Verifique sua conexão.','error');
+        showToast('Erro ao gerar PDF. Verifique a sua conexão.','error');
         if(!fromPreview) exitPreviewMode();
     }
 }
