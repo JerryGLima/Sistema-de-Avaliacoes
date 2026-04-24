@@ -607,7 +607,7 @@ function applyCrop(full){
     }
 
     targetW = srcW; targetH = srcH;
-    const MAX_DIM = 600; 
+    const MAX_DIM = 1000; 
     if(targetW > MAX_DIM || targetH > MAX_DIM) {
         const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH);
         targetW *= ratio; targetH *= ratio;
@@ -620,7 +620,7 @@ function applyCrop(full){
     ctx.fillRect(0, 0, targetW, targetH);
     ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetW, targetH);
     
-    const data=c.toDataURL('image/jpeg', 0.65); 
+    const data=c.toDataURL('image/jpeg', 0.90); 
     
     const q=questions.find(qu=>qu.id===cropState.questionId);
     if(cropState.optionId)q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data;
@@ -643,7 +643,7 @@ function uploadHeader(input){
         const img = new Image();
         img.onload = () => {
             const c = document.createElement('canvas');
-            const MAX_W = 800; 
+            const MAX_W = 1200; 
             let w = img.width, h = img.height;
             if(w > MAX_W) { h *= MAX_W/w; w = MAX_W; }
             
@@ -653,7 +653,7 @@ function uploadHeader(input){
             ctx.fillRect(0, 0, w, h);
             ctx.drawImage(img, 0, 0, w, h);
             
-            headerData.imagem = c.toDataURL('image/jpeg', 0.65);
+            headerData.imagem = c.toDataURL('image/jpeg', 0.90);
             document.getElementById('header-upload-container').classList.add('hidden');
             document.getElementById('header-preview-container').classList.remove('hidden');
             document.getElementById('header-img-preview').src = headerData.imagem;
