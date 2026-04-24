@@ -48,7 +48,6 @@
         /* A4 SHEET RIGIDA */
         .a4-sheet{
             width: 210mm;
-            min-height: 297mm;
             height: 297mm;
             background: white;
             font-family: Arial, Helvetica, sans-serif;
@@ -60,10 +59,8 @@
             position: relative;
             overflow: hidden;
             margin-bottom: 20px;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
         }
-        .a4-sheet *{box-sizing:border-box;max-width:100%;}
+        .a4-sheet *{box-sizing:border-box}
         .q-block{page-break-inside:avoid;break-inside:avoid}
 
         /* =========================================
@@ -138,8 +135,8 @@
                 <i data-lucide="file-text" class="text-white w-9 h-9 -rotate-6"></i>
             </div>
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Sistema de Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Avaliações</h1>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor 2026</p>
             </div>
         </div>
         <form id="login-form" class="space-y-5">
@@ -168,7 +165,7 @@
                 <button onclick="newAssessment()" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="plus-circle" class="w-4 h-4"></i><span class="hidden sm:inline">Novo</span></button>
                 <button id="btn-save" onclick="saveToCloud()" class="flex items-center gap-1.5 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-emerald-600 btn-active"><i data-lucide="save" class="w-4 h-4"></i><span class="hidden sm:inline">Salvar</span></button>
                 <button onclick="enterPreviewMode()" class="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 btn-active"><i data-lucide="eye" class="w-4 h-4"></i><span class="hidden sm:inline">Visualizar</span></button>
-                <button onclick="generatePDF(false)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
+                <button onclick="generatePDF(true)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
                 <button onclick="printDirect()" class="flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-violet-700 btn-active"><i data-lucide="printer" class="w-4 h-4"></i><span class="hidden md:inline">Imprimir</span></button>
                 <button onclick="handleLogout()" class="p-2.5 text-red-400 hover:bg-red-50 rounded-xl btn-active"><i data-lucide="log-out" class="w-4 h-4"></i></button>
             </div>
@@ -179,13 +176,13 @@
         <section class="bg-white rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-slate-100 p-8 space-y-8">
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-sm font-black">01</span>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Cabeçalho</h2>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Estrutura</h2>
             </div>
             <div>
                 <div id="header-upload-container">
                     <label class="flex flex-col items-center justify-center gap-4 w-full py-12 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-blue-50/50 hover:border-blue-300 transition-all bg-slate-50/50">
                         <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-7 h-7 text-slate-300"></i></div>
-                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Padrao</span>
+                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Oficial</span>
                         <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
                     </label>
                 </div>
@@ -920,12 +917,11 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO (GERADOR PDF ATUALIZADO)
+// BUILD HTML DA QUESTÃO (ALINHAMENTO PERFEITO CORRIGIDO)
 // =============================================
 function buildQuestaoHTML(q,index){
     let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
     
-    // BLOCO EXCLUSIVO DA NOVA QUESTÃO: COMPLETAR LACUNAS
     if(q.type === 'fill-in-the-blanks') {
         h+=`<div style="display:flex;gap:5pt;margin-bottom:8pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;line-height:1.45;">${q.enunciado||'...'}</div></div>`;
         
@@ -946,8 +942,8 @@ function buildQuestaoHTML(q,index){
             q.opcoes.forEach((opt, i) => {
                 const l = String.fromCharCode(97+i); 
                 if(opt.text && opt.text.replace(/<[^>]*>/g,'').trim()) {
-                    h += `<div style="display:flex; gap:6pt; margin-bottom:8pt; line-height:2; font-size:11pt; text-align:justify;">
-                            <span style="font-weight:700;">${l})</span>
+                    h += `<div style="display:flex; gap:6pt; margin-bottom:8pt; line-height:2; font-size:11pt; text-align:justify; page-break-inside:avoid;">
+                            <div style="font-weight:700; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
                             <div style="flex:1;">${opt.text}</div>
                           </div>`;
                 }
@@ -955,7 +951,6 @@ function buildQuestaoHTML(q,index){
             h += `</div>`;
         }
     } 
-    // BLOCO DAS OUTRAS QUESTÕES
     else {
         if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
             h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
@@ -977,23 +972,22 @@ function buildQuestaoHTML(q,index){
                 const l=String.fromCharCode(97+i);
                 const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
                 
-                let prefixHTML = '';
                 if(q.type === 'multiple-choice' || q.type === 'true-false') {
-                    // Prefixo: letra + quadrado alinhados com a primeira linha do texto
-                    prefixHTML = `<div style="display:inline-flex; align-items:flex-start; gap:4pt; flex-shrink:0; padding-top:1.5pt;">
-                        <span style="font-weight:700; font-size:11pt; line-height:1.45;">${l})</span>
-                        <span style="display:inline-block; width:13pt; height:13pt; border:1.2pt solid #000; border-radius:2pt; flex-shrink:0; margin-top:1pt; vertical-align:top;"></span>
+                    // NOVO ALINHAMENTO: Colunas independentes com flex-start e padding para bater a base do texto
+                    h+=`<div style="display:flex; align-items:flex-start; gap:6pt; margin-bottom:6pt; page-break-inside:avoid;">
+                        <div style="font-weight:700; font-size:11pt; line-height:1.45; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
+                        <div style="padding-top:1.5pt; flex-shrink:0;">
+                            <div style="width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt;"></div>
+                        </div>
+                        <div style="flex:1; font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
                     </div>`;
                 } else {
-                    prefixHTML = `<span style="font-weight:700; font-size:11pt; line-height:1.45; flex-shrink:0; padding-top:1.5pt;">${l})</span>`;
+                    h+=`<div style="display:flex; align-items:flex-start; gap:6pt; margin-bottom:2pt; page-break-inside:avoid;">
+                        <div style="font-weight:700; font-size:11pt; line-height:1.45; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
+                        <div style="flex:1; font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
+                    </div>
+                    <div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
                 }
-                
-                h+=`<div style="display:flex; align-items:flex-start; gap:6pt; margin-bottom:${q.type==='discursive-list'?'3pt':'7pt'}; page-break-inside:avoid;">
-                    ${prefixHTML}
-                    <div style="flex:1; font-size:11pt; line-height:1.45; padding-top:1.5pt;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;display:block;" crossorigin="anonymous">`:opt.text||''}</div>
-                </div>`;
-                
-                if(q.type==='discursive-list')h+=`<div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
             });
             h+=`</div>`;
         }
@@ -1003,7 +997,19 @@ function buildQuestaoHTML(q,index){
                 const l=String.fromCharCode(97+i);
                 const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
 
-                h+=`<div style="display:flex;align-items:flex-start;gap:12pt;margin-bottom:8pt;page-break-inside:avoid;"><div style="flex:1;display:flex;align-items:flex-start;gap:4pt;"><span style="font-weight:700;font-size:11pt;line-height:1.45;flex-shrink:0;padding-top:1.5pt;">${l})</span>${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;display:block;" crossorigin="anonymous">`:`<span style="flex:1;font-size:11pt;line-height:1.45;padding-top:1.5pt;">${opt.text||''}</span>`}</div><div style="flex:1;display:flex;align-items:flex-start;gap:5pt;"><span style="display:inline-block;width:13pt;height:13pt;border:1.2pt solid #000;border-radius:2pt;flex-shrink:0;margin-top:3pt;vertical-align:top;"></span><span style="flex:1;font-size:11pt;line-height:1.45;padding-top:1.5pt;">${opt.matchText||''}</span></div></div>`;
+                h+=`<div style="display:flex;align-items:flex-start;gap:15pt;margin-bottom:8pt;page-break-inside:avoid;">
+                    <div style="flex:1;display:flex;align-items:flex-start;gap:4pt;">
+                        <div style="font-weight:700; font-size:11pt; line-height:1.45; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
+                        ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
+                        `<div style="flex:1; font-size:11pt; line-height:1.45;">${opt.text||''}</div>`}
+                    </div>
+                    <div style="flex:1;display:flex;align-items:flex-start;gap:6pt;">
+                        <div style="padding-top:1.5pt; flex-shrink:0;">
+                            <div style="width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt;"></div>
+                        </div>
+                        <div style="flex:1; font-size:11pt; line-height:1.45;">${opt.matchText||''}</div>
+                    </div>
+                </div>`;
             });
             h+=`</div>`;
         }
@@ -1050,12 +1056,10 @@ async function createPaginatedDOM() {
     function newSheet() {
         const sheet = document.createElement('div');
         sheet.className = 'a4-sheet';
-        // Padding de 15mm → em pixels a 96dpi ≈ 57px
-        sheet.style.padding = '57px';
+        sheet.style.padding = '15mm';
         
         const content = document.createElement('div');
         content.style.width = '100%';
-        content.style.fontFamily = 'Arial, Helvetica, sans-serif';
         sheet.appendChild(content);
         
         sheets.push({ sheet, content });
@@ -1147,11 +1151,8 @@ async function generatePDF(fromPreview = false){
     if(!fromPreview) {
         showToast('Preparando documento...', 'info', 2000);
         await enterPreviewMode();
-        // PAUSA ESTRATÉGICA: Aguarda renderização completa do navegador, incluindo fontes e imagens
-        await new Promise(r => setTimeout(r, 1200)); 
-    } else {
-        // Mesmo no preview, aguarda layout estabilizar
-        await new Promise(r => setTimeout(r, 300));
+        // PAUSA ESTRATÉGICA: Dá tempo ao navegador de desenhar a tela antes do snapshot
+        await new Promise(r => setTimeout(r, 800)); 
     }
 
     showToast('A gerar PDF da prova...','info',10000);
@@ -1166,42 +1167,20 @@ async function generatePDF(fromPreview = false){
         for(let i=0; i<pages.length; i++){
             if(i > 0) pdf.addPage();
             
-            const pg = pages[i];
-            const originalShadow = pg.style.boxShadow;
-            const originalWidth = pg.style.width;
-            const originalHeight = pg.style.height;
-            const originalMinHeight = pg.style.minHeight;
+            const originalShadow = pages[i].style.boxShadow;
+            pages[i].style.boxShadow = 'none';
             
-            // Fixa dimensões absolutas em pixels (A4 a 96dpi: 794x1123px)
-            const A4_W_PX = 794;
-            const A4_H_PX = 1123;
-            pg.style.boxShadow = 'none';
-            pg.style.width = A4_W_PX + 'px';
-            pg.style.height = A4_H_PX + 'px';
-            pg.style.minHeight = A4_H_PX + 'px';
-            
-            // Aguarda o reflow
-            await new Promise(r => setTimeout(r, 80));
-            
-            const canvas = await html2canvas(pg, {
-                scale: 2,
+            const canvas = await html2canvas(pages[i], {
+                scale: 2, 
                 useCORS: true,
                 allowTaint: true,
                 logging: false,
-                backgroundColor: '#ffffff',
-                width: A4_W_PX,
-                height: A4_H_PX,
-                scrollX: 0,
-                scrollY: 0
+                backgroundColor: '#ffffff'
             });
             
-            // Restaura estilos originais
-            pg.style.boxShadow = originalShadow;
-            pg.style.width = originalWidth;
-            pg.style.height = originalHeight;
-            pg.style.minHeight = originalMinHeight;
+            pages[i].style.boxShadow = originalShadow; 
             
-            const imgData = canvas.toDataURL('image/jpeg', 0.97);
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
         }
 
