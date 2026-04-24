@@ -350,11 +350,8 @@ auth.onAuthStateChanged(user=>{
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
         
-        // Restaura rascunho local se existir (preserva ao F5)
-        const hasDraft = loadDraftLocally();
-        
         // Passa a ID do usuário ativamente para evitar falha no F5
-        loadSavedAssessments(user.uid, !hasDraft); 
+        loadSavedAssessments(user.uid, true); 
         initColorPicker();
     }else{
         document.getElementById('login-screen').classList.remove('hidden');
@@ -634,56 +631,7 @@ function uploadHeader(input){
     r.readAsDataURL(file);
 }
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
-function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();clearDraftLocally();showToast('Nova prova iniciada','info');}
-
-// =============================================
-// CAPTURA CONTEÚDO DOS EDITORES ANTES DE SALVAR
-// =============================================
-function captureEditorContents(){
-    questions.forEach(q=>{
-        const apoio=document.getElementById(`apoio-${q.id}`);
-        const enun=document.getElementById(`enunciado-${q.id}`);
-        if(apoio) q.textoApoio=apoio.innerHTML;
-        if(enun)  q.enunciado=enun.innerHTML;
-    });
-}
-
-// =============================================
-// RASCUNHO LOCAL (PRESERVA AO F5/LOGOUT)
-// =============================================
-function saveDraftLocally(){
-    try{
-        captureEditorContents();
-        const draft={questions, headerData, title: document.getElementById('assessment-title')?.value||''};
-        localStorage.setItem('draft_assessment', JSON.stringify(draft));
-    }catch(e){console.warn('Draft local falhou:',e);}
-}
-
-function loadDraftLocally(){
-    try{
-        const raw=localStorage.getItem('draft_assessment');
-        if(!raw) return false;
-        const draft=JSON.parse(raw);
-        if(!draft || !draft.questions) return false;
-        questions=draft.questions.map(q=>({...q, opcoes:q.opcoes?q.opcoes.map(o=>({...o})):[]}));
-        headerData={...draft.headerData};
-        const titleEl=document.getElementById('assessment-title');
-        if(titleEl) titleEl.value=draft.title||headerData.titulo||'';
-        if(headerData.imagem){
-            document.getElementById('header-upload-container').classList.add('hidden');
-            document.getElementById('header-preview-container').classList.remove('hidden');
-            document.getElementById('header-img-preview').src=headerData.imagem;
-        } else {
-            removeHeader();
-        }
-        renderQuestions();
-        return true;
-    }catch(e){console.warn('Erro ao restaurar rascunho:',e); return false;}
-}
-
-function clearDraftLocally(){
-    try{ localStorage.removeItem('draft_assessment'); }catch(e){}
-}
+function newAssessment(){if(!confirm('Criar nova prova? Conteúdo não salvo será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();localStorage.removeItem('last_open_assessment_id');showToast('Nova prova iniciada','info');}
 
 // =============================================
 // SALVAR BLINDADO E RÁPIDO
@@ -692,7 +640,6 @@ async function saveToCloud(){
     if(!auth.currentUser)return;
     const title=document.getElementById('assessment-title').value.trim();
     if(!title){showToast('Digite um título para a prova','warning');return;}
-    captureEditorContents();
     headerData.titulo=title;
     const btn=document.getElementById('btn-save');
     
@@ -712,7 +659,7 @@ async function saveToCloud(){
         ]);
         
         headerData.id=docId;
-        saveDraftLocally();
+        localStorage.setItem('last_open_assessment_id', docId);
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Salvo!</span>`;
         btn.style.background='#065f46';
         showToast('✓ Prova salva com sucesso!','success');
@@ -795,23 +742,29 @@ async function loadSavedAssessments(uid = null, autoOpen = false){
         });
 
         if(autoOpen && allAssessments.length > 0) {
-            document.getElementById('saved-modal').classList.remove('hidden');
+            // Ao dar F5 logado: carrega automaticamente a última prova salva (mais recente)
+            // sem abrir a modal — comportamento esperado pelo professor
+            const lastId = localStorage.getItem('last_open_assessment_id');
+            const idx = lastId ? allAssessments.findIndex(a => a.id === lastId) : -1;
+            loadAssessmentByIndex(idx >= 0 ? idx : 0, true); // true = silencioso (sem toast)
         }
 
     }catch{list.innerHTML='<div class="text-center py-8 text-red-400 font-bold text-sm">Erro ao carregar</div>';}
     lucide.createIcons();
 }
-function loadAssessmentByIndex(idx){
+function loadAssessmentByIndex(idx, silent = false){
     const data=allAssessments[idx];
+    if(!data) return;
     headerData={...data.headerData};
     questions=data.questions.map(q=>({...q,opcoes:q.opcoes?q.opcoes.map(o=>({...o})):[]}));
     document.getElementById('assessment-title').value=headerData.titulo||'';
     if(headerData.imagem){document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=headerData.imagem;}
     else removeHeader();
     renderQuestions();
-    saveDraftLocally();
-    document.getElementById('saved-modal').classList.add('hidden'); // Fecha a modal ao carregar
-    showToast(`"${headerData.titulo}" carregada`,'info');
+    // Guarda qual prova está aberta para restaurar no próximo F5
+    localStorage.setItem('last_open_assessment_id', headerData.id || '');
+    document.getElementById('saved-modal').classList.add('hidden');
+    if(!silent) showToast(`"${headerData.titulo}" carregada`,'info');
 }
 async function deleteAssessment(docId,idx){
     if(!confirm('Excluir esta prova permanentemente?'))return;
