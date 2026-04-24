@@ -165,7 +165,9 @@
                 <button onclick="newAssessment()" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="plus-circle" class="w-4 h-4"></i><span class="hidden sm:inline">Novo</span></button>
                 <button id="btn-save" onclick="saveToCloud()" class="flex items-center gap-1.5 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-emerald-600 btn-active"><i data-lucide="save" class="w-4 h-4"></i><span class="hidden sm:inline">Salvar</span></button>
                 <button onclick="enterPreviewMode()" class="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 btn-active"><i data-lucide="eye" class="w-4 h-4"></i><span class="hidden sm:inline">Visualizar</span></button>
-                <button onclick="generatePDF(true)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
+                
+                <button onclick="generatePDF(false)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
+                
                 <button onclick="printDirect()" class="flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-violet-700 btn-active"><i data-lucide="printer" class="w-4 h-4"></i><span class="hidden md:inline">Imprimir</span></button>
                 <button onclick="handleLogout()" class="p-2.5 text-red-400 hover:bg-red-50 rounded-xl btn-active"><i data-lucide="log-out" class="w-4 h-4"></i></button>
             </div>
@@ -211,7 +213,6 @@
 <div id="print-view" class="hidden bg-zinc-900">
     <div id="print-toolbar" class="flex justify-center gap-3 px-4 flex-wrap">
         <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
-        <button onclick="generatePDF(true)" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Gerar PDF</button>
         <button onclick="window.print()" class="bg-violet-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-violet-700 btn-active flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
     </div>
     <div id="print-content"></div>
@@ -917,11 +918,12 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO (ALINHAMENTO PERFEITO CORRIGIDO)
+// BUILD HTML DA QUESTÃO (ALINHAMENTO BLINDADO ABSOLUTO)
 // =============================================
 function buildQuestaoHTML(q,index){
     let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
     
+    // BLOCO EXCLUSIVO DA NOVA QUESTÃO: COMPLETAR LACUNAS
     if(q.type === 'fill-in-the-blanks') {
         h+=`<div style="display:flex;gap:5pt;margin-bottom:8pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;line-height:1.45;">${q.enunciado||'...'}</div></div>`;
         
@@ -942,15 +944,16 @@ function buildQuestaoHTML(q,index){
             q.opcoes.forEach((opt, i) => {
                 const l = String.fromCharCode(97+i); 
                 if(opt.text && opt.text.replace(/<[^>]*>/g,'').trim()) {
-                    h += `<div style="display:flex; gap:6pt; margin-bottom:8pt; line-height:2; font-size:11pt; text-align:justify; page-break-inside:avoid;">
-                            <div style="font-weight:700; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
-                            <div style="flex:1;">${opt.text}</div>
+                    h += `<div style="position:relative; padding-left:20pt; margin-bottom:8pt; page-break-inside:avoid; min-height:16pt;">
+                            <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
+                            <div style="font-size:11pt; line-height:2; text-align:justify;">${opt.text}</div>
                           </div>`;
                 }
             });
             h += `</div>`;
         }
     } 
+    // BLOCO DAS OUTRAS QUESTÕES
     else {
         if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
             h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
@@ -973,18 +976,17 @@ function buildQuestaoHTML(q,index){
                 const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
                 
                 if(q.type === 'multiple-choice' || q.type === 'true-false') {
-                    // NOVO ALINHAMENTO: Colunas independentes com flex-start e padding para bater a base do texto
-                    h+=`<div style="display:flex; align-items:flex-start; gap:6pt; margin-bottom:6pt; page-break-inside:avoid;">
-                        <div style="font-weight:700; font-size:11pt; line-height:1.45; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
-                        <div style="padding-top:1.5pt; flex-shrink:0;">
-                            <div style="width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt;"></div>
-                        </div>
-                        <div style="flex:1; font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
+                    // Estrutura blindada para o PDF: Posicionamento absoluto garante o alinhamento da caixa com a primeira linha do texto
+                    h+=`<div style="position:relative; padding-left:36pt; margin-bottom:6pt; page-break-inside:avoid; min-height:16pt;">
+                        <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
+                        <div style="position:absolute; left:19pt; top:2pt; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt; box-sizing:border-box;"></div>
+                        <div style="font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
                     </div>`;
                 } else {
-                    h+=`<div style="display:flex; align-items:flex-start; gap:6pt; margin-bottom:2pt; page-break-inside:avoid;">
-                        <div style="font-weight:700; font-size:11pt; line-height:1.45; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
-                        <div style="flex:1; font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
+                    // Discursiva
+                    h+=`<div style="position:relative; padding-left:20pt; margin-bottom:2pt; page-break-inside:avoid; min-height:16pt;">
+                        <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
+                        <div style="font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
                     </div>
                     <div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
                 }
@@ -997,17 +999,18 @@ function buildQuestaoHTML(q,index){
                 const l=String.fromCharCode(97+i);
                 const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
 
-                h+=`<div style="display:flex;align-items:flex-start;gap:15pt;margin-bottom:8pt;page-break-inside:avoid;">
-                    <div style="flex:1;display:flex;align-items:flex-start;gap:4pt;">
-                        <div style="font-weight:700; font-size:11pt; line-height:1.45; width:14pt; text-align:right; flex-shrink:0;">${l})</div>
-                        ${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:
-                        `<div style="flex:1; font-size:11pt; line-height:1.45;">${opt.text||''}</div>`}
-                    </div>
-                    <div style="flex:1;display:flex;align-items:flex-start;gap:6pt;">
-                        <div style="padding-top:1.5pt; flex-shrink:0;">
-                            <div style="width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt;"></div>
+                h+=`<div style="display:table; width:100%; margin-bottom:8pt; page-break-inside:avoid;">
+                    <div style="display:table-cell; width:50%; vertical-align:top; padding-right:10pt;">
+                        <div style="position:relative; padding-left:20pt; min-height:16pt;">
+                            <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
+                            <div style="font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:opt.text||''}</div>
                         </div>
-                        <div style="flex:1; font-size:11pt; line-height:1.45;">${opt.matchText||''}</div>
+                    </div>
+                    <div style="display:table-cell; width:50%; vertical-align:top;">
+                        <div style="position:relative; padding-left:20pt; min-height:16pt;">
+                            <div style="position:absolute; left:0; top:2pt; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt; box-sizing:border-box;"></div>
+                            <div style="font-size:11pt; line-height:1.45;">${opt.matchText||''}</div>
+                        </div>
                     </div>
                 </div>`;
             });
@@ -1148,6 +1151,7 @@ async function generatePDF(fromPreview = false){
     const rawTitle = document.getElementById('assessment-title').value.trim() || 'avaliacao';
     const filename = rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '.pdf';
 
+    // Se estiver a gerar pela tela inicial (fromPreview = false)
     if(!fromPreview) {
         showToast('Preparando documento...', 'info', 2000);
         await enterPreviewMode();
