@@ -70,8 +70,7 @@
         .q-options { margin-top: 4px; margin-left: 14px; }
         .q-opt { display: table; width: 100%; border-collapse: collapse; margin-bottom: 6px; page-break-inside: avoid; }
         .q-opt-letter { display: table-cell; white-space: nowrap; vertical-align: top; font-weight: 700; font-size: 14px; line-height: 1.5; padding-right: 4px; width: 1%; }
-        .q-opt-box-cell { display: table-cell; white-space: nowrap; vertical-align: top; padding-right: 5px; width: 1%; }
-        .q-checkbox { display: block; width: 13px; height: 13px; border: 1.5px solid #000; border-radius: 2px; margin-top: 3px; }
+        .q-opt-paren { display: table-cell; white-space: nowrap; vertical-align: top; padding-right: 6px; width: 1%; font-size: 14px; line-height: 1.5; letter-spacing: 1px; }
         .q-opt-text { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; }
         .q-vf-cell { display: table-cell; white-space: nowrap; vertical-align: top; padding-right: 8px; width: 1%; }
         .q-vf-wrap { display: inline-table; border-collapse: collapse; margin-top: 2px; }
@@ -165,9 +164,8 @@
             }
             /* Garantir que as classes de questão mantêm display:table em print */
             .q-row, .q-opt, .q-match-row { display: table !important; }
-            .q-row-num, .q-opt-letter, .q-opt-box-cell, .q-vf-cell,
+            .q-row-num, .q-opt-letter, .q-opt-paren, .q-vf-cell,
             .q-opt-text, .q-row-body, .q-match-left, .q-match-right { display: table-cell !important; }
-            .q-checkbox { display: block !important; }
         }
     </style>
 </head>
@@ -969,8 +967,6 @@ async function deleteAssessment(docId,idx){
 // BUILD HTML DA QUESTÃO — CLASSES UNIFICADAS (preview = print = PDF)
 // =============================================
 function buildQuestaoHTML(q, index) {
-    const CB = '<span class="q-checkbox"></span>'; // checkbox padronizado via CSS
-
     function optLetter(i) { return String.fromCharCode(97 + i) + ')'; }
 
     function enunciadoRow(num, html, extraClass='') {
@@ -1030,23 +1026,18 @@ function buildQuestaoHTML(q, index) {
                     : (opt.text || '');
 
                 if (q.type === 'multiple-choice') {
+                    // Parênteses ( ) no lugar do quadrado
                     h += `<div class="q-opt">
                         <span class="q-opt-letter">${optLetter(i)}</span>
-                        <span class="q-opt-box-cell">${CB}</span>
+                        <span class="q-opt-paren">(  )</span>
                         <span class="q-opt-text">${content}</span>
                     </div>`;
 
                 } else if (q.type === 'true-false') {
+                    // Um único ( ) para o aluno escrever V ou F
                     h += `<div class="q-opt">
                         <span class="q-opt-letter">${optLetter(i)}</span>
-                        <span class="q-vf-cell">
-                            <table class="q-vf-wrap"><tbody><tr>
-                                <td>V</td>
-                                <td>${CB}</td>
-                                <td style="padding-left:4px;">F</td>
-                                <td>${CB}</td>
-                            </tr></tbody></table>
-                        </span>
+                        <span class="q-opt-paren">(  )</span>
                         <span class="q-opt-text">${content}</span>
                     </div>`;
 
@@ -1080,7 +1071,7 @@ function buildQuestaoHTML(q, index) {
                     </div>
                     <div class="q-match-right">
                         <div class="q-opt" style="margin-bottom:0;">
-                            <span class="q-opt-box-cell">${CB}</span>
+                            <span class="q-opt-paren">(  )</span>
                             <span class="q-opt-text">${opt.matchText || ''}</span>
                         </div>
                     </div>
