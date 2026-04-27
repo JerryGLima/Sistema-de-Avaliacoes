@@ -62,19 +62,66 @@
         .a4-sheet *{ box-sizing: border-box; }
         .q-block{ page-break-inside: avoid; break-inside: avoid; margin-bottom: 22px; width: 100%; position: relative; z-index: 20; }
 
-        /* ESTILOS DE BORDAS DECORATIVAS PARA A PROVA */
+        /* ESTILOS DE BORDAS DECORATIVAS (Grade de Repetição Contínua) */
         .print-border {
             position: absolute;
             top: 10mm; left: 10mm; right: 10mm; bottom: 10mm;
-            pointer-events: none; /* Para não atrapalhar o clique/seleção */
+            pointer-events: none; 
             z-index: 10;
         }
-        /* SVG Dinâmico (Perfeito para impressão, não perde qualidade) */
-        .borda-stars   { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E") 30 round; }
-        .borda-flowers { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E") 30 round; }
-        .borda-leaves  { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E") 30 round; }
-        .borda-kids    { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E") 30 round; }
-        .borda-classic { border: 4px double #333; outline: 1px solid #333; outline-offset: 4px; }
+
+        .borda-classic {
+            border: 6px double #334155; 
+            border-radius: 4px;
+        }
+
+        .borda-stars {
+            background-image: 
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E");
+            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
+            background-position: top left, bottom left, top left, top right;
+            background-size: 26px 26px;
+            border: none;
+        }
+
+        .borda-flowers {
+            background-image: 
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E");
+            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
+            background-position: top left, bottom left, top left, top right;
+            background-size: 26px 26px;
+            border: none;
+        }
+
+        .borda-leaves {
+            background-image: 
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E");
+            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
+            background-position: top left, bottom left, top left, top right;
+            background-size: 26px 26px;
+            border: none;
+        }
+
+        .borda-kids {
+            background-image: 
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E");
+            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
+            background-position: top left, bottom left, top left, top right;
+            background-size: 26px 26px;
+            border: none;
+        }
 
         /* LAYOUT UNIFICADO DAS QUESTOES */
         .q-row { display: table; width: 100%; border-collapse: collapse; margin-bottom: 4px; }
@@ -1301,7 +1348,8 @@ async function createPaginatedDOM() {
     document.body.appendChild(measureWrapper);
 
     const mmDiv = document.createElement('div');
-    mmDiv.style.height = '262mm'; 
+    // 1. AJUSTE DA ALTURA SEGURA (Compensando as novas margens para a quebra de página)
+    mmDiv.style.height = '250mm'; 
     measureWrapper.appendChild(mmDiv);
     const safeHeightPx = mmDiv.getBoundingClientRect().height;
     measureWrapper.removeChild(mmDiv);
@@ -1312,7 +1360,9 @@ async function createPaginatedDOM() {
     function newSheet() {
         const sheet = document.createElement('div');
         sheet.className = 'a4-sheet';
-        sheet.style.padding = '15mm 15mm 20mm 15mm';
+        
+        // 2. AJUSTE DO ESPAÇAMENTO INTERNO (Afastando o texto das bordas)
+        sheet.style.padding = '22mm 22mm 25mm 22mm';
         
         // Aplica a borda decorativa (caso o usuário tenha selecionado)
         if(headerData.borda && headerData.borda !== 'none') {
@@ -1375,7 +1425,8 @@ async function createPaginatedDOM() {
     const totalPages = sheets.length;
     sheets.forEach((s, index) => {
         const footer = document.createElement('div');
-        footer.style.cssText = 'position: absolute; bottom: 15mm; right: 15mm; font-size: 9pt; font-weight: 700; color: #000; font-family: Arial, sans-serif; z-index: 30;';
+        // 3. AJUSTE DO NÚMERO DA PÁGINA (Para não ficar em cima da borda inferior direita)
+        footer.style.cssText = 'position: absolute; bottom: 22mm; right: 22mm; font-size: 9pt; font-weight: 700; color: #000; font-family: Arial, sans-serif; z-index: 30;';
         footer.textContent = `${index + 1} / ${totalPages}`;
         s.sheet.appendChild(footer);
         
