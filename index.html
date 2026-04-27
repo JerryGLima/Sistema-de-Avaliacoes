@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Avaliações</title>
+    <title>ProvaFácil AI - Sistema de Avaliações</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -63,7 +63,7 @@
         .a4-sheet *{ box-sizing: border-box; }
         .q-block{ page-break-inside: avoid; break-inside: avoid; margin-bottom: 22px; width: 100%; }
 
-        /* LAYOUT UNIFICADO DAS QUESTOES (preview = print = PDF) */
+        /* LAYOUT UNIFICADO DAS QUESTOES */
         .q-row { display: table; width: 100%; border-collapse: collapse; margin-bottom: 4px; }
         .q-row-num { display: table-cell; white-space: nowrap; vertical-align: top; font-weight: 700; font-size: 14px; line-height: 1.5; padding-right: 6px; }
         .q-row-body { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; }
@@ -83,15 +83,9 @@
         .q-wordbank { text-align: center; margin: 8px 0 12px 0; }
         .q-wordbank-inner { display: inline-block; border: 1.5px solid #888; border-radius: 12px; padding: 4px 18px; font-size: 14px; font-weight: 600; }
 
-        /* =========================================
-           MOBILE PREVIEW FIXES (ZOOM & PAN LIVRE)
-           ========================================= */
+        /* MOBILE PREVIEW FIXES */
         body { overflow-x: hidden; } 
-        
-        body.preview-mode { 
-            overflow: auto !important; 
-            background: #18181b; 
-        }
+        body.preview-mode { overflow: auto !important; background: #18181b; }
         .preview-mode #app-screen { display: none !important; }
         .preview-mode #print-view {
             display: block !important;
@@ -101,11 +95,7 @@
             z-index: 100;
             overflow: visible !important;
         }
-        #print-toolbar {
-            position: fixed; 
-            top: 20px; left: 0; right: 0;
-            z-index: 1000;
-        }
+        #print-toolbar { position: fixed; top: 20px; left: 0; right: 0; z-index: 1000; }
         #print-content {
             padding: 100px 20px 40px 20px;
             display: flex;
@@ -115,10 +105,7 @@
             min-width: max-content; 
         }
         @media (min-width: 850px) {
-            #print-content {
-                align-items: center; 
-                min-width: 100%;
-            }
+            #print-content { align-items: center; min-width: 100%; }
         }
 
         /* AJUSTE CROPPER NO MOBILE */
@@ -126,7 +113,7 @@
         .cropper-line { background-color: #3b82f6; opacity: 0.5; }
         .cropper-point { background-color: #3b82f6; }
 
-        /* PRINT — idêntico ao preview */
+        /* PRINT */
         @media print {
             @page { size: A4 portrait; margin: 0; }
             *, *::before, *::after {
@@ -158,11 +145,7 @@
                 break-after: page;
                 overflow: visible !important;
             }
-            .a4-sheet:last-child {
-                page-break-after: auto;
-                break-after: auto;
-            }
-            /* Garantir que as classes de questão mantêm display:table em print */
+            .a4-sheet:last-child { page-break-after: auto; break-after: auto; }
             .q-row, .q-opt, .q-match-row { display: table !important; }
             .q-row-num, .q-opt-letter, .q-opt-paren, .q-vf-cell,
             .q-opt-text, .q-row-body, .q-match-left, .q-match-right { display: table-cell !important; }
@@ -173,28 +156,90 @@
 
 <div id="toast-container"></div>
 
-<div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
-    <div class="w-full max-w-md bg-white rounded-[3rem] shadow-[0_30px_80px_rgba(0,0,0,0.08)] border border-slate-100 p-12 space-y-10">
-        <div class="text-center space-y-4">
-            <div class="w-20 h-20 bg-blue-600 rounded-[1.75rem] flex items-center justify-center shadow-2xl shadow-blue-200 mx-auto rotate-6">
-                <i data-lucide="file-text" class="text-white w-9 h-9 -rotate-6"></i>
+<!-- ==============================================
+     NOVA TELA DE LOGIN: SPLIT-SCREEN PROFISSIONAL
+     ============================================== -->
+<div id="login-screen" class="min-h-screen flex bg-white">
+    
+    <!-- Lado Esquerdo: Branding e Copy (Oculto no Celular, aparece no PC/Tablet grande) -->
+    <div class="hidden lg:flex w-1/2 bg-blue-600 relative overflow-hidden flex-col justify-center px-16 xl:px-24">
+        <!-- Elementos de Decoração Visual -->
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="absolute top-[-20%] left-[-10%] w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+        
+        <!-- Conteúdo Copywriting -->
+        <div class="relative z-10 text-white w-full max-w-xl">
+            <div class="w-20 h-20 bg-white/10 rounded-[1.75rem] flex items-center justify-center backdrop-blur-md mb-8 shadow-2xl border border-white/20">
+                <i data-lucide="file-check-2" class="text-white w-10 h-10"></i>
             </div>
-            <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Sistema de Avaliações</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel do Professor</p>
+            <h1 class="text-5xl xl:text-6xl font-black mb-6 leading-tight tracking-tight">
+                Crie provas perfeitas em <span class="text-blue-200">minutos</span>.
+            </h1>
+            <p class="text-blue-100 text-lg xl:text-xl mb-10 leading-relaxed font-medium">
+                O ProvaFácil AI é o sistema definitivo para professores. Diga adeus à formatação quebrada do Word e tenha avaliações com padrão profissional sempre.
+            </p>
+            
+            <ul class="space-y-5">
+                <li class="flex items-center gap-4 text-blue-50 text-base font-semibold">
+                    <div class="bg-blue-500 p-1.5 rounded-lg"><i data-lucide="check" class="w-5 h-5"></i></div>
+                    Paginação inteligente 100% precisa
+                </li>
+                <li class="flex items-center gap-4 text-blue-50 text-base font-semibold">
+                    <div class="bg-blue-500 p-1.5 rounded-lg"><i data-lucide="check" class="w-5 h-5"></i></div>
+                    Editor de imagens integrado (Cropper)
+                </li>
+                <li class="flex items-center gap-4 text-blue-50 text-base font-semibold">
+                    <div class="bg-blue-500 p-1.5 rounded-lg"><i data-lucide="check" class="w-5 h-5"></i></div>
+                    Salvo automaticamente na Nuvem
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Lado Direito: Formulário de Login -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-slate-50 relative">
+        <div class="w-full max-w-[420px] bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] border border-slate-100 p-10 sm:p-12 space-y-10 relative z-10">
+            <div class="text-center space-y-4">
+                <!-- Ícone mobile apenas -->
+                <div class="w-16 h-16 bg-blue-600 rounded-[1.25rem] flex lg:hidden items-center justify-center shadow-xl shadow-blue-200 mx-auto mb-4 rotate-3">
+                    <i data-lucide="file-text" class="text-white w-8 h-8 -rotate-3"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Acessar Sistema</h2>
+                    <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel de Controle</p>
+                </div>
+            </div>
+            
+            <form id="login-form" class="space-y-5">
+                <div id="auth-error" class="hidden bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100"></div>
+                
+                <div class="relative group">
+                    <i data-lucide="mail" class="absolute left-5 top-5 w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors"></i>
+                    <input type="email" id="login-email" required class="w-full pl-14 pr-6 py-5 bg-slate-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-50 font-medium text-slate-700 placeholder:text-slate-400 transition-all" placeholder="Seu e-mail">
+                </div>
+                
+                <div class="relative group">
+                    <i data-lucide="lock" class="absolute left-5 top-5 w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors"></i>
+                    <input type="password" id="login-password" required class="w-full pl-14 pr-6 py-5 bg-slate-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-50 font-medium text-slate-700 placeholder:text-slate-400 transition-all" placeholder="Sua senha">
+                </div>
+                
+                <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-200 btn-active flex items-center justify-center gap-3 transition-all duration-300 mt-2">
+                    <span>Entrar na Plataforma</span>
+                    <div id="login-spinner" class="hidden w-5 h-5 border-4 border-t-transparent border-white loader"></div>
+                </button>
+            </form>
+            
+            <div class="text-center pt-2">
+                <p class="text-xs text-slate-400 font-medium">Uso exclusivo para assinantes.</p>
             </div>
         </div>
-        <form id="login-form" class="space-y-5">
-            <div id="auth-error" class="hidden bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100"></div>
-            <div class="relative"><i data-lucide="mail" class="absolute left-5 top-5 w-5 h-5 text-slate-300"></i><input type="email" id="login-email" required class="w-full pl-14 pr-6 py-5 bg-slate-50 border-0 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 font-medium text-slate-700 placeholder:text-slate-300" placeholder="E-mail"></div>
-            <div class="relative"><i data-lucide="lock" class="absolute left-5 top-5 w-5 h-5 text-slate-300"></i><input type="password" id="login-password" required class="w-full pl-14 pr-6 py-5 bg-slate-50 border-0 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 font-medium text-slate-700 placeholder:text-slate-300" placeholder="Senha"></div>
-            <button type="submit" class="w-full py-5 bg-slate-950 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 btn-active flex items-center justify-center gap-3">
-                <span>Entrar</span><div id="login-spinner" class="hidden w-5 h-5 border-4 border-t-transparent border-white loader"></div>
-            </button>
-        </form>
     </div>
 </div>
 
+<!-- ==============================================
+     SISTEMA PRINCIPAL
+     ============================================== -->
 <div id="app-screen" class="hidden min-h-screen">
     <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 h-20 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto h-full px-4 flex justify-between items-center gap-2">
@@ -255,6 +300,9 @@
     </div>
 </div>
 
+<!-- ==============================================
+     MODAIS E COMPONENTES OCULTOS
+     ============================================== -->
 <div id="print-view" class="hidden bg-zinc-900">
     <div id="print-toolbar" class="flex justify-center gap-3 px-4 flex-wrap">
         <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
@@ -303,6 +351,9 @@
 </div>
 
 <script>
+// Inicializa ícones na carga inicial
+lucide.createIcons();
+
 // =============================================
 // FIREBASE
 // =============================================
@@ -964,7 +1015,7 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO — CLASSES UNIFICADAS (preview = print = PDF)
+// BUILD HTML DA QUESTÃO — CLASSES UNIFICADAS
 // =============================================
 function buildQuestaoHTML(q, index) {
     function optLetter(i) { return String.fromCharCode(97 + i) + ')'; }
@@ -1026,7 +1077,6 @@ function buildQuestaoHTML(q, index) {
                     : (opt.text || '');
 
                 if (q.type === 'multiple-choice') {
-                    // Parênteses ( ) no lugar do quadrado
                     h += `<div class="q-opt">
                         <span class="q-opt-letter">${optLetter(i)}</span>
                         <span class="q-opt-paren">(  )</span>
@@ -1034,7 +1084,6 @@ function buildQuestaoHTML(q, index) {
                     </div>`;
 
                 } else if (q.type === 'true-false') {
-                    // Um único ( ) para o aluno escrever V ou F
                     h += `<div class="q-opt">
                         <span class="q-opt-letter">${optLetter(i)}</span>
                         <span class="q-opt-paren">(  )</span>
@@ -1042,7 +1091,6 @@ function buildQuestaoHTML(q, index) {
                     </div>`;
 
                 } else {
-                    // Tópicos / discursiva-list
                     h += `<div class="q-opt">
                         <span class="q-opt-letter">${optLetter(i)}</span>
                         <span class="q-opt-text">${content}</span>
@@ -1111,7 +1159,7 @@ async function createPaginatedDOM() {
     document.body.appendChild(measureWrapper);
 
     const mmDiv = document.createElement('div');
-    mmDiv.style.height = '262mm'; // margem segura: 297 - 15*2 padding - 5 footer
+    mmDiv.style.height = '262mm'; 
     measureWrapper.appendChild(mmDiv);
     const safeHeightPx = mmDiv.getBoundingClientRect().height;
     measureWrapper.removeChild(mmDiv);
@@ -1208,8 +1256,7 @@ function exitPreviewMode(){
 }
 
 // =============================================
-// GERAR PDF — usa window.print() via diálogo do navegador
-// Motor nativo = alinhamento 100% idêntico ao preview
+// GERAR PDF E IMPRESSÃO
 // =============================================
 async function generatePDF(fromPreview = false) {
     captureEditorContents();
@@ -1223,9 +1270,6 @@ async function generatePDF(fromPreview = false) {
     window.print();
 }
 
-// =============================================
-// IMPRIMIR DIRETO DO NAVEGADOR
-// =============================================
 async function printDirect() {
     captureEditorContents();
     await enterPreviewMode();
