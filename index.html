@@ -653,7 +653,11 @@ async function generateQuestionAI() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: promptText }] }],
-                generationConfig: { temperature: 0.7, topK: 40 }
+                generationConfig: { 
+                    temperature: 0.7, 
+                    topK: 40,
+                    responseMimeType: "application/json" // <- ISSO OBRIGA A IA A NÃO ERRAR O FORMATO
+                }
             })
         });
 
