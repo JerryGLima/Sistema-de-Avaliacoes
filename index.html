@@ -45,14 +45,14 @@
         .fmt-btn:hover{background:#e2e8f0;color:#0f172a}
         .fmt-sep{width:1px;height:20px;background:#e2e8f0;margin:0 3px;flex-shrink:0}
 
-        /* A4 SHEET RIGIDA */
+        /* A4 SHEET */
         .a4-sheet{
             width: 210mm;
             height: 297mm;
             background: white;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11pt;
-            line-height: 1.45;
+            font-size: 14px;
+            line-height: 1.5;
             color: #000;
             box-sizing: border-box;
             box-shadow: 0 10px 40px rgba(0,0,0,.35);
@@ -60,8 +60,29 @@
             overflow: hidden;
             margin-bottom: 20px;
         }
-        .a4-sheet *{box-sizing:border-box}
-        .q-block{page-break-inside:avoid;break-inside:avoid}
+        .a4-sheet *{ box-sizing: border-box; }
+        .q-block{ page-break-inside: avoid; break-inside: avoid; margin-bottom: 22px; width: 100%; }
+
+        /* LAYOUT UNIFICADO DAS QUESTOES (preview = print = PDF) */
+        .q-row { display: table; width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+        .q-row-num { display: table-cell; white-space: nowrap; vertical-align: top; font-weight: 700; font-size: 14px; line-height: 1.5; padding-right: 6px; }
+        .q-row-body { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; }
+        .q-options { margin-top: 4px; margin-left: 14px; }
+        .q-opt { display: table; width: 100%; border-collapse: collapse; margin-bottom: 6px; page-break-inside: avoid; }
+        .q-opt-letter { display: table-cell; white-space: nowrap; vertical-align: top; font-weight: 700; font-size: 14px; line-height: 1.5; padding-right: 4px; width: 1%; }
+        .q-opt-box-cell { display: table-cell; white-space: nowrap; vertical-align: top; padding-right: 5px; width: 1%; }
+        .q-checkbox { display: block; width: 13px; height: 13px; border: 1.5px solid #000; border-radius: 2px; margin-top: 3px; }
+        .q-opt-text { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; }
+        .q-vf-cell { display: table-cell; white-space: nowrap; vertical-align: top; padding-right: 8px; width: 1%; }
+        .q-vf-wrap { display: inline-table; border-collapse: collapse; margin-top: 2px; }
+        .q-vf-wrap td { vertical-align: middle; padding: 0 2px; font-size: 11px; font-weight: 700; line-height: 1; }
+        .q-apoio { background: #f2f2f2; border-left: 3px solid #444; padding: 4px 8px; margin-bottom: 5px; font-size: 13px; font-style: italic; }
+        .q-line { border-bottom: 1px solid #999; height: 22px; width: 100%; display: block; }
+        .q-match-row { display: table; width: 100%; border-collapse: collapse; margin-bottom: 8px; page-break-inside: avoid; }
+        .q-match-left { display: table-cell; width: 50%; vertical-align: top; padding-right: 10px; }
+        .q-match-right { display: table-cell; width: 50%; vertical-align: top; }
+        .q-wordbank { text-align: center; margin: 8px 0 12px 0; }
+        .q-wordbank-inner { display: inline-block; border: 1.5px solid #888; border-radius: 12px; padding: 4px 18px; font-size: 14px; font-weight: 600; }
 
         /* =========================================
            MOBILE PREVIEW FIXES (ZOOM & PAN LIVRE)
@@ -106,21 +127,47 @@
         .cropper-line { background-color: #3b82f6; opacity: 0.5; }
         .cropper-point { background-color: #3b82f6; }
 
-        /* PRINT */
-        @media print{
+        /* PRINT — idêntico ao preview */
+        @media print {
             @page { size: A4 portrait; margin: 0; }
-            *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-            body,html{margin:0;padding:0;background:white}
-            #app-screen,#login-screen,#print-toolbar,#toast-container,#color-picker-popup{display:none!important}
-            #print-view{display:block!important;position:static!important;background:white!important;overflow:visible!important;padding:0!important}
-            #print-content{padding:0!important;margin:0!important;display:block!important}
-            
-            .a4-sheet{
-                box-shadow:none!important;
-                margin:0!important;
-                page-break-after: always;
+            *, *::before, *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                box-sizing: border-box !important;
             }
-            .a4-sheet:last-child { page-break-after: auto; }
+            html, body { margin: 0; padding: 0; background: white; }
+            #app-screen, #login-screen, #print-toolbar,
+            #toast-container, #color-picker-popup { display: none !important; }
+            #print-view {
+                display: block !important;
+                position: static !important;
+                background: white !important;
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+            #print-content {
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                align-items: unset !important;
+                min-width: unset !important;
+            }
+            .a4-sheet {
+                box-shadow: none !important;
+                margin: 0 !important;
+                page-break-after: always;
+                break-after: page;
+                overflow: visible !important;
+            }
+            .a4-sheet:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+            /* Garantir que as classes de questão mantêm display:table em print */
+            .q-row, .q-opt, .q-match-row { display: table !important; }
+            .q-row-num, .q-opt-letter, .q-opt-box-cell, .q-vf-cell,
+            .q-opt-text, .q-row-body, .q-match-left, .q-match-right { display: table-cell !important; }
+            .q-checkbox { display: block !important; }
         }
     </style>
 </head>
@@ -213,6 +260,7 @@
 <div id="print-view" class="hidden bg-zinc-900">
     <div id="print-toolbar" class="flex justify-center gap-3 px-4 flex-wrap">
         <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
+        <button onclick="window.print()" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Salvar PDF</button>
         <button onclick="window.print()" class="bg-violet-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-violet-700 btn-active flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
     </div>
     <div id="print-content"></div>
@@ -918,107 +966,131 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO (ALINHAMENTO BLINDADO ABSOLUTO)
+// BUILD HTML DA QUESTÃO — CLASSES UNIFICADAS (preview = print = PDF)
 // =============================================
-function buildQuestaoHTML(q,index){
-    let h=`<div class="q-block" style="margin-bottom:28pt;page-break-inside:avoid;break-inside:avoid;width:100%;">`;
-    
-    // BLOCO EXCLUSIVO DA NOVA QUESTÃO: COMPLETAR LACUNAS
-    if(q.type === 'fill-in-the-blanks') {
-        h+=`<div style="display:flex;gap:5pt;margin-bottom:8pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;line-height:1.45;">${q.enunciado||'...'}</div></div>`;
-        
-        const hasValidImg = q.imagem && q.imagem.length > 30;
-        if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
-        
-        if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
-            h+=`<div style="text-align:center; margin:10pt 0 15pt 0;"><div style="display:inline-block; border:1.5pt solid #888; border-radius:15pt; padding:6pt 20pt; font-size:11pt; font-weight:600;">${q.textoApoio}</div></div>`;
-        }
-        
+function buildQuestaoHTML(q, index) {
+    const CB = '<span class="q-checkbox"></span>'; // checkbox padronizado via CSS
+
+    function optLetter(i) { return String.fromCharCode(97 + i) + ')'; }
+
+    function enunciadoRow(num, html, extraClass='') {
+        return `<div class="q-row${extraClass ? ' '+extraClass : ''}"><span class="q-row-num">${num}.</span><span class="q-row-body">${html}</span></div>`;
+    }
+
+    let h = `<div class="q-block">`;
+
+    // ── COMPLETAR LACUNAS ──────────────────────────────────────
+    if (q.type === 'fill-in-the-blanks') {
+        h += enunciadoRow(index + 1, q.enunciado || '...');
+
+        if (q.imagem && q.imagem.length > 30)
+            h += `<div style="text-align:center;margin:6px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
+
+        if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim())
+            h += `<div class="q-wordbank"><div class="q-wordbank-inner">${q.textoApoio}</div></div>`;
+
         if (q.opcoes && q.opcoes.length === 1) {
-            const lacunasText = q.opcoes[0].text;
-            if(lacunasText && lacunasText.replace(/<[^>]*>/g,'').trim()) {
-                 h+=`<div style="line-height:2; font-size:11pt; text-align:justify; margin-top:5pt;">${lacunasText}</div>`;
-            }
+            const t = q.opcoes[0].text;
+            if (t && t.replace(/<[^>]*>/g, '').trim())
+                h += `<div style="font-size:14px;line-height:2;text-align:justify;margin-top:4px;">${t}</div>`;
         } else if (q.opcoes && q.opcoes.length > 1) {
-            h += `<div style="margin-top:5pt;">`;
+            h += `<div class="q-options">`;
             q.opcoes.forEach((opt, i) => {
-                const l = String.fromCharCode(97+i); 
-                if(opt.text && opt.text.replace(/<[^>]*>/g,'').trim()) {
-                    h += `<div style="position:relative; padding-left:20pt; margin-bottom:8pt; page-break-inside:avoid; min-height:16pt;">
-                            <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
-                            <div style="font-size:11pt; line-height:2; text-align:justify;">${opt.text}</div>
-                          </div>`;
+                if (opt.text && opt.text.replace(/<[^>]*>/g, '').trim())
+                    h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text" style="line-height:2;text-align:justify;">${opt.text}</span></div>`;
+            });
+            h += `</div>`;
+        }
+
+    // ── OUTROS TIPOS ───────────────────────────────────────────
+    } else {
+        if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim())
+            h += `<div class="q-apoio">${q.textoApoio}</div>`;
+
+        h += enunciadoRow(index + 1, q.enunciado || '...');
+
+        if (q.imagem && q.imagem.length > 30)
+            h += `<div style="text-align:center;margin:5px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
+
+        // ── Escrita livre ──
+        if (q.type === 'text') {
+            const n = Math.max(1, parseInt(q.linhas) || 4);
+            h += `<div style="margin-top:4px;">`;
+            for (let i = 0; i < n; i++) h += `<span class="q-line"></span>`;
+            h += `</div>`;
+        }
+
+        // ── Múltipla escolha, V/F, Tópicos ──
+        if (['multiple-choice', 'true-false', 'discursive-list'].includes(q.type)) {
+            h += `<div class="q-options">`;
+            q.opcoes.forEach((opt, i) => {
+                const img = opt.type === 'image' && opt.image && opt.image.length > 30;
+                const content = img
+                    ? `<img src="${opt.image}" style="max-height:50px;width:auto;object-fit:contain;display:block;" crossorigin="anonymous">`
+                    : (opt.text || '');
+
+                if (q.type === 'multiple-choice') {
+                    h += `<div class="q-opt">
+                        <span class="q-opt-letter">${optLetter(i)}</span>
+                        <span class="q-opt-box-cell">${CB}</span>
+                        <span class="q-opt-text">${content}</span>
+                    </div>`;
+
+                } else if (q.type === 'true-false') {
+                    h += `<div class="q-opt">
+                        <span class="q-opt-letter">${optLetter(i)}</span>
+                        <span class="q-vf-cell">
+                            <table class="q-vf-wrap"><tbody><tr>
+                                <td>V</td>
+                                <td>${CB}</td>
+                                <td style="padding-left:4px;">F</td>
+                                <td>${CB}</td>
+                            </tr></tbody></table>
+                        </span>
+                        <span class="q-opt-text">${content}</span>
+                    </div>`;
+
+                } else {
+                    // Tópicos / discursiva-list
+                    h += `<div class="q-opt">
+                        <span class="q-opt-letter">${optLetter(i)}</span>
+                        <span class="q-opt-text">${content}</span>
+                    </div>
+                    <span class="q-line"></span>`;
                 }
             });
             h += `</div>`;
         }
-    } 
-    // BLOCO DAS OUTRAS QUESTÕES
-    else {
-        if(q.textoApoio&&q.textoApoio.replace(/<[^>]*>/g,'').trim()){
-            h+=`<div style="background:#f2f2f2;border-left:3pt solid #444;padding:5pt 8pt;margin-bottom:5pt;font-size:10pt;font-style:italic;">${q.textoApoio}</div>`;
-        }
-        h+=`<div style="display:flex;gap:5pt;margin-bottom:3pt;align-items:flex-start;"><strong style="white-space:nowrap;font-size:11pt;min-width:16pt;">${index+1}.</strong><div style="flex:1;font-weight:600;">${q.enunciado||'...'}</div></div>`;
-        
-        const hasValidImg = q.imagem && q.imagem.length > 30;
-        if(hasValidImg)h+=`<div style="text-align:center;margin:5pt 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
-        
-        if(q.type==='text'){
-            const n=Math.max(1,parseInt(q.linhas)||4);
-            h+=`<div style="margin-top:4pt;">`;
-            for(let i=0;i<n;i++)h+=`<div style="border-bottom:0.8pt solid #999;height:20pt;width:100%;"></div>`;
-            h+=`</div>`;
-        }
-        if(['multiple-choice','true-false','discursive-list'].includes(q.type)){
-            h+=`<div style="margin-top:3pt;margin-left:12pt;">`;
-            q.opcoes.forEach((opt,i)=>{
-                const l=String.fromCharCode(97+i);
-                const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
-                
-                if(q.type === 'multiple-choice' || q.type === 'true-false') {
-                    // Estrutura blindada para o PDF: Posicionamento absoluto garante o alinhamento da caixa com a primeira linha do texto
-                    h+=`<div style="position:relative; padding-left:36pt; margin-bottom:6pt; page-break-inside:avoid; min-height:16pt;">
-                        <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
-                        <div style="position:absolute; left:19pt; top:2pt; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt; box-sizing:border-box;"></div>
-                        <div style="font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
-                    </div>`;
-                } else {
-                    // Discursiva
-                    h+=`<div style="position:relative; padding-left:20pt; margin-bottom:2pt; page-break-inside:avoid; min-height:16pt;">
-                        <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
-                        <div style="font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:50pt;width:auto;object-fit:contain;" crossorigin="anonymous">`:opt.text||''}</div>
-                    </div>
-                    <div style="border-bottom:0.5pt solid #ccc;height:16pt;width:100%;margin-bottom:3pt;"></div>`;
-                }
-            });
-            h+=`</div>`;
-        }
-        if(q.type==='matching'){
-            h+=`<div style="margin-top:5pt;margin-left:12pt;">`;
-            q.opcoes.forEach((opt,i)=>{
-                const l=String.fromCharCode(97+i);
-                const optImgValid = opt.type==='image' && opt.image && opt.image.length > 30;
 
-                h+=`<div style="display:table; width:100%; margin-bottom:8pt; page-break-inside:avoid;">
-                    <div style="display:table-cell; width:50%; vertical-align:top; padding-right:10pt;">
-                        <div style="position:relative; padding-left:20pt; min-height:16pt;">
-                            <div style="position:absolute; left:0; top:0; width:14pt; text-align:right; font-weight:700; font-size:11pt; line-height:1.45;">${l})</div>
-                            <div style="font-size:11pt; line-height:1.45;">${optImgValid?`<img src="${opt.image}" style="max-height:40pt;width:auto;border:0.5pt solid #ccc;" crossorigin="anonymous">`:opt.text||''}</div>
+        // ── Ligar colunas ──
+        if (q.type === 'matching') {
+            h += `<div class="q-options">`;
+            q.opcoes.forEach((opt, i) => {
+                const img = opt.type === 'image' && opt.image && opt.image.length > 30;
+                const leftContent = img
+                    ? `<img src="${opt.image}" style="max-height:40px;width:auto;border:0.5px solid #ccc;display:block;" crossorigin="anonymous">`
+                    : (opt.text || '');
+
+                h += `<div class="q-match-row">
+                    <div class="q-match-left">
+                        <div class="q-opt" style="margin-bottom:0;">
+                            <span class="q-opt-letter">${optLetter(i)}</span>
+                            <span class="q-opt-text">${leftContent}</span>
                         </div>
                     </div>
-                    <div style="display:table-cell; width:50%; vertical-align:top;">
-                        <div style="position:relative; padding-left:20pt; min-height:16pt;">
-                            <div style="position:absolute; left:0; top:2pt; width:12pt; height:12pt; border:1.2pt solid #000; border-radius:2.5pt; box-sizing:border-box;"></div>
-                            <div style="font-size:11pt; line-height:1.45;">${opt.matchText||''}</div>
+                    <div class="q-match-right">
+                        <div class="q-opt" style="margin-bottom:0;">
+                            <span class="q-opt-box-cell">${CB}</span>
+                            <span class="q-opt-text">${opt.matchText || ''}</span>
                         </div>
                     </div>
                 </div>`;
             });
-            h+=`</div>`;
+            h += `</div>`;
         }
     }
-    
-    h+=`</div>`;
+
+    h += `</div>`;
     return h;
 }
 
@@ -1048,9 +1120,9 @@ async function createPaginatedDOM() {
     document.body.appendChild(measureWrapper);
 
     const mmDiv = document.createElement('div');
-    mmDiv.style.height = '267mm'; 
+    mmDiv.style.height = '262mm'; // margem segura: 297 - 15*2 padding - 5 footer
     measureWrapper.appendChild(mmDiv);
-    const safeHeightPx = mmDiv.getBoundingClientRect().height - 5; 
+    const safeHeightPx = mmDiv.getBoundingClientRect().height;
     measureWrapper.removeChild(mmDiv);
 
     let sheets = [];
@@ -1059,7 +1131,7 @@ async function createPaginatedDOM() {
     function newSheet() {
         const sheet = document.createElement('div');
         sheet.className = 'a4-sheet';
-        sheet.style.padding = '15mm';
+        sheet.style.padding = '15mm 15mm 20mm 15mm';
         
         const content = document.createElement('div');
         content.style.width = '100%';
@@ -1145,69 +1217,29 @@ function exitPreviewMode(){
 }
 
 // =============================================
-// GERAR PDF (Via Preview)
+// GERAR PDF — usa window.print() via diálogo do navegador
+// Motor nativo = alinhamento 100% idêntico ao preview
 // =============================================
-async function generatePDF(fromPreview = false){
-    const rawTitle = document.getElementById('assessment-title').value.trim() || 'avaliacao';
-    const filename = rawTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '.pdf';
-
-    // Se estiver a gerar pela tela inicial (fromPreview = false)
-    if(!fromPreview) {
+async function generatePDF(fromPreview = false) {
+    captureEditorContents();
+    if (!fromPreview) {
         showToast('Preparando documento...', 'info', 2000);
         await enterPreviewMode();
-        // PAUSA ESTRATÉGICA: Dá tempo ao navegador de desenhar a tela antes do snapshot
-        await new Promise(r => setTimeout(r, 800)); 
+        await new Promise(r => setTimeout(r, 600));
     }
-
-    showToast('A gerar PDF da prova...','info',10000);
-    const pages = document.getElementById('print-content').querySelectorAll('.a4-sheet');
-
-    try {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfW = pdf.internal.pageSize.getWidth();
-        const pdfH = pdf.internal.pageSize.getHeight();
-
-        for(let i=0; i<pages.length; i++){
-            if(i > 0) pdf.addPage();
-            
-            const originalShadow = pages[i].style.boxShadow;
-            pages[i].style.boxShadow = 'none';
-            
-            const canvas = await html2canvas(pages[i], {
-                scale: 2, 
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                backgroundColor: '#ffffff'
-            });
-            
-            pages[i].style.boxShadow = originalShadow; 
-            
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
-        }
-
-        pdf.save(filename);
-        showToast('✓ PDF gerado com paginação perfeita!','success');
-        
-        if(!fromPreview) exitPreviewMode();
-
-    } catch(e) {
-        console.error("Erro na geração de PDF:", e);
-        showToast('Erro ao gerar PDF. Verifique a sua conexão.','error');
-        if(!fromPreview) exitPreviewMode();
-    }
+    showToast('Abrindo diálogo de impressão — escolha "Salvar como PDF"', 'info', 5000);
+    await new Promise(r => setTimeout(r, 400));
+    window.print();
 }
 
 // =============================================
 // IMPRIMIR DIRETO DO NAVEGADOR
 // =============================================
-async function printDirect(){
+async function printDirect() {
+    captureEditorContents();
     await enterPreviewMode();
-    setTimeout(()=>{
-        window.print();
-    }, 800);
+    await new Promise(r => setTimeout(r, 600));
+    window.print();
 }
 
 // =============================================
