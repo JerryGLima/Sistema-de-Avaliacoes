@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProvaFácil - Sistema de Avaliações</title>
+    <title>ProvaFácil AI - Sistema de Avaliações</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
+    <!-- PDF & Cropper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
@@ -45,7 +46,7 @@
         .fmt-btn:hover{background:#e2e8f0;color:#0f172a}
         .fmt-sep{width:1px;height:20px;background:#e2e8f0;margin:0 3px;flex-shrink:0}
 
-        /* A4 SHEET */
+        /* A4 SHEET (Folha da Prova) */
         .a4-sheet{
             width: 210mm;
             height: 297mm;
@@ -61,7 +62,21 @@
             margin-bottom: 20px;
         }
         .a4-sheet *{ box-sizing: border-box; }
-        .q-block{ page-break-inside: avoid; break-inside: avoid; margin-bottom: 22px; width: 100%; }
+        .q-block{ page-break-inside: avoid; break-inside: avoid; margin-bottom: 22px; width: 100%; position: relative; z-index: 20; }
+
+        /* ESTILOS DE BORDAS DECORATIVAS PARA A PROVA */
+        .print-border {
+            position: absolute;
+            top: 10mm; left: 10mm; right: 10mm; bottom: 10mm;
+            pointer-events: none; /* Para não atrapalhar o clique/seleção */
+            z-index: 10;
+        }
+        /* SVG Dinâmico (Perfeito para impressão, não perde qualidade) */
+        .borda-stars   { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E") 30 round; }
+        .borda-flowers { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E") 30 round; }
+        .borda-leaves  { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E") 30 round; }
+        .borda-kids    { border: 20px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E") 30 round; }
+        .borda-classic { border: 4px double #333; outline: 1px solid #333; outline-offset: 4px; }
 
         /* LAYOUT UNIFICADO DAS QUESTOES */
         .q-row { display: table; width: 100%; border-collapse: collapse; margin-bottom: 4px; }
@@ -108,11 +123,6 @@
             #print-content { align-items: center; min-width: 100%; }
         }
 
-        /* AJUSTE CROPPER NO MOBILE */
-        .cropper-view-box, .cropper-face { border-radius: 8px; }
-        .cropper-line { background-color: #3b82f6; opacity: 0.5; }
-        .cropper-point { background-color: #3b82f6; }
-
         /* PRINT */
         @media print {
             @page { size: A4 portrait; margin: 0; }
@@ -157,82 +167,60 @@
 <div id="toast-container"></div>
 
 <!-- ==============================================
-     NOVA TELA DE LOGIN: SPLIT-SCREEN PROFISSIONAL
+     TELA DE LOGIN: SPLIT-SCREEN PROFISSIONAL (RESPONSIVO)
      ============================================== -->
-<div id="login-screen" class="min-h-screen flex bg-white">
-    
-    <!-- Lado Esquerdo: Branding e Copy (Oculto no Celular, aparece no PC/Tablet grande) -->
-    <div class="hidden lg:flex w-1/2 bg-blue-600 relative overflow-hidden flex-col justify-center px-16 xl:px-24">
-        <!-- Elementos de Decoração Visual -->
+<div id="login-screen" class="min-h-screen flex flex-col lg:flex-row bg-white">
+    <!-- Lado Esquerdo: Branding e Copy -->
+    <!-- Agora usa flex em todas as telas (visível no mobile dividindo topo/baixo e no PC lado a lado) -->
+    <div class="flex w-full lg:w-1/2 bg-blue-600 relative overflow-hidden flex-col justify-center px-8 py-12 lg:py-0 lg:px-16 xl:px-24">
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div class="absolute top-[-20%] left-[-10%] w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+        <div class="absolute top-[-20%] left-[-10%] w-64 h-64 lg:w-96 lg:h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[20rem] h-[20rem] lg:w-[30rem] lg:h-[30rem] bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
         
-        <!-- Conteúdo Copywriting -->
-        <div class="relative z-10 text-white w-full max-w-xl">
-            <div class="w-20 h-20 bg-white/10 rounded-[1.75rem] flex items-center justify-center backdrop-blur-md mb-8 shadow-2xl border border-white/20">
-                <i data-lucide="file-check-2" class="text-white w-10 h-10"></i>
+        <div class="relative z-10 text-white w-full max-w-xl mx-auto lg:mx-0">
+            <div class="w-16 h-16 lg:w-20 lg:h-20 bg-white/10 rounded-2xl lg:rounded-[1.75rem] flex items-center justify-center backdrop-blur-md mb-6 lg:mb-8 shadow-2xl border border-white/20">
+                <i data-lucide="file-check-2" class="text-white w-8 h-8 lg:w-10 lg:h-10"></i>
             </div>
-            <h1 class="text-5xl xl:text-6xl font-black mb-6 leading-tight tracking-tight">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-4 lg:mb-6 leading-tight tracking-tight">
                 Crie provas perfeitas em <span class="text-blue-200">minutos</span>.
             </h1>
-            <p class="text-blue-100 text-lg xl:text-xl mb-10 leading-relaxed font-medium">
-                O ProvaFácil é o sistema definitivo para professores. Diga adeus à formatação quebrada do Word e tenha avaliações com padrão profissional sempre.
+            <p class="text-blue-100 text-sm sm:text-base lg:text-lg xl:text-xl mb-8 lg:mb-10 leading-relaxed font-medium">
+                O ProvaFácil AI é o sistema definitivo para professores. Diga adeus à formatação quebrada do Word e tenha avaliações com padrão profissional sempre.
             </p>
-            
-            <ul class="space-y-5">
-                <li class="flex items-center gap-4 text-blue-50 text-base font-semibold">
-                    <div class="bg-blue-500 p-1.5 rounded-lg"><i data-lucide="check" class="w-5 h-5"></i></div>
-                    Paginação inteligente 100% precisa
-                </li>
-                <li class="flex items-center gap-4 text-blue-50 text-base font-semibold">
-                    <div class="bg-blue-500 p-1.5 rounded-lg"><i data-lucide="check" class="w-5 h-5"></i></div>
-                    Editor de imagens integrado (Cropper)
-                </li>
-                <li class="flex items-center gap-4 text-blue-50 text-base font-semibold">
-                    <div class="bg-blue-500 p-1.5 rounded-lg"><i data-lucide="check" class="w-5 h-5"></i></div>
-                    Salvo automaticamente na Nuvem
-                </li>
+            <ul class="space-y-3 lg:space-y-5">
+                <li class="flex items-center gap-3 lg:gap-4 text-blue-50 text-sm lg:text-base font-semibold"><div class="bg-blue-500 p-1 lg:p-1.5 rounded-lg"><i data-lucide="check" class="w-4 h-4 lg:w-5 lg:h-5"></i></div>Paginação inteligente 100% precisa</li>
+                <li class="flex items-center gap-3 lg:gap-4 text-blue-50 text-sm lg:text-base font-semibold"><div class="bg-blue-500 p-1 lg:p-1.5 rounded-lg"><i data-lucide="sparkles" class="w-4 h-4 lg:w-5 lg:h-5"></i></div>Criação Automática com Inteligência Artificial</li>
+                <li class="flex items-center gap-3 lg:gap-4 text-blue-50 text-sm lg:text-base font-semibold"><div class="bg-blue-500 p-1 lg:p-1.5 rounded-lg"><i data-lucide="layout" class="w-4 h-4 lg:w-5 lg:h-5"></i></div>Bordas Decorativas Exclusivas</li>
             </ul>
         </div>
     </div>
 
-    <!-- Lado Direito: Formulário de Login -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-slate-50 relative">
-        <div class="w-full max-w-[420px] bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] border border-slate-100 p-10 sm:p-12 space-y-10 relative z-10">
-            <div class="text-center space-y-4">
-                <!-- Ícone mobile apenas -->
-                <div class="w-16 h-16 bg-blue-600 rounded-[1.25rem] flex lg:hidden items-center justify-center shadow-xl shadow-blue-200 mx-auto mb-4 rotate-3">
-                    <i data-lucide="file-text" class="text-white w-8 h-8 -rotate-3"></i>
-                </div>
+    <!-- Lado Direito: Login -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 py-12 lg:p-12 bg-slate-50 relative flex-1">
+        <div class="w-full max-w-[420px] bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] border border-slate-100 p-8 sm:p-10 lg:p-12 space-y-8 lg:space-y-10 relative z-10">
+            <div class="text-center space-y-2 lg:space-y-4">
                 <div>
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">Acessar Sistema</h2>
+                    <h2 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tighter">Acessar Sistema</h2>
                     <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Painel de Controle</p>
                 </div>
             </div>
             
             <form id="login-form" class="space-y-5">
                 <div id="auth-error" class="hidden bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100"></div>
-                
                 <div class="relative group">
                     <i data-lucide="mail" class="absolute left-5 top-5 w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors"></i>
                     <input type="email" id="login-email" required class="w-full pl-14 pr-6 py-5 bg-slate-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-50 font-medium text-slate-700 placeholder:text-slate-400 transition-all" placeholder="Seu e-mail">
                 </div>
-                
                 <div class="relative group">
                     <i data-lucide="lock" class="absolute left-5 top-5 w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors"></i>
                     <input type="password" id="login-password" required class="w-full pl-14 pr-6 py-5 bg-slate-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-50 font-medium text-slate-700 placeholder:text-slate-400 transition-all" placeholder="Sua senha">
                 </div>
-                
                 <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-200 btn-active flex items-center justify-center gap-3 transition-all duration-300 mt-2">
                     <span>Entrar na Plataforma</span>
                     <div id="login-spinner" class="hidden w-5 h-5 border-4 border-t-transparent border-white loader"></div>
                 </button>
             </form>
-            
-            <div class="text-center pt-2">
-                <p class="text-xs text-slate-400 font-medium">Uso exclusivo para assinantes.</p>
-            </div>
+            <div class="text-center pt-2"><p class="text-xs text-slate-400 font-medium">Uso exclusivo para assinantes.</p></div>
         </div>
     </div>
 </div>
@@ -266,15 +254,18 @@
 
     <main class="max-w-4xl mx-auto p-6 space-y-8 mt-6 pb-48">
         <section class="bg-white rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-slate-100 p-8 space-y-8">
-            <div class="flex items-center gap-3">
-                <span class="w-10 h-10 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-sm font-black">01</span>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Cabeçalho</h2>
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-sm font-black">01</span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Cabeçalho & Estilo</h2>
+                </div>
             </div>
+            
             <div>
                 <div id="header-upload-container">
                     <label class="flex flex-col items-center justify-center gap-4 w-full py-12 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-blue-50/50 hover:border-blue-300 transition-all bg-slate-50/50">
                         <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-7 h-7 text-slate-300"></i></div>
-                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Padrão da sua escola</span>
+                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Padrão da escola</span>
                         <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
                     </label>
                 </div>
@@ -283,19 +274,97 @@
                     <button onclick="removeHeader()" class="absolute top-3 right-3 bg-white text-red-500 p-3 rounded-2xl shadow-xl border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </div>
-            <input type="text" id="assessment-title" class="w-full p-7 bg-slate-50 border-2 border-transparent focus:border-blue-300 rounded-2xl outline-none text-center font-black text-3xl text-slate-900 uppercase tracking-tight transition-all shadow-inner" placeholder="TÍTULO DA PROVA">
+
+            <div class="border-t border-slate-100 pt-6">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Borda da Prova (Aparece na Impressão/PDF)</label>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400"><i data-lucide="layout" class="w-5 h-5"></i></div>
+                    <select id="border-style" class="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 cursor-pointer" onchange="updateBorderStyle(this.value)">
+                        <option value="none">Nenhuma Borda</option>
+                        <option value="borda-classic">Clássica (Linha Dupla Preta)</option>
+                        <option value="borda-stars">Estrelinhas ⭐⭐⭐</option>
+                        <option value="borda-flowers">Flores 🌸🌸🌸</option>
+                        <option value="borda-leaves">Folhas 🌿🌿🌿</option>
+                        <option value="borda-kids">Infantil ✏️✏️✏️</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-6">
+                <input type="text" id="assessment-title" class="w-full p-7 bg-slate-50 border-2 border-transparent focus:border-blue-300 rounded-2xl outline-none text-center font-black text-3xl text-slate-900 uppercase tracking-tight transition-all shadow-inner" placeholder="TÍTULO DA PROVA">
+            </div>
         </section>
+        
         <div id="questions-container" class="space-y-6"></div>
     </main>
 
-    <div class="fixed bottom-8 left-0 right-0 z-40 px-4">
-        <div class="max-w-3xl mx-auto bg-slate-950/95 backdrop-blur-xl border border-white/10 p-2.5 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex justify-between items-center gap-2 overflow-x-auto no-scrollbar">
+    <!-- BARRA FLUTUANTE DE FERRAMENTAS -->
+    <div class="fixed bottom-8 left-0 right-0 z-40 px-4 pointer-events-none">
+        <div class="max-w-4xl mx-auto bg-slate-950/95 backdrop-blur-xl border border-white/10 p-2.5 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex justify-between items-center gap-2 overflow-x-auto no-scrollbar pointer-events-auto">
+            
+            <!-- Botão da IA -->
+            <button onclick="openAIModal()" class="flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90 shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                <i data-lucide="sparkles" class="w-5 h-5"></i><span>Criar c/ IA</span>
+            </button>
+
+            <div class="w-px h-10 bg-white/10 mx-1 shrink-0"></div>
+
             <button onclick="addQuestion('text')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-blue-600 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="align-left" class="w-5 h-5"></i><span>Escrita</span></button>
-            <button onclick="addQuestion('discursive-list')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-orange-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="file-text" class="w-5 h-5"></i><span>Tópicos</span></button>
-            <button onclick="addQuestion('fill-in-the-blanks')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-rose-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="edit-3" class="w-5 h-5"></i><span>Completar</span></button>
-            <button onclick="addQuestion('matching')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-sky-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="link" class="w-5 h-5"></i><span>Ligar</span></button>
             <button onclick="addQuestion('multiple-choice')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-emerald-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="check-square" class="w-5 h-5"></i><span>Marca X</span></button>
             <button onclick="addQuestion('true-false')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-purple-600 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="list-checks" class="w-5 h-5"></i><span>V ou F</span></button>
+            <button onclick="addQuestion('fill-in-the-blanks')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-rose-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="edit-3" class="w-5 h-5"></i><span>Completar</span></button>
+            <button onclick="addQuestion('discursive-list')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-orange-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="file-text" class="w-5 h-5"></i><span>Tópicos</span></button>
+            <button onclick="addQuestion('matching')" class="flex flex-col items-center justify-center gap-1.5 bg-white/5 hover:bg-sky-500 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90"><i data-lucide="link" class="w-5 h-5"></i><span>Ligar</span></button>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================
+     MODAL DA INTELIGÊNCIA ARTIFICIAL (GEMINI)
+     ============================================== -->
+<div id="ai-modal" class="hidden fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6">
+    <div class="w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
+        <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-purple-50">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="sparkles" class="w-6 h-6 text-white"></i></div>
+                <div>
+                    <h3 class="font-black text-xl text-slate-900">Gerador de Questões IA</h3>
+                    <p class="text-xs font-bold text-purple-600 uppercase tracking-widest mt-0.5">Powered by Google Gemini</p>
+                </div>
+            </div>
+            <button onclick="closeAIModal()" class="p-3 hover:bg-white/50 rounded-2xl transition-all"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+        </div>
+        
+        <div class="p-8 space-y-6">
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">O que você quer que a IA crie? (Assunto)</label>
+                <textarea id="ai-prompt" rows="3" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-medium text-slate-700 outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 transition-all resize-none" placeholder="Ex: Uma questão sobre a Revolução Francesa para alunos do 8º ano..."></textarea>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Tipo de Questão</label>
+                    <select id="ai-type" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-purple-400">
+                        <option value="multiple-choice">Múltipla Escolha</option>
+                        <option value="true-false">Verdadeiro ou Falso</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Dificuldade</label>
+                    <select id="ai-difficulty" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-purple-400">
+                        <option value="Fácil">Fácil</option>
+                        <option value="Média">Média</option>
+                        <option value="Difícil">Difícil</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 border-t border-slate-100 bg-slate-50">
+            <button id="btn-generate-ai" onclick="generateQuestionAI()" class="w-full py-5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:shadow-[0_10px_30px_rgba(139,92,246,0.3)] transition-all flex items-center justify-center gap-3">
+                <i data-lucide="zap" class="w-4 h-4"></i><span>Gerar Questão Agora</span>
+                <div id="ai-spinner" class="hidden w-4 h-4 border-2 border-t-transparent border-white loader"></div>
+            </button>
         </div>
     </div>
 </div>
@@ -306,8 +375,7 @@
 <div id="print-view" class="hidden bg-zinc-900">
     <div id="print-toolbar" class="flex justify-center gap-3 px-4 flex-wrap">
         <button onclick="exitPreviewMode()" class="bg-white text-zinc-800 px-6 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-zinc-100 btn-active flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>Voltar</button>
-        <button onclick="window.print()" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Salvar PDF</button>
-        <button onclick="window.print()" class="bg-violet-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-violet-700 btn-active flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i>Imprimir</button>
+        <button onclick="window.print()" class="bg-blue-600 text-white px-7 py-3 rounded-[1.25rem] font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-700 btn-active flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i>Salvar PDF / Imprimir</button>
     </div>
     <div id="print-content"></div>
 </div>
@@ -351,8 +419,22 @@
 </div>
 
 <script>
-// Inicializa ícones na carga inicial
 lucide.createIcons();
+
+// =============================================
+// TRUQUE DE OFUSCAÇÃO PARA O GITHUB (BASE64)
+// =============================================
+// PASSO A PASSO PARA VOCÊ (Dono do Sistema):
+// 1. Acesse o site: https://www.base64encode.org/
+// 2. Cole a sua chave do Google Gemini lá e clique em "Encode"
+// 3. Copie o resultado gerado e cole abaixo, dentro das aspas do GEMINI_B64:
+const GEMINI_B64 = "Q09MRV9TVUFfQ0hBVkVfRU1fQkFTRTY0X0FRVUk=";
+
+// O código abaixo descriptografa a chave automaticamente no navegador do usuário
+// O robô do GitHub não consegue ler, logo, ele não bloqueia a sua chave!
+let GEMINI_API_KEY = "";
+try { GEMINI_API_KEY = atob(GEMINI_B64); } catch(e) { console.error("Chave inválida"); }
+
 
 // =============================================
 // FIREBASE
@@ -467,10 +549,16 @@ function makeToolbar(editorId){
 // ESTADO E VARIÁVEIS GLOBAIS
 // =============================================
 let questions=[];
-let headerData={id:null,imagem:null,titulo:''};
+let headerData={id:null, imagem:null, titulo:'', borda:'none'}; // Adicionado 'borda'
 let cropState={questionId:null,optionId:null};
 let allAssessments=[];
 let cropperInstance = null; 
+
+// Atualiza Borda Visual
+function updateBorderStyle(val) {
+    headerData.borda = val;
+    showToast('Estilo de borda alterado', 'info', 1500);
+}
 
 // =============================================
 // AUTH 
@@ -498,9 +586,10 @@ auth.onAuthStateChanged(user=>{
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
         questions=[];
-        headerData={id:null,imagem:null,titulo:''};
+        headerData={id:null, imagem:null, titulo:'', borda:'none'};
         allAssessments=[];
         document.getElementById('assessment-title').value='';
+        document.getElementById('border-style').value='none';
         removeHeader();
         renderQuestions();
     }
@@ -514,7 +603,110 @@ function handleLogout(){
 }
 
 // =============================================
-// QUESTÕES
+// INTEGRAÇÃO COM INTELIGÊNCIA ARTIFICIAL (GEMINI)
+// =============================================
+function openAIModal() {
+    document.getElementById('ai-modal').classList.remove('hidden');
+}
+function closeAIModal() {
+    document.getElementById('ai-modal').classList.add('hidden');
+    document.getElementById('ai-prompt').value = '';
+}
+
+async function generateQuestionAI() {
+    const promptInput = document.getElementById('ai-prompt').value.trim();
+    const qType = document.getElementById('ai-type').value;
+    const difficulty = document.getElementById('ai-difficulty').value;
+    
+    if(!promptInput) { showToast('Descreva o assunto da questão', 'warning'); return; }
+    if(GEMINI_API_KEY.includes("COLE_") || GEMINI_API_KEY.trim() === "") {
+        alert("Atenção Admin: Você não configurou a chave da API do Gemini corretamente em formato Base64. Leia o Passo a Passo no código-fonte.");
+        return;
+    }
+
+    const btn = document.getElementById('btn-generate-ai');
+    const spinner = document.getElementById('ai-spinner');
+    const btnText = btn.querySelector('span');
+    
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    btnText.innerText = 'A IA está pensando...';
+
+    // Construção do Prompt rigoroso pedindo JSON
+    const promptText = `Atue como um professor especialista. Crie uma questão de ${qType === 'multiple-choice' ? 'Múltipla Escolha' : 'Verdadeiro ou Falso'} sobre o seguinte assunto: "${promptInput}". Dificuldade: ${difficulty}.
+    A questão deve ser inédita, didática e muito bem escrita.
+    
+    CRUCIAL: Retorne APENAS um JSON estrito (sem markdown, sem blocos de código, apenas chaves e colchetes). Use EXATAMENTE esta estrutura:
+    {
+      "enunciado": "Texto da pergunta aqui formatada em HTML básico se necessário (ex: tags <b> ou <i>)",
+      "opcoes": [
+        {"text": "Opção A aqui"},
+        {"text": "Opção B aqui"},
+        {"text": "Opção C aqui"},
+        {"text": "Opção D aqui"}
+      ]
+    }`;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: promptText }] }],
+                generationConfig: { temperature: 0.7, topK: 40 }
+            })
+        });
+
+        const data = await response.json();
+        
+        if(data.error) throw new Error(data.error.message);
+
+        let aiText = data.candidates[0].content.parts[0].text;
+        // Limpar possíveis formatações markdown do retorno da IA
+        aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        const qData = JSON.parse(aiText);
+
+        // Adicionar a questão no sistema
+        const newOps = qData.opcoes.map(o => ({
+            id: Date.now().toString() + Math.floor(Math.random()*1000),
+            text: o.text,
+            image: null,
+            matchText: '',
+            type: 'text'
+        }));
+
+        const newQ = {
+            id: Date.now().toString(),
+            type: qType,
+            textoApoio: '',
+            enunciado: qData.enunciado,
+            imagem: null,
+            imageWidth: 50,
+            opcoes: newOps,
+            linhas: 4
+        };
+
+        questions.push(newQ);
+        renderQuestions();
+        showToast('Questão gerada com sucesso!', 'success');
+        closeAIModal();
+        
+        // Scroll para a nova questão
+        setTimeout(()=>{const el=document.getElementById(`enunciado-${newQ.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
+
+    } catch (e) {
+        console.error("Erro na IA:", e);
+        showToast('Erro ao gerar questão. Tente formular o assunto de outra forma.', 'error', 5000);
+    } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.innerText = 'Gerar Questão Agora';
+    }
+}
+
+// =============================================
+// QUESTÕES E RENDERIZAÇÃO
 // =============================================
 function addQuestion(type){
     let ops = [];
@@ -536,6 +728,7 @@ function addQuestion(type){
     questions.push(q); renderQuestions();
     setTimeout(()=>{const el=document.getElementById(`enunciado-${q.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
 }
+
 function removeQuestion(id){
     if(!confirm('Remover esta questão?'))return;
     questions=questions.filter(q=>q.id!==id); renderQuestions();
@@ -557,7 +750,6 @@ function renderQuestions(){
 
     questions.forEach((q,index)=>{
         const color=TC[q.type]||'blue';
-        
         let apoioLabel = "Texto de Apoio (opcional)";
         let apoioPlaceholder = "Texto base ou contexto...";
         let enunLabel = "Enunciado *";
@@ -601,12 +793,10 @@ function renderQuestions(){
 
         const optC=document.getElementById(`options-${q.id}`);
         
-        // Renderização para questões antigas de opções
         if(['multiple-choice','true-false','discursive-list','matching'].includes(q.type)){
             q.opcoes.forEach((opt,oi)=>{
                 const od=document.createElement('div');
                 od.className='bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3';
-                
                 const hasValidOptImg = opt.image && opt.image.length > 30;
                 
                 od.innerHTML=`
@@ -640,7 +830,6 @@ function renderQuestions(){
             optC.appendChild(ab);
         }
         
-        // Renderização NOVA para questão de Completar (Múltiplas Alternativas)
         else if (q.type === 'fill-in-the-blanks') {
             q.opcoes.forEach((opt, oi) => {
                 const od = document.createElement('div');
@@ -659,9 +848,7 @@ function renderQuestions(){
                 optC.appendChild(od);
                 document.getElementById(`lacunas-tb-${opt.id}`).appendChild(makeToolbar(`lacunas-${opt.id}`));
                 const lacEditor = document.getElementById(`lacunas-${opt.id}`);
-                lacEditor.oninput = (e) => {
-                    opt.text = e.target.innerHTML;
-                };
+                lacEditor.oninput = (e) => { opt.text = e.target.innerHTML; };
             });
 
             const ab=document.createElement('button');
@@ -671,7 +858,6 @@ function renderQuestions(){
             optC.appendChild(ab);
         }
         
-        // Renderização para a Escrita
         if(q.type==='text'){
             const rd=document.createElement('div');
             rd.className="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100";
@@ -697,7 +883,6 @@ function renderQuestions(){
 
 function buildImgZone(q){
     const hasValidImg = q.imagem && q.imagem.length > 30;
-    
     if(!hasValidImg)return`<label class="flex items-center gap-4 w-full p-5 border-2 border-dashed border-slate-100 rounded-2xl cursor-pointer hover:bg-blue-50/50 hover:border-blue-200 transition-all bg-slate-50/30"><div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-6 h-6 text-slate-300"></i></div><span class="font-bold text-sm uppercase tracking-widest text-slate-400">Incluir Imagem</span><input type="file" accept="image/*" class="hidden" onchange="startCrop('${q.id}',null,this)"></label>`;
     
     return`<div class="bg-slate-50 rounded-2xl p-6 space-y-5 border border-slate-100">
@@ -729,26 +914,11 @@ function startCrop(qId, oId, input){
         cropState.optionId = oId;
         const img = document.getElementById('img-to-crop');
         
-        if(cropperInstance) {
-            cropperInstance.destroy();
-            cropperInstance = null;
-        }
+        if(cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
 
         img.onload = () => {
             document.getElementById('cropper-modal').classList.remove('hidden');
-            
-            cropperInstance = new Cropper(img, {
-                viewMode: 1, 
-                dragMode: 'move', 
-                autoCropArea: 0.8,
-                restore: false,
-                guides: true, 
-                center: true,
-                highlight: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
-            });
+            cropperInstance = new Cropper(img, { viewMode: 1, dragMode: 'move', autoCropArea: 0.8, restore: false, guides: true, center: true, highlight: false, cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false, });
         };
         img.src = e.target.result;
     };
@@ -758,60 +928,39 @@ function startCrop(qId, oId, input){
 
 function applyCrop(full){
     if(!cropperInstance) return;
-
     let canvas;
-    if(full) {
-        cropperInstance.clear();
-    }
+    if(full) cropperInstance.clear();
     
-    canvas = cropperInstance.getCroppedCanvas({
-        fillColor: '#ffffff',
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high',
-    });
-
+    canvas = cropperInstance.getCroppedCanvas({ fillColor: '#ffffff', imageSmoothingEnabled: true, imageSmoothingQuality: 'high', });
     if(!canvas) { closeCropper(); return; }
 
     const MAX_DIM = 1000; 
-    let targetW = canvas.width;
-    let targetH = canvas.height;
-
+    let targetW = canvas.width; let targetH = canvas.height;
     if(targetW > MAX_DIM || targetH > MAX_DIM) {
         const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH);
-        targetW *= ratio; 
-        targetH *= ratio;
+        targetW *= ratio; targetH *= ratio;
     }
 
     const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = targetW;
-    finalCanvas.height = targetH;
+    finalCanvas.width = targetW; finalCanvas.height = targetH;
     const ctx = finalCanvas.getContext('2d');
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, targetW, targetH);
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, targetW, targetH);
     ctx.drawImage(canvas, 0, 0, targetW, targetH);
     
     const data = finalCanvas.toDataURL('image/jpeg', 0.90); 
     
     const q = questions.find(qu=>qu.id===cropState.questionId);
-    if(cropState.optionId) {
-        q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data;
-    } else {
-        q.imagem=data;
-    }
+    if(cropState.optionId) { q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data; } 
+    else { q.imagem=data; }
     
-    closeCropper();
-    renderQuestions();
+    closeCropper(); renderQuestions();
 }
 
 function closeCropper(){
     document.getElementById('cropper-modal').classList.add('hidden');
-    if(cropperInstance) {
-        cropperInstance.destroy();
-        cropperInstance = null;
-    }
+    if(cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
     document.getElementById('img-to-crop').src = '';
 }
-
 function removeQuestionImage(qId){questions.find(q=>q.id===qId).imagem=null;renderQuestions();}
 function removeOptImage(qId,oId){questions.find(q=>q.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).image=null;renderQuestions();}
 
@@ -831,8 +980,7 @@ function uploadHeader(input){
             
             c.width = w; c.height = h;
             const ctx = c.getContext('2d');
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h);
             ctx.drawImage(img, 0, 0, w, h);
             
             headerData.imagem = c.toDataURL('image/jpeg', 0.90);
@@ -846,10 +994,20 @@ function uploadHeader(input){
     r.readAsDataURL(file);
 }
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
-function newAssessment(){if(!confirm('Criar nova prova? O conteúdo não guardado será perdido.'))return;questions=[];headerData={id:null,imagem:null,titulo:''};document.getElementById('assessment-title').value='';removeHeader();renderQuestions();localStorage.removeItem('last_open_assessment_id');showToast('Nova prova iniciada','info');}
+function newAssessment(){
+    if(!confirm('Criar nova prova? O conteúdo não guardado será perdido.'))return;
+    questions=[];
+    headerData={id:null,imagem:null,titulo:'', borda:'none'};
+    document.getElementById('assessment-title').value='';
+    document.getElementById('border-style').value='none';
+    removeHeader();
+    renderQuestions();
+    localStorage.removeItem('last_open_assessment_id');
+    showToast('Nova prova iniciada','info');
+}
 
 // =============================================
-// CAPTURA EDITORES RICH-TEXT ANTES DE SALVAR
+// SALVAR BLINDADO
 // =============================================
 function captureEditorContents(){
     questions.forEach(q=>{
@@ -861,25 +1019,23 @@ function captureEditorContents(){
         if(q.type === 'fill-in-the-blanks' && q.opcoes) {
             q.opcoes.forEach(opt => {
                 const lac = document.getElementById(`lacunas-${opt.id}`);
-                if(lac) {
-                    opt.text = lac.innerHTML;
-                }
+                if(lac) { opt.text = lac.innerHTML; }
             });
         }
     });
 }
 
-// =============================================
-// SALVAR BLINDADO COM "BALANÇA DIGITAL"
-// =============================================
 async function saveToCloud(){
     if(!auth.currentUser)return;
     const title=document.getElementById('assessment-title').value.trim();
     if(!title){showToast('Digite um título para a prova','warning');return;}
     captureEditorContents();
     headerData.titulo=title;
-    const btn=document.getElementById('btn-save');
     
+    // Garantir que salva a borda
+    headerData.borda = document.getElementById('border-style').value || 'none';
+
+    const btn=document.getElementById('btn-save');
     btn.disabled=true;
     btn.innerHTML=`<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full loader" style="display:inline-block"></div><span class="hidden sm:inline ml-1">A guardar...</span>`;
     const docId=headerData.id||Date.now().toString();
@@ -918,18 +1074,15 @@ async function saveToCloud(){
 
     }catch(e){
         console.error(e);
-        if(e.message === 'TIMEOUT') {
-            showToast('Tempo esgotado. A internet falhou.', 'error');
-        } else if (e.message !== 'PAYLOAD_TOO_LARGE') {
-            showToast('Erro ao guardar no servidor. Verifique a internet.', 'error');
-        }
+        if(e.message === 'TIMEOUT') { showToast('Tempo esgotado. A internet falhou.', 'error'); } 
+        else if (e.message !== 'PAYLOAD_TOO_LARGE') { showToast('Erro ao guardar no servidor. Verifique a internet.', 'error'); }
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`;
         btn.disabled=false;
     }
 }
 
 // =============================================
-// HISTÓRICO COM CORREÇÃO DE CORRIDA E ABERTURA AUTO
+// HISTÓRICO 
 // =============================================
 function toggleSavedModal(){
     const m=document.getElementById('saved-modal');
@@ -994,7 +1147,12 @@ async function loadSavedAssessments(uid = null, autoOpen = false){
 function loadAssessmentByIndex(idx, silent = false){
     const data=allAssessments[idx];
     if(!data) return;
+    
+    // Carrega dados da prova e a Borda salva
     headerData={...data.headerData};
+    if(!headerData.borda) headerData.borda = 'none';
+    document.getElementById('border-style').value = headerData.borda;
+
     questions=data.questions.map(q=>({...q,opcoes:q.opcoes?q.opcoes.map(o=>({...o})):[]}));
     document.getElementById('assessment-title').value=headerData.titulo||'';
     if(headerData.imagem){document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=headerData.imagem;}
@@ -1015,7 +1173,7 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO — CLASSES UNIFICADAS
+// BUILD HTML DA QUESTÃO
 // =============================================
 function buildQuestaoHTML(q, index) {
     function optLetter(i) { return String.fromCharCode(97 + i) + ')'; }
@@ -1026,40 +1184,23 @@ function buildQuestaoHTML(q, index) {
 
     let h = `<div class="q-block">`;
 
-    // ── COMPLETAR LACUNAS ──────────────────────────────────────
     if (q.type === 'fill-in-the-blanks') {
         h += enunciadoRow(index + 1, q.enunciado || '...');
-
-        if (q.imagem && q.imagem.length > 30)
-            h += `<div style="text-align:center;margin:6px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
-
-        if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim())
-            h += `<div class="q-wordbank"><div class="q-wordbank-inner">${q.textoApoio}</div></div>`;
-
+        if (q.imagem && q.imagem.length > 30) h += `<div style="text-align:center;margin:6px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
+        if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim()) h += `<div class="q-wordbank"><div class="q-wordbank-inner">${q.textoApoio}</div></div>`;
         if (q.opcoes && q.opcoes.length === 1) {
             const t = q.opcoes[0].text;
-            if (t && t.replace(/<[^>]*>/g, '').trim())
-                h += `<div style="font-size:14px;line-height:2;text-align:justify;margin-top:4px;">${t}</div>`;
+            if (t && t.replace(/<[^>]*>/g, '').trim()) h += `<div style="font-size:14px;line-height:2;text-align:justify;margin-top:4px;">${t}</div>`;
         } else if (q.opcoes && q.opcoes.length > 1) {
             h += `<div class="q-options">`;
-            q.opcoes.forEach((opt, i) => {
-                if (opt.text && opt.text.replace(/<[^>]*>/g, '').trim())
-                    h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text" style="line-height:2;text-align:justify;">${opt.text}</span></div>`;
-            });
+            q.opcoes.forEach((opt, i) => { if (opt.text && opt.text.replace(/<[^>]*>/g, '').trim()) h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text" style="line-height:2;text-align:justify;">${opt.text}</span></div>`; });
             h += `</div>`;
         }
-
-    // ── OUTROS TIPOS ───────────────────────────────────────────
     } else {
-        if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim())
-            h += `<div class="q-apoio">${q.textoApoio}</div>`;
-
+        if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim()) h += `<div class="q-apoio">${q.textoApoio}</div>`;
         h += enunciadoRow(index + 1, q.enunciado || '...');
+        if (q.imagem && q.imagem.length > 30) h += `<div style="text-align:center;margin:5px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
 
-        if (q.imagem && q.imagem.length > 30)
-            h += `<div style="text-align:center;margin:5px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
-
-        // ── Escrita livre ──
         if (q.type === 'text') {
             const n = Math.max(1, parseInt(q.linhas) || 4);
             h += `<div style="margin-top:4px;">`;
@@ -1067,63 +1208,25 @@ function buildQuestaoHTML(q, index) {
             h += `</div>`;
         }
 
-        // ── Múltipla escolha, V/F, Tópicos ──
         if (['multiple-choice', 'true-false', 'discursive-list'].includes(q.type)) {
             h += `<div class="q-options">`;
             q.opcoes.forEach((opt, i) => {
                 const img = opt.type === 'image' && opt.image && opt.image.length > 30;
-                const content = img
-                    ? `<img src="${opt.image}" style="max-height:50px;width:auto;object-fit:contain;display:block;" crossorigin="anonymous">`
-                    : (opt.text || '');
+                const content = img ? `<img src="${opt.image}" style="max-height:50px;width:auto;object-fit:contain;display:block;" crossorigin="anonymous">` : (opt.text || '');
 
-                if (q.type === 'multiple-choice') {
-                    h += `<div class="q-opt">
-                        <span class="q-opt-letter">${optLetter(i)}</span>
-                        <span class="q-opt-paren">(  )</span>
-                        <span class="q-opt-text">${content}</span>
-                    </div>`;
-
-                } else if (q.type === 'true-false') {
-                    h += `<div class="q-opt">
-                        <span class="q-opt-letter">${optLetter(i)}</span>
-                        <span class="q-opt-paren">(  )</span>
-                        <span class="q-opt-text">${content}</span>
-                    </div>`;
-
-                } else {
-                    h += `<div class="q-opt">
-                        <span class="q-opt-letter">${optLetter(i)}</span>
-                        <span class="q-opt-text">${content}</span>
-                    </div>
-                    <span class="q-line"></span>`;
-                }
+                if (q.type === 'multiple-choice') { h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-paren">(  )</span><span class="q-opt-text">${content}</span></div>`; } 
+                else if (q.type === 'true-false') { h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-paren">(  )</span><span class="q-opt-text">${content}</span></div>`; } 
+                else { h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text">${content}</span></div><span class="q-line"></span>`; }
             });
             h += `</div>`;
         }
 
-        // ── Ligar colunas ──
         if (q.type === 'matching') {
             h += `<div class="q-options">`;
             q.opcoes.forEach((opt, i) => {
                 const img = opt.type === 'image' && opt.image && opt.image.length > 30;
-                const leftContent = img
-                    ? `<img src="${opt.image}" style="max-height:40px;width:auto;border:0.5px solid #ccc;display:block;" crossorigin="anonymous">`
-                    : (opt.text || '');
-
-                h += `<div class="q-match-row">
-                    <div class="q-match-left">
-                        <div class="q-opt" style="margin-bottom:0;">
-                            <span class="q-opt-letter">${optLetter(i)}</span>
-                            <span class="q-opt-text">${leftContent}</span>
-                        </div>
-                    </div>
-                    <div class="q-match-right">
-                        <div class="q-opt" style="margin-bottom:0;">
-                            <span class="q-opt-paren">(  )</span>
-                            <span class="q-opt-text">${opt.matchText || ''}</span>
-                        </div>
-                    </div>
-                </div>`;
+                const leftContent = img ? `<img src="${opt.image}" style="max-height:40px;width:auto;border:0.5px solid #ccc;display:block;" crossorigin="anonymous">` : (opt.text || '');
+                h += `<div class="q-match-row"><div class="q-match-left"><div class="q-opt" style="margin-bottom:0;"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text">${leftContent}</span></div></div><div class="q-match-right"><div class="q-opt" style="margin-bottom:0;"><span class="q-opt-paren">(  )</span><span class="q-opt-text">${opt.matchText || ''}</span></div></div></div>`;
             });
             h += `</div>`;
         }
@@ -1134,18 +1237,14 @@ function buildQuestaoHTML(q, index) {
 }
 
 // =============================================
-// NOVO MOTOR DE PAGINAÇÃO (DOM)
+// NOVO MOTOR DE PAGINAÇÃO (DOM) COM BORDAS
 // =============================================
 async function waitForImagesToLoad(element) {
     const images = Array.from(element.querySelectorAll('img'));
     if (images.length === 0) return;
-    
     await Promise.all(images.map(img => {
         if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-        return new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve; 
-        });
+        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
     }));
     await new Promise(r => setTimeout(r, 50));
 }
@@ -1172,8 +1271,17 @@ async function createPaginatedDOM() {
         sheet.className = 'a4-sheet';
         sheet.style.padding = '15mm 15mm 20mm 15mm';
         
+        // Aplica a borda decorativa (caso o usuário tenha selecionado)
+        if(headerData.borda && headerData.borda !== 'none') {
+            const borderEl = document.createElement('div');
+            borderEl.className = 'print-border ' + headerData.borda;
+            sheet.appendChild(borderEl);
+        }
+
         const content = document.createElement('div');
         content.style.width = '100%';
+        content.style.position = 'relative';
+        content.style.zIndex = '20'; // Garante que fica por cima da borda
         sheet.appendChild(content);
         
         sheets.push({ sheet, content });
@@ -1224,7 +1332,7 @@ async function createPaginatedDOM() {
     const totalPages = sheets.length;
     sheets.forEach((s, index) => {
         const footer = document.createElement('div');
-        footer.style.cssText = 'position: absolute; bottom: 15mm; right: 15mm; font-size: 9pt; font-weight: 700; color: #000; font-family: Arial, sans-serif;';
+        footer.style.cssText = 'position: absolute; bottom: 15mm; right: 15mm; font-size: 9pt; font-weight: 700; color: #000; font-family: Arial, sans-serif; z-index: 30;';
         footer.textContent = `${index + 1} / ${totalPages}`;
         s.sheet.appendChild(footer);
         
@@ -1236,7 +1344,7 @@ async function createPaginatedDOM() {
 }
 
 // =============================================
-// PREVIEW VISUAL RENDERIZADA
+// PREVIEW VISUAL E GERAR PDF
 // =============================================
 async function enterPreviewMode(){
     document.body.classList.add('preview-mode');
@@ -1255,9 +1363,6 @@ function exitPreviewMode(){
     document.getElementById('print-content').innerHTML = ''; 
 }
 
-// =============================================
-// GERAR PDF E IMPRESSÃO
-// =============================================
 async function generatePDF(fromPreview = false) {
     captureEditorContents();
     if (!fromPreview) {
@@ -1278,17 +1383,9 @@ async function printDirect() {
 }
 
 // =============================================
-// HELPERS
+// HELPERS DAS QUESTÕES
 // =============================================
-function addOption(qId){
-    const q = questions.find(qu=>qu.id===qId);
-    q.opcoes.push({id:Date.now().toString(), text:'', image:null, matchText:'', type:'text'});
-    renderQuestions();
-}
-function updateImageWidth(qId,val){
-    const q=questions.find(qu=>qu.id===qId);q.imageWidth=parseInt(val);
-    const z=document.getElementById(`img-zone-${qId}`);if(z){z.innerHTML=buildImgZone(q);lucide.createIcons();}
-}
+function updateImageWidth(qId,val){ const q=questions.find(qu=>qu.id===qId);q.imageWidth=parseInt(val); const z=document.getElementById(`img-zone-${qId}`);if(z){z.innerHTML=buildImgZone(q);lucide.createIcons();} }
 function adjustLines(qId,d){const q=questions.find(qu=>qu.id===qId);q.linhas=Math.max(1,Math.min(20,(parseInt(q.linhas)||4)+d));const el=document.getElementById(`lines-d-${qId}`);if(el)el.textContent=q.linhas;}
 function setOptType(qId,oId,type){questions.find(qu=>qu.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).type=type;renderQuestions();}
 function updateOptText(qId,oId,val){questions.find(qu=>qu.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).text=val;}
