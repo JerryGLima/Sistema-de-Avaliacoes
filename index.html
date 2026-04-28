@@ -1485,6 +1485,25 @@ function setOptType(qId,oId,type){questions.find(qu=>qu.id===qId).opcoes.find(o=
 function updateOptText(qId,oId,val){questions.find(qu=>qu.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).text=val;}
 function updateOptMatch(qId,oId,val){questions.find(qu=>qu.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).matchText=val;}
 function removeOption(qId,oId){const q=questions.find(qu=>qu.id===qId);if(q.opcoes.length<=1){showToast('Mínimo de 1 opção','warning');return;}q.opcoes=q.opcoes.filter(o=>o.id.toString()!==oId.toString());renderQuestions();}
+
+function addOption(qId){
+    const q=questions.find(qu=>qu.id===qId);
+    if(!q) return;
+    const newId=(Date.now()+Math.floor(Math.random()*9999)).toString();
+    if(q.type==='matching'){
+        q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'});
+    } else if(q.type==='fill-in-the-blanks'){
+        q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'});
+    } else {
+        q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'});
+    }
+    captureEditorContents();
+    renderQuestions();
+    setTimeout(()=>{
+        const inputs=document.querySelectorAll(`#options-${qId} input[type="text"]`);
+        if(inputs.length>0) inputs[inputs.length-1].focus();
+    },100);
+}
 </script>
 </body>
 </html>
