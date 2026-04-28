@@ -90,6 +90,21 @@
         .q-wordbank { text-align: center; margin: 8px 0 12px 0; }
         .q-wordbank-inner { display: inline-block; border: 1.5px solid #888; border-radius: 12px; padding: 4px 18px; font-size: 14px; font-weight: 600; }
 
+        /* GABARITO PRINT STYLE */
+        .print-gabarito {
+            border: 2px dashed #10b981;
+            padding: 10px 14px;
+            margin-top: 12px;
+            font-size: 12pt;
+            border-radius: 8px;
+            page-break-inside: avoid;
+            background-color: #ecfdf5 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color: #064e3b;
+            text-align: justify;
+        }
+
         /* MOBILE PREVIEW FIXES */
         body { overflow-x: hidden; } 
         body.preview-mode { overflow: auto !important; background: #18181b; }
@@ -209,11 +224,9 @@
             <div class="text-center pt-2"><p class="text-xs text-slate-400 font-medium">Uso exclusivo para assinantes.</p></div>
             
             <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col items-center gap-3">
-                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Desenvolvido por Jerry Gleydison</p>
-                <a href="https://wa.me/+5599981453613" target="_blank" class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
-                    <svg fill="currentColor" viewBox="0 0 24 24" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Desenvolvido por Jerry Gleydison</p>
+                <a href="https://wa.me/55SEUNUMEROAQUI" target="_blank" class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
                     <span>Suporte no WhatsApp</span>
                 </a>
             </div>
@@ -233,13 +246,16 @@
             </div>
             <div class="flex items-center gap-1.5 flex-wrap justify-end">
                 <button onclick="toggleSavedModal()" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="folder-open" class="w-4 h-4"></i><span class="hidden sm:inline">Arquivos</span></button>
-                <button onclick="newAssessment()" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="plus-circle" class="w-4 h-4"></i><span class="hidden sm:inline">Novo</span></button>
+                <button onclick="newAssessment(false)" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="plus-circle" class="w-4 h-4"></i><span class="hidden sm:inline">Novo</span></button>
                 <button id="btn-save" onclick="saveToCloud()" class="flex items-center gap-1.5 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-emerald-600 btn-active"><i data-lucide="save" class="w-4 h-4"></i><span class="hidden sm:inline">Salvar</span></button>
-                <button onclick="enterPreviewMode()" class="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 btn-active"><i data-lucide="eye" class="w-4 h-4"></i><span class="hidden sm:inline">Visualizar</span></button>
+                <button onclick="enterPreviewMode(false)" class="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 btn-active"><i data-lucide="eye" class="w-4 h-4"></i><span class="hidden sm:inline">Visualizar</span></button>
                 
                 <button onclick="generatePDF(false)" class="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-700 btn-active"><i data-lucide="file-down" class="w-4 h-4"></i><span class="hidden md:inline">Gerar PDF</span></button>
                 
-                <button onclick="printDirect()" class="flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-violet-700 btn-active"><i data-lucide="printer" class="w-4 h-4"></i><span class="hidden md:inline">Imprimir</span></button>
+                <button onclick="printDirect(false)" class="flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-violet-700 btn-active"><i data-lucide="printer" class="w-4 h-4"></i><span class="hidden md:inline">Imprimir Prova</span></button>
+                
+                <button onclick="printDirect(true)" class="flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-emerald-700 btn-active"><i data-lucide="check-circle" class="w-4 h-4"></i><span class="hidden md:inline">Gabarito</span></button>
+                
                 <button onclick="handleLogout()" class="p-2.5 text-red-400 hover:bg-red-50 rounded-xl btn-active"><i data-lucide="log-out" class="w-4 h-4"></i></button>
             </div>
         </div>
@@ -331,10 +347,8 @@
 
         <div class="mt-12 pt-8 border-t border-slate-200 flex flex-col items-center justify-center gap-3 pb-4">
             <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Desenvolvido por Jerry Gleydison</p>
-            <a href="https://wa.me/5599SEUNUMEROAQUI" target="_blank" class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
-                <svg fill="currentColor" viewBox="0 0 24 24" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
+            <a href="https://wa.me/55SEUNUMEROAQUI" target="_blank" class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
                 <span>Suporte no WhatsApp</span>
             </a>
         </div>
@@ -612,6 +626,22 @@ function makeToolbar(editorId){
 }
 
 // =============================================
+// PROTEÇÃO CONTRA PERDA DE DADOS E AVISOS
+// =============================================
+window.addEventListener('beforeunload', (e) => {
+    if(questions.length > 0) {
+        e.preventDefault();
+        e.returnValue = ''; // Padrão do navegador para alertar antes de fechar a aba
+    }
+});
+
+setInterval(() => {
+    if(questions.length > 0) {
+        showToast('Lembrete: Não se esqueça de salvar sua prova na nuvem!', 'info', 5000);
+    }
+}, 10 * 60 * 1000); // Lembrete a cada 10 minutos
+
+// =============================================
 // AUTH 
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
@@ -635,7 +665,7 @@ auth.onAuthStateChanged(user=>{
     }else{
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
-        newAssessment(); // Limpa estado
+        newAssessment(true); // Parametro silencioso
     }
     lucide.createIcons();
 });
@@ -666,17 +696,17 @@ async function generateQuestionAI() {
 
     let tipoNome = ""; let jsonSchema = "";
     switch(qType) {
-        case 'text': tipoNome = "Escrita Livre (Dissertativa)"; jsonSchema = `{"enunciado": "Texto da pergunta descritiva e detalhada aqui"}`; break;
-        case 'multiple-choice': tipoNome = "Múltipla Escolha"; jsonSchema = `{"enunciado": "Pergunta direta", "opcoes": ["Opção A", "Opção B", "Opção C", "Opção D"]}`; break;
-        case 'true-false': tipoNome = "Verdadeiro ou Falso"; jsonSchema = `{"enunciado": "Afirmação ou pergunta para julgar se é V ou F", "opcoes": ["Opção 1", "Opção 2", "Opção 3"]}`; break;
-        case 'discursive-list': tipoNome = "Tópicos (Listagem)"; jsonSchema = `{"enunciado": "Instrução (ex: Liste as principais causas...)", "opcoes": ["Tópico 1 para preencher", "Tópico 2 para preencher"]}`; break;
-        case 'fill-in-the-blanks': tipoNome = "Completar Lacunas"; jsonSchema = `{"enunciado": "Instrução clara para completar os espaços", "quadro_palavras": "Palavra 1 - Palavra 2 - Palavra 3", "texto_lacunas": "O texto didático contendo espaços no formato ____ para o aluno preencher."}`; break;
-        case 'matching': tipoNome = "Ligar Colunas"; jsonSchema = `{"enunciado": "Instrução para relacionar as colunas", "pares": [{"esquerda": "Conceito 1", "direita": "Definição 1"}, {"esquerda": "Conceito 2", "direita": "Definição 2"}, {"esquerda": "Conceito 3", "direita": "Definição 3"}]}`; break;
+        case 'text': tipoNome = "Escrita Livre (Dissertativa)"; jsonSchema = `{"enunciado": "Texto da pergunta descritiva e detalhada aqui", "gabarito": "Resposta ideal ou tópicos esperados para a correção"}`; break;
+        case 'multiple-choice': tipoNome = "Múltipla Escolha"; jsonSchema = `{"enunciado": "Pergunta direta", "opcoes": ["Opção A", "Opção B", "Opção C", "Opção D"], "gabarito": "Indique qual é a letra correta e uma breve justificação."}`; break;
+        case 'true-false': tipoNome = "Verdadeiro ou Falso"; jsonSchema = `{"enunciado": "Afirmação ou pergunta para julgar se é V ou F", "opcoes": ["Opção 1", "Opção 2", "Opção 3"], "gabarito": "Indique a sequência correta (ex: V, F, V)."}`; break;
+        case 'discursive-list': tipoNome = "Tópicos (Listagem)"; jsonSchema = `{"enunciado": "Instrução (ex: Liste as principais causas...)", "opcoes": ["Tópico 1 para preencher", "Tópico 2 para preencher"], "gabarito": "Respostas esperadas para cada tópico."}`; break;
+        case 'fill-in-the-blanks': tipoNome = "Completar Lacunas"; jsonSchema = `{"enunciado": "Instrução clara para completar os espaços", "quadro_palavras": "Palavra 1 - Palavra 2 - Palavra 3", "texto_lacunas": "O texto didático contendo espaços no formato ____ para o aluno preencher.", "gabarito": "O texto completo e correto sem as lacunas."}`; break;
+        case 'matching': tipoNome = "Ligar Colunas"; jsonSchema = `{"enunciado": "Instrução para relacionar as colunas", "pares": [{"esquerda": "Conceito 1", "direita": "Definição 1"}, {"esquerda": "Conceito 2", "direita": "Definição 2"}, {"esquerda": "Conceito 3", "direita": "Definição 3"}], "gabarito": "A correspondência correta das colunas."}`; break;
     }
 
     const promptText = `Atue como um professor especialista. Crie uma questão de ${tipoNome} sobre o seguinte assunto: "${promptInput}". Dificuldade: ${difficulty}.
     A questão deve ser inédita, didática e muito bem escrita. ${qType === 'multiple-choice' ? 'ATENÇÃO: É OBRIGATÓRIO gerar EXATAMENTE 4 alternativas.' : ''}
-    CRUCIAL: Retorne APENAS um objeto JSON estrito (sem markdown, sem blocos de código, apenas chaves e colchetes). Use EXATAMENTE esta estrutura de exemplo:
+    CRUCIAL: Retorne APENAS um objeto JSON estrito (sem markdown, sem blocos de código). Inclua OBRIGATORIAMENTE o campo "gabarito" com a resposta correta detalhada. Use EXATAMENTE esta estrutura de exemplo:
     ${jsonSchema}`;
 
     try {
@@ -707,7 +737,7 @@ async function generateQuestionAI() {
             if(newOps.length === 0) newOps.push({id: Date.now().toString(), text:'...', image:null, matchText:'...', type:'text'});
         }
 
-        const newQ = { id: Date.now().toString(), type: qType, textoApoio: textoApoio, enunciado: qData.enunciado || '', imagem: null, imageWidth: 50, opcoes: newOps, linhas: qType === 'text' ? 4 : 4 };
+        const newQ = { id: Date.now().toString(), type: qType, textoApoio: textoApoio, enunciado: qData.enunciado || '', imagem: null, imageWidth: 50, opcoes: newOps, linhas: qType === 'text' ? 4 : 4, gabarito: qData.gabarito || '' };
 
         questions.push(newQ); renderQuestions(); showToast('Questão gerada com sucesso!', 'success'); closeAIModal();
         setTimeout(()=>{const el=document.getElementById(`enunciado-${newQ.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
@@ -724,7 +754,7 @@ function addQuestion(type){
     if(['multiple-choice','true-false','discursive-list','matching'].includes(type)){ ops = [ {id:(Date.now()+1).toString(),text:'',image:null,matchText:'',type:'text'}, {id:(Date.now()+2).toString(),text:'',image:null,matchText:'',type:'text'} ]; } 
     else if (type === 'fill-in-the-blanks') { ops = [ {id:(Date.now()+1).toString(), text:''} ]; }
     
-    const q={ id:Date.now().toString(), type, textoApoio:'', enunciado:'', imagem:null, imageWidth:50, opcoes: ops, linhas:4 };
+    const q={ id:Date.now().toString(), type, textoApoio:'', enunciado:'', imagem:null, imageWidth:50, opcoes: ops, linhas:4, gabarito:'' };
     questions.push(q); renderQuestions();
     setTimeout(()=>{const el=document.getElementById(`enunciado-${q.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
 }
@@ -746,6 +776,7 @@ function renderQuestions(){
     const TC={text:'blue','multiple-choice':'emerald','true-false':'purple','discursive-list':'orange',matching:'sky','fill-in-the-blanks':'rose'};
 
     questions.forEach((q,index)=>{
+        if(q.gabarito === undefined) q.gabarito = '';
         const color=TC[q.type]||'blue';
         let apoioLabel = "Texto de Apoio (opcional)"; let apoioPlaceholder = "Texto base ou contexto...";
         let enunLabel = "Enunciado *"; let enunPlaceholder = "Digite a pergunta aqui...";
@@ -775,11 +806,18 @@ function renderQuestions(){
                     <div id="enunciado-${q.id}" class="rich-editor" contenteditable="true" data-placeholder="${enunPlaceholder}">${q.enunciado}</div>
                 </div>
                 <div id="options-${q.id}" class="space-y-4"></div>
+
+                <div class="mt-4 p-5 bg-emerald-50 border border-emerald-100 rounded-2xl shadow-sm">
+                    <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i>Gabarito / Resposta Esperada (Não sai na prova do aluno)</p>
+                    <div id="gab-tb-${q.id}"></div>
+                    <div id="gabarito-${q.id}" class="rich-editor !bg-white/60 focus:!bg-white !border-emerald-200" contenteditable="true" data-placeholder="Digite a resposta correta aqui...">${q.gabarito}</div>
+                </div>
             </div>`;
         container.appendChild(card);
 
         document.getElementById(`apoio-tb-${q.id}`).appendChild(makeToolbar(`apoio-${q.id}`));
         document.getElementById(`enun-tb-${q.id}`).appendChild(makeToolbar(`enunciado-${q.id}`));
+        document.getElementById(`gab-tb-${q.id}`).appendChild(makeToolbar(`gabarito-${q.id}`));
 
         const optC=document.getElementById(`options-${q.id}`);
         
@@ -863,8 +901,10 @@ function renderQuestions(){
 
         const ae=document.getElementById(`apoio-${q.id}`);
         const en=document.getElementById(`enunciado-${q.id}`);
+        const gb=document.getElementById(`gabarito-${q.id}`);
         if(ae) ae.oninput=(e)=>{q.textoApoio=e.target.innerHTML;};
         if(en) en.oninput=(e)=>{q.enunciado=e.target.innerHTML;};
+        if(gb) gb.oninput=(e)=>{q.gabarito=e.target.innerHTML;};
     });
     lucide.createIcons();
 }
@@ -943,8 +983,9 @@ function uploadHeader(input){
 }
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
 
-function newAssessment(){
-    if(!confirm('Criar nova prova? O conteúdo não guardado será perdido.'))return;
+// PARÂMETRO SILENCIOSO (Mudança 1)
+function newAssessment(silent = false){
+    if(!silent && !confirm('Criar nova prova? O conteúdo não guardado será perdido.'))return;
     questions=[];
     headerData={ id:null, imagem:null, titulo:'', borda:'none', layout:'1-col', tipoCabecalho:'imagem', escola:'', professor:'', disciplina:'', bimestre:'' };
     document.getElementById('assessment-title').value='';
@@ -958,7 +999,7 @@ function newAssessment(){
     removeHeader();
     renderQuestions();
     localStorage.removeItem('last_open_assessment_id');
-    showToast('Nova prova iniciada','info');
+    if(!silent) showToast('Nova prova iniciada','info');
 }
 
 // =============================================
@@ -966,8 +1007,8 @@ function newAssessment(){
 // =============================================
 function captureEditorContents(){
     questions.forEach(q=>{
-        const apoio=document.getElementById(`apoio-${q.id}`); const enun=document.getElementById(`enunciado-${q.id}`);
-        if(apoio) q.textoApoio=apoio.innerHTML; if(enun) q.enunciado=enun.innerHTML;
+        const apoio=document.getElementById(`apoio-${q.id}`); const enun=document.getElementById(`enunciado-${q.id}`); const gab=document.getElementById(`gabarito-${q.id}`);
+        if(apoio) q.textoApoio=apoio.innerHTML; if(enun) q.enunciado=enun.innerHTML; if(gab) q.gabarito=gab.innerHTML;
         if(q.type === 'fill-in-the-blanks' && q.opcoes) { q.opcoes.forEach(opt => { const lac = document.getElementById(`lacunas-${opt.id}`); if(lac) { opt.text = lac.innerHTML; } }); }
     });
     
@@ -1001,10 +1042,10 @@ async function saveToCloud(){
         headerData.id=docId; localStorage.setItem('last_open_assessment_id', docId);
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Guardado!</span>`;
         btn.style.background='#065f46'; showToast('✓ Prova guardada com sucesso!','success');
-        setTimeout(()=>{ btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`; btn.style.background=''; btn.disabled=false; },2000);
+        setTimeout(()=>{ btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`; btn.style.background=''; btn.disabled=false; },2000);
     }catch(e){
         if(e.message === 'TIMEOUT') { showToast('Tempo esgotado. A internet falhou.', 'error'); } else if (e.message !== 'PAYLOAD_TOO_LARGE') { showToast('Erro ao guardar no servidor. Verifique a internet.', 'error'); }
-        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`; btn.disabled=false;
+        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`; btn.disabled=false;
     }
 }
 
@@ -1086,9 +1127,9 @@ async function deleteAssessment(docId,idx){
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO E PAGINAÇÃO 
+// BUILD HTML DA QUESTÃO E PAGINAÇÃO (Atualizado p/ Gabarito)
 // =============================================
-function buildQuestaoHTML(q, index) {
+function buildQuestaoHTML(q, index, showGabarito = false) {
     function optLetter(i) { return String.fromCharCode(97 + i) + ')'; }
     function enunciadoRow(num, html, extraClass='') { return `<div class="q-row${extraClass ? ' '+extraClass : ''}"><span class="q-row-num">${num}.</span><span class="q-row-body">${html}</span></div>`; }
 
@@ -1125,6 +1166,11 @@ function buildQuestaoHTML(q, index) {
             h += `</div>`;
         }
     }
+
+    if (showGabarito && q.gabarito && q.gabarito.replace(/<[^>]*>/g, '').trim() !== '') {
+        h += `<div class="print-gabarito"><strong>GABARITO:</strong><br/>${q.gabarito}</div>`;
+    }
+
     h += `</div>`; return h;
 }
 
@@ -1137,7 +1183,7 @@ async function waitForImagesToLoad(element) {
     await new Promise(r => setTimeout(r, 50));
 }
 
-async function createPaginatedDOM() {
+async function createPaginatedDOM(showGabarito = false) {
     const container = document.createElement('div');
     container.className = 'flex flex-col gap-8 items-start md:items-center w-full min-w-max';
     const measureWrapper = document.createElement('div'); measureWrapper.style.cssText = 'position:fixed; left:-9999px; top:0; visibility:hidden;'; document.body.appendChild(measureWrapper);
@@ -1155,6 +1201,13 @@ async function createPaginatedDOM() {
     }
 
     let { sheet, content } = newSheet();
+
+    if (showGabarito) {
+        const warning = document.createElement('div');
+        warning.style.cssText = 'column-span: all; background:#064e3b; color:white; text-align:center; padding:5pt; font-size:12pt; font-weight:bold; margin-bottom:10pt; border-radius:4px;';
+        warning.textContent = "DOCUMENTO DO PROFESSOR - GABARITO DE CORREÇÃO";
+        content.appendChild(warning);
+    }
 
     if(headerData.tipoCabecalho === 'imagem' && headerData.imagem){
         const img = document.createElement('img'); img.src = headerData.imagem; img.style.cssText = 'column-span: all; width:100%; display:block; max-height:40mm; object-fit:contain; margin-bottom:8pt;'; img.crossOrigin = "anonymous";
@@ -1191,7 +1244,7 @@ async function createPaginatedDOM() {
     }
 
     for(let i=0; i<questions.length; i++){
-        const tempDiv = document.createElement('div'); tempDiv.innerHTML = buildQuestaoHTML(questions[i], i); const qNode = tempDiv.firstElementChild;
+        const tempDiv = document.createElement('div'); tempDiv.innerHTML = buildQuestaoHTML(questions[i], i, showGabarito); const qNode = tempDiv.firstElementChild;
         content.appendChild(qNode); await waitForImagesToLoad(qNode);
         if(content.getBoundingClientRect().height > safeHeightPx) {
             const qCount = content.querySelectorAll('.q-block').length;
@@ -1214,22 +1267,26 @@ async function createPaginatedDOM() {
 // =============================================
 // PREVIEW VISUAL E IMPRESSÃO
 // =============================================
-async function enterPreviewMode(){
+async function enterPreviewMode(showGabarito = false){
     captureEditorContents();
     document.body.classList.add('preview-mode'); window.scrollTo(0,0);
     const printContent = document.getElementById('print-content');
-    printContent.innerHTML = '<div class="text-white flex flex-col items-center gap-4 mt-20 w-full" style="min-width:100vw"><div class="loader w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" style="animation: spinner 1s linear infinite"></div><p class="font-bold text-sm uppercase tracking-widest text-slate-400">Processando e paginando prova...</p></div>';
-    const paginatedDOM = await createPaginatedDOM(); printContent.innerHTML = ''; printContent.appendChild(paginatedDOM);
+    printContent.innerHTML = '<div class="text-white flex flex-col items-center gap-4 mt-20 w-full" style="min-width:100vw"><div class="loader w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" style="animation: spinner 1s linear infinite"></div><p class="font-bold text-sm uppercase tracking-widest text-slate-400">Processando e paginando...</p></div>';
+    const paginatedDOM = await createPaginatedDOM(showGabarito); printContent.innerHTML = ''; printContent.appendChild(paginatedDOM);
 }
 
 function exitPreviewMode(){ document.body.classList.remove('preview-mode'); document.getElementById('print-content').innerHTML = ''; }
 
 async function generatePDF(fromPreview = false) {
-    if (!fromPreview) { showToast('Preparando documento...', 'info', 2000); await enterPreviewMode(); await new Promise(r => setTimeout(r, 600)); }
+    if (!fromPreview) { showToast('Preparando documento...', 'info', 2000); await enterPreviewMode(false); await new Promise(r => setTimeout(r, 600)); }
     showToast('Abrindo diálogo de impressão — escolha "Salvar como PDF"', 'info', 5000); await new Promise(r => setTimeout(r, 400)); window.print();
 }
 
-async function printDirect() { await enterPreviewMode(); await new Promise(r => setTimeout(r, 600)); window.print(); }
+async function printDirect(showGabarito = false) { 
+    await enterPreviewMode(showGabarito); 
+    await new Promise(r => setTimeout(r, 600)); 
+    window.print(); 
+}
 
 // =============================================
 // HELPERS
