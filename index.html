@@ -34,7 +34,7 @@
         @keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(60px)}}
 
         /* RICH EDITOR */
-        .rich-editor{outline:none;border:1px solid #e2e8f0;border-radius:0 0 1rem 1rem;padding:.875rem 1rem;min-height:44px;transition:border-color .2s,box-shadow .2s; background:white;}
+        .rich-editor{outline:none;border:1px solid #e2e8f0;border-radius:0 0 1rem 1rem;padding:.875rem 1rem;min-height:44px;transition:border-color .2s,box-shadow .2s; background:white; text-align: justify;}
         .rich-editor:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.1)}
         .rich-editor:empty:before{content:attr(data-placeholder);color:#94a3b8;pointer-events:none;display:block}
 
@@ -62,76 +62,23 @@
         .a4-sheet *{ box-sizing: border-box; }
         .q-block{ page-break-inside: avoid; break-inside: avoid; margin-bottom: 22px; width: 100%; position: relative; z-index: 20; }
 
-        /* ESTILOS DE BORDAS DECORATIVAS (Grade de Repetição Contínua) */
-        .print-border {
-            position: absolute;
-            top: 10mm; left: 10mm; right: 10mm; bottom: 10mm;
-            pointer-events: none; 
-            z-index: 10;
-        }
-
-        .borda-classic {
-            border: 6px double #334155; 
-            border-radius: 4px;
-        }
-
-        .borda-stars {
-            background-image: 
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E");
-            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
-            background-position: top left, bottom left, top left, top right;
-            background-size: 26px 26px;
-            border: none;
-        }
-
-        .borda-flowers {
-            background-image: 
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E");
-            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
-            background-position: top left, bottom left, top left, top right;
-            background-size: 26px 26px;
-            border: none;
-        }
-
-        .borda-leaves {
-            background-image: 
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E");
-            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
-            background-position: top left, bottom left, top left, top right;
-            background-size: 26px 26px;
-            border: none;
-        }
-
-        .borda-kids {
-            background-image: 
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E");
-            background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round;
-            background-position: top left, bottom left, top left, top right;
-            background-size: 26px 26px;
-            border: none;
-        }
+        /* ESTILOS DE BORDAS DECORATIVAS */
+        .print-border { position: absolute; top: 10mm; left: 10mm; right: 10mm; bottom: 10mm; pointer-events: none; z-index: 10; }
+        .borda-classic { border: 6px double #334155; border-radius: 4px; }
+        .borda-stars { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E⭐%3C/text%3E%3C/svg%3E"); background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round; background-position: top left, bottom left, top left, top right; background-size: 26px 26px; border: none; }
+        .borda-flowers { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌸%3C/text%3E%3C/svg%3E"); background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round; background-position: top left, bottom left, top left, top right; background-size: 26px 26px; border: none; }
+        .borda-leaves { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E🌿%3C/text%3E%3C/svg%3E"); background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round; background-position: top left, bottom left, top left, top right; background-size: 26px 26px; border: none; }
+        .borda-kids { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ctext x='2' y='21' font-size='20'%3E✏️%3C/text%3E%3C/svg%3E"); background-repeat: round no-repeat, round no-repeat, no-repeat round, no-repeat round; background-position: top left, bottom left, top left, top right; background-size: 26px 26px; border: none; }
 
         /* LAYOUT UNIFICADO DAS QUESTOES */
         .q-row { display: table; width: 100%; border-collapse: collapse; margin-bottom: 4px; }
         .q-row-num { display: table-cell; white-space: nowrap; vertical-align: top; font-weight: 700; font-size: 14px; line-height: 1.5; padding-right: 6px; }
-        .q-row-body { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; }
+        .q-row-body { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; text-align: justify; } /* Texto justificado adicionado */
         .q-options { margin-top: 4px; margin-left: 14px; }
         .q-opt { display: table; width: 100%; border-collapse: collapse; margin-bottom: 6px; page-break-inside: avoid; }
         .q-opt-letter { display: table-cell; white-space: nowrap; vertical-align: top; font-weight: 700; font-size: 14px; line-height: 1.5; padding-right: 4px; width: 1%; }
         .q-opt-paren { display: table-cell; white-space: nowrap; vertical-align: top; padding-right: 6px; width: 1%; font-size: 14px; line-height: 1.5; letter-spacing: 1px; }
-        .q-opt-text { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; }
+        .q-opt-text { display: table-cell; vertical-align: top; font-size: 14px; line-height: 1.5; width: 100%; text-align: justify; } /* Texto justificado adicionado */
         .q-vf-cell { display: table-cell; white-space: nowrap; vertical-align: top; padding-right: 8px; width: 1%; }
         .q-vf-wrap { display: inline-table; border-collapse: collapse; margin-top: 2px; }
         .q-vf-wrap td { vertical-align: middle; padding: 0 2px; font-size: 11px; font-weight: 700; line-height: 1; }
@@ -230,7 +177,7 @@
             <ul class="space-y-3 lg:space-y-5">
                 <li class="flex items-center gap-3 lg:gap-4 text-blue-50 text-sm lg:text-base font-semibold"><div class="bg-blue-500 p-1 lg:p-1.5 rounded-lg"><i data-lucide="check" class="w-4 h-4 lg:w-5 lg:h-5"></i></div>Paginação inteligente 100% precisa</li>
                 <li class="flex items-center gap-3 lg:gap-4 text-blue-50 text-sm lg:text-base font-semibold"><div class="bg-blue-500 p-1 lg:p-1.5 rounded-lg"><i data-lucide="sparkles" class="w-4 h-4 lg:w-5 lg:h-5"></i></div>Criação Automática com Inteligência Artificial</li>
-                <li class="flex items-center gap-3 lg:gap-4 text-blue-50 text-sm lg:text-base font-semibold"><div class="bg-blue-500 p-1 lg:p-1.5 rounded-lg"><i data-lucide="layout" class="w-4 h-4 lg:w-5 lg:h-5"></i></div>Bordas Decorativas Exclusivas</li>
+                <li class="flex items-center gap-3 lg:gap-4 text-blue-50 text-sm lg:text-base font-semibold"><div class="bg-blue-500 p-1 lg:p-1.5 rounded-lg"><i data-lucide="layout" class="w-4 h-4 lg:w-5 lg:h-5"></i></div>Bordas e Layouts Dinâmicos</li>
             </ul>
         </div>
     </div>
@@ -298,31 +245,70 @@
             </div>
             
             <div>
-                <div id="header-upload-container">
-                    <label class="flex flex-col items-center justify-center gap-4 w-full py-12 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-blue-50/50 hover:border-blue-300 transition-all bg-slate-50/50">
-                        <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-7 h-7 text-slate-300"></i></div>
-                        <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Padrão da escola</span>
-                        <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
-                    </label>
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Tipo de Cabeçalho</label>
+                <div class="flex gap-4 mb-6">
+                    <button onclick="setCabecalhoType('imagem')" id="btn-cab-img" class="flex-1 py-3 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-bold text-xs uppercase tracking-widest transition-all">Imagem da Escola</button>
+                    <button onclick="setCabecalhoType('manual')" id="btn-cab-man" class="flex-1 py-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300 font-bold text-xs uppercase tracking-widest transition-all">Preenchimento Manual</button>
                 </div>
-                <div id="header-preview-container" class="hidden relative group shadow-lg rounded-2xl overflow-hidden border-4 border-white">
-                    <img id="header-img-preview" src="" class="w-full object-contain">
-                    <button onclick="removeHeader()" class="absolute top-3 right-3 bg-white text-red-500 p-3 rounded-2xl shadow-xl border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+
+                <div id="cabecalho-imagem-wrap">
+                    <div id="header-upload-container">
+                        <label class="flex flex-col items-center justify-center gap-4 w-full py-12 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-blue-50/50 hover:border-blue-300 transition-all bg-slate-50/50">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-7 h-7 text-slate-300"></i></div>
+                            <span class="font-black text-slate-500 text-sm uppercase tracking-widest">Carregar Cabeçalho Padrão da escola</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
+                        </label>
+                    </div>
+                    <div id="header-preview-container" class="hidden relative group shadow-lg rounded-2xl overflow-hidden border-4 border-white">
+                        <img id="header-img-preview" src="" class="w-full object-contain">
+                        <button onclick="removeHeader()" class="absolute top-3 right-3 bg-white text-red-500 p-3 rounded-2xl shadow-xl border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
+                <div id="cabecalho-manual-wrap" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Nome da Escola</label>
+                        <input type="text" id="cab-escola" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400" placeholder="Ex: Colégio Elicéu Monteiro Alves">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Nome do Professor(a)</label>
+                        <input type="text" id="cab-professor" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400" placeholder="Ex: Jerry Gleydison">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Disciplina</label>
+                        <input type="text" id="cab-disciplina" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400" placeholder="Ex: Matemática">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Bimestre / Unidade</label>
+                        <input type="text" id="cab-bimestre" class="w-full p-4 bg-white border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400" placeholder="Ex: 1º Bimestre">
+                    </div>
                 </div>
             </div>
 
-            <div class="border-t border-slate-100 pt-6">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Borda da Prova (Aparece na Impressão/PDF)</label>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400"><i data-lucide="layout" class="w-5 h-5"></i></div>
-                    <select id="border-style" class="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 cursor-pointer" onchange="updateBorderStyle(this.value)">
-                        <option value="none">Nenhuma Borda</option>
-                        <option value="borda-classic">Clássica (Linha Dupla Preta)</option>
-                        <option value="borda-stars">Estrelinhas ⭐⭐⭐</option>
-                        <option value="borda-flowers">Flores 🌸🌸🌸</option>
-                        <option value="borda-leaves">Folhas 🌿🌿🌿</option>
-                        <option value="borda-kids">Infantil ✏️✏️✏️</option>
-                    </select>
+            <div class="border-t border-slate-100 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Layout das Questões (Impressão)</label>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400"><i data-lucide="columns" class="w-5 h-5"></i></div>
+                        <select id="layout-style" class="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400 cursor-pointer" onchange="updateLayoutStyle(this.value)">
+                            <option value="1-col">1 Coluna (Padrão)</option>
+                            <option value="2-col">2 Colunas (Lado a Lado)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Borda da Prova (Impressão)</label>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400"><i data-lucide="layout" class="w-5 h-5"></i></div>
+                        <select id="border-style" class="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 outline-none focus:border-blue-400 cursor-pointer" onchange="updateBorderStyle(this.value)">
+                            <option value="none">Nenhuma Borda</option>
+                            <option value="borda-classic">Clássica (Linha Dupla Preta)</option>
+                            <option value="borda-stars">Estrelinhas ⭐⭐⭐</option>
+                            <option value="borda-flowers">Flores 🌸🌸🌸</option>
+                            <option value="borda-leaves">Folhas 🌿🌿🌿</option>
+                            <option value="borda-kids">Infantil ✏️✏️✏️</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -452,20 +438,9 @@
 <script>
 lucide.createIcons();
 
-// =============================================
-// TRUQUE DE OFUSCAÇÃO PARA O GITHUB (BASE64)
-// =============================================
-// PASSO A PASSO PARA VOCÊ (Dono do Sistema):
-// 1. Acesse o site: https://www.base64encode.org/
-// 2. Cole a sua chave do Google Gemini lá e clique em "Encode"
-// 3. Copie o resultado gerado e cole abaixo, dentro das aspas do GEMINI_B64:
 const GEMINI_B64 = "QUl6YVN5RG45eE1UYVlOUHZjRjhvNlYxNUtaZjFzTi1lV2hmRmdv";
-
-// O código abaixo descriptografa a chave automaticamente no navegador do usuário
-// O robô do GitHub não consegue ler, logo, ele não bloqueia a sua chave!
 let GEMINI_API_KEY = "";
 try { GEMINI_API_KEY = atob(GEMINI_B64); } catch(e) { console.error("Chave inválida"); }
-
 
 // =============================================
 // FIREBASE
@@ -484,7 +459,53 @@ const db = firebase.firestore();
 const DB_COL = "sistema-avaliacoes-v5";
 
 // =============================================
-// TOAST
+// ESTADO E VARIÁVEIS GLOBAIS
+// =============================================
+let questions=[];
+let headerData={
+    id:null, 
+    imagem:null, 
+    titulo:'', 
+    borda:'none', 
+    layout:'1-col', 
+    tipoCabecalho:'imagem',
+    escola:'',
+    professor:'',
+    disciplina:'',
+    bimestre:''
+};
+let cropState={questionId:null,optionId:null};
+let allAssessments=[];
+let cropperInstance = null; 
+
+// =============================================
+// CONTROLES DE INTERFACE (Cabeçalho, Layout, Borda)
+// =============================================
+function updateBorderStyle(val) { headerData.borda = val; showToast('Estilo de borda alterado', 'info', 1500); }
+function updateLayoutStyle(val) { headerData.layout = val; showToast('Layout alterado', 'info', 1500); }
+
+function setCabecalhoType(type) {
+    headerData.tipoCabecalho = type;
+    const btnImg = document.getElementById('btn-cab-img');
+    const btnMan = document.getElementById('btn-cab-man');
+    const wrapImg = document.getElementById('cabecalho-imagem-wrap');
+    const wrapMan = document.getElementById('cabecalho-manual-wrap');
+
+    if(type === 'imagem') {
+        btnImg.className = "flex-1 py-3 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-bold text-xs uppercase tracking-widest transition-all";
+        btnMan.className = "flex-1 py-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300 font-bold text-xs uppercase tracking-widest transition-all";
+        wrapImg.classList.remove('hidden');
+        wrapMan.classList.add('hidden');
+    } else {
+        btnMan.className = "flex-1 py-3 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-bold text-xs uppercase tracking-widest transition-all";
+        btnImg.className = "flex-1 py-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300 font-bold text-xs uppercase tracking-widest transition-all";
+        wrapMan.classList.remove('hidden');
+        wrapImg.classList.add('hidden');
+    }
+}
+
+// =============================================
+// TOAST E COR (Utilitários)
 // =============================================
 function showToast(msg, type='success', dur=3500) {
     const icons={success:'check-circle',error:'alert-circle',info:'info',warning:'alert-triangle'};
@@ -497,9 +518,6 @@ function showToast(msg, type='success', dur=3500) {
     setTimeout(()=>{t.style.animation='toastOut .35s ease forwards';setTimeout(()=>t.remove(),350);},dur);
 }
 
-// =============================================
-// COLOR PICKER
-// =============================================
 const PALETTE=['#000000','#1e293b','#334155','#64748b','#94a3b8','#cbd5e1','#ffffff',
     '#dc2626','#ea580c','#d97706','#16a34a','#0284c7','#7c3aed','#db2777',
     '#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899',
@@ -539,9 +557,6 @@ function applyColor(c){
     document.getElementById('color-picker-popup').classList.add('hidden');
 }
 
-// =============================================
-// TOOLBAR DE FORMATAÇÃO
-// =============================================
 function makeToolbar(editorId){
     const tb=document.createElement('div');
     tb.className='fmt-toolbar';
@@ -577,21 +592,6 @@ function makeToolbar(editorId){
 }
 
 // =============================================
-// ESTADO E VARIÁVEIS GLOBAIS
-// =============================================
-let questions=[];
-let headerData={id:null, imagem:null, titulo:'', borda:'none'}; // Adicionado 'borda'
-let cropState={questionId:null,optionId:null};
-let allAssessments=[];
-let cropperInstance = null; 
-
-// Atualiza Borda Visual
-function updateBorderStyle(val) {
-    headerData.borda = val;
-    showToast('Estilo de borda alterado', 'info', 1500);
-}
-
-// =============================================
 // AUTH 
 // =============================================
 document.getElementById('login-form').onsubmit=async(e)=>{
@@ -610,19 +610,12 @@ auth.onAuthStateChanged(user=>{
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
         document.getElementById('user-display').innerText=user.email?user.email.split('@')[0]:'Professor';
-        
         loadSavedAssessments(user.uid, true); 
         initColorPicker();
     }else{
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
-        questions=[];
-        headerData={id:null, imagem:null, titulo:'', borda:'none'};
-        allAssessments=[];
-        document.getElementById('assessment-title').value='';
-        document.getElementById('border-style').value='none';
-        removeHeader();
-        renderQuestions();
+        newAssessment(); // Limpa estado
     }
     lucide.createIcons();
 });
@@ -636,13 +629,8 @@ function handleLogout(){
 // =============================================
 // INTEGRAÇÃO COM INTELIGÊNCIA ARTIFICIAL (GEMINI)
 // =============================================
-function openAIModal() {
-    document.getElementById('ai-modal').classList.remove('hidden');
-}
-function closeAIModal() {
-    document.getElementById('ai-modal').classList.add('hidden');
-    document.getElementById('ai-prompt').value = '';
-}
+function openAIModal() { document.getElementById('ai-modal').classList.remove('hidden'); }
+function closeAIModal() { document.getElementById('ai-modal').classList.add('hidden'); document.getElementById('ai-prompt').value = ''; }
 
 async function generateQuestionAI() {
     const promptInput = document.getElementById('ai-prompt').value.trim();
@@ -650,149 +638,62 @@ async function generateQuestionAI() {
     const difficulty = document.getElementById('ai-difficulty').value;
     
     if(!promptInput) { showToast('Descreva o assunto da questão', 'warning'); return; }
-    if(GEMINI_API_KEY.includes("COLE_") || GEMINI_API_KEY.trim() === "") {
-        alert("Atenção Admin: Você não configurou a chave da API do Gemini corretamente em formato Base64. Leia o Passo a Passo no código-fonte.");
-        return;
-    }
 
     const btn = document.getElementById('btn-generate-ai');
     const spinner = document.getElementById('ai-spinner');
     const btnText = btn.querySelector('span');
-    
-    btn.disabled = true;
-    spinner.classList.remove('hidden');
-    btnText.innerText = 'A IA está pensando...';
+    btn.disabled = true; spinner.classList.remove('hidden'); btnText.innerText = 'A IA está pensando...';
 
-    // 1. Configurar dinamicamente o Schema JSON de acordo com o tipo escolhido
-    let tipoNome = "";
-    let jsonSchema = "";
-
+    let tipoNome = ""; let jsonSchema = "";
     switch(qType) {
-        case 'text':
-            tipoNome = "Escrita Livre (Dissertativa)";
-            jsonSchema = `{"enunciado": "Texto da pergunta descritiva e detalhada aqui"}`;
-            break;
-        case 'multiple-choice':
-            tipoNome = "Múltipla Escolha";
-            jsonSchema = `{"enunciado": "Pergunta direta", "opcoes": ["Opção A", "Opção B", "Opção C", "Opção D"]}`;
-            break;
-        case 'true-false':
-            tipoNome = "Verdadeiro ou Falso";
-            jsonSchema = `{"enunciado": "Afirmação ou pergunta para julgar se é V ou F", "opcoes": ["Opção 1", "Opção 2", "Opção 3"]}`;
-            break;
-        case 'discursive-list':
-            tipoNome = "Tópicos (Listagem)";
-            jsonSchema = `{"enunciado": "Instrução (ex: Liste as principais causas...)", "opcoes": ["Tópico 1 para preencher", "Tópico 2 para preencher"]}`;
-            break;
-        case 'fill-in-the-blanks':
-            tipoNome = "Completar Lacunas";
-            jsonSchema = `{"enunciado": "Instrução clara para completar os espaços", "quadro_palavras": "Palavra 1 - Palavra 2 - Palavra 3", "texto_lacunas": "O texto didático contendo espaços no formato ____ para o aluno preencher."}`;
-            break;
-        case 'matching':
-            tipoNome = "Ligar Colunas";
-            jsonSchema = `{"enunciado": "Instrução para relacionar as colunas", "pares": [{"esquerda": "Conceito 1", "direita": "Definição 1"}, {"esquerda": "Conceito 2", "direita": "Definição 2"}, {"esquerda": "Conceito 3", "direita": "Definição 3"}]}`;
-            break;
+        case 'text': tipoNome = "Escrita Livre (Dissertativa)"; jsonSchema = `{"enunciado": "Texto da pergunta descritiva e detalhada aqui"}`; break;
+        case 'multiple-choice': tipoNome = "Múltipla Escolha"; jsonSchema = `{"enunciado": "Pergunta direta", "opcoes": ["Opção A", "Opção B", "Opção C", "Opção D"]}`; break;
+        case 'true-false': tipoNome = "Verdadeiro ou Falso"; jsonSchema = `{"enunciado": "Afirmação ou pergunta para julgar se é V ou F", "opcoes": ["Opção 1", "Opção 2", "Opção 3"]}`; break;
+        case 'discursive-list': tipoNome = "Tópicos (Listagem)"; jsonSchema = `{"enunciado": "Instrução (ex: Liste as principais causas...)", "opcoes": ["Tópico 1 para preencher", "Tópico 2 para preencher"]}`; break;
+        case 'fill-in-the-blanks': tipoNome = "Completar Lacunas"; jsonSchema = `{"enunciado": "Instrução clara para completar os espaços", "quadro_palavras": "Palavra 1 - Palavra 2 - Palavra 3", "texto_lacunas": "O texto didático contendo espaços no formato ____ para o aluno preencher."}`; break;
+        case 'matching': tipoNome = "Ligar Colunas"; jsonSchema = `{"enunciado": "Instrução para relacionar as colunas", "pares": [{"esquerda": "Conceito 1", "direita": "Definição 1"}, {"esquerda": "Conceito 2", "direita": "Definição 2"}, {"esquerda": "Conceito 3", "direita": "Definição 3"}]}`; break;
     }
 
     const promptText = `Atue como um professor especialista. Crie uma questão de ${tipoNome} sobre o seguinte assunto: "${promptInput}". Dificuldade: ${difficulty}.
     A questão deve ser inédita, didática e muito bem escrita. ${qType === 'multiple-choice' ? 'ATENÇÃO: É OBRIGATÓRIO gerar EXATAMENTE 4 alternativas.' : ''}
-    
     CRUCIAL: Retorne APENAS um objeto JSON estrito (sem markdown, sem blocos de código, apenas chaves e colchetes). Use EXATAMENTE esta estrutura de exemplo:
     ${jsonSchema}`;
 
     try {
-        
-     // Usando o modelo estável e recomendado: gemini-2.5-flash
-const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { 
-            temperature: 0.7, 
-            topK: 40
-        }
-    } )
-});
-
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7, topK: 40 } } )
+        });
 
         const data = await response.json();
-        
         if(data.error) throw new Error(data.error.message);
 
         let aiText = data.candidates[0].content.parts[0].text;
         aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
-        
         const qData = JSON.parse(aiText);
 
-        // 2. Mapear dinamicamente os dados do JSON para a estrutura nativa da questão
-        let newOps = [];
-        let textoApoio = '';
+        let newOps = []; let textoApoio = '';
 
         if (['multiple-choice', 'true-false', 'discursive-list'].includes(qType)) {
             let opcoesArray = qData.opcoes || [];
-            newOps = opcoesArray.map(opt => ({
-                id: Date.now().toString() + Math.floor(Math.random()*1000),
-                text: typeof opt === 'string' ? opt : (opt.text || ''),
-                image: null,
-                matchText: '',
-                type: 'text'
-            }));
-            // Fallback caso venha sem opções
+            newOps = opcoesArray.map(opt => ({ id: Date.now().toString() + Math.floor(Math.random()*1000), text: typeof opt === 'string' ? opt : (opt.text || ''), image: null, matchText: '', type: 'text' }));
             if(newOps.length === 0) newOps.push({id: Date.now().toString(), text:'...', image:null, matchText:'', type:'text'});
-        
-        } else if (qType === 'text') {
-            // Escrita livre não precisa de opções
-            newOps = [];
-        
         } else if (qType === 'fill-in-the-blanks') {
             textoApoio = qData.quadro_palavras || '';
-            newOps = [{
-                id: Date.now().toString() + Math.floor(Math.random()*1000),
-                text: qData.texto_lacunas || '',
-                image: null,
-                matchText: '',
-                type: 'text'
-            }];
-        
+            newOps = [{ id: Date.now().toString() + Math.floor(Math.random()*1000), text: qData.texto_lacunas || '', image: null, matchText: '', type: 'text' }];
         } else if (qType === 'matching') {
             let paresArray = qData.pares || [];
-            newOps = paresArray.map(par => ({
-                id: Date.now().toString() + Math.floor(Math.random()*1000),
-                text: par.esquerda || '',
-                image: null,
-                matchText: par.direita || '',
-                type: 'text'
-            }));
+            newOps = paresArray.map(par => ({ id: Date.now().toString() + Math.floor(Math.random()*1000), text: par.esquerda || '', image: null, matchText: par.direita || '', type: 'text' }));
             if(newOps.length === 0) newOps.push({id: Date.now().toString(), text:'...', image:null, matchText:'...', type:'text'});
         }
 
-        const newQ = {
-            id: Date.now().toString(),
-            type: qType,
-            textoApoio: textoApoio,
-            enunciado: qData.enunciado || '',
-            imagem: null,
-            imageWidth: 50,
-            opcoes: newOps,
-            linhas: qType === 'text' ? 4 : 4 // Linhas padrão para discursiva
-        };
+        const newQ = { id: Date.now().toString(), type: qType, textoApoio: textoApoio, enunciado: qData.enunciado || '', imagem: null, imageWidth: 50, opcoes: newOps, linhas: qType === 'text' ? 4 : 4 };
 
-        questions.push(newQ);
-        renderQuestions();
-        showToast('Questão gerada com sucesso!', 'success');
-        closeAIModal();
-        
+        questions.push(newQ); renderQuestions(); showToast('Questão gerada com sucesso!', 'success'); closeAIModal();
         setTimeout(()=>{const el=document.getElementById(`enunciado-${newQ.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
-
     } catch (e) {
-        console.error("Erro na IA:", e);
         showToast('Erro ao gerar questão. Tente formular o assunto de outra forma.', 'error', 5000);
-    } finally {
-        btn.disabled = false;
-        spinner.classList.add('hidden');
-        btnText.innerText = 'Gerar Questão Agora';
-    }
+    } finally { btn.disabled = false; spinner.classList.add('hidden'); btnText.innerText = 'Gerar Questão Agora'; }
 }
 
 // =============================================
@@ -800,29 +701,15 @@ const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/m
 // =============================================
 function addQuestion(type){
     let ops = [];
-    if(['multiple-choice','true-false','discursive-list','matching'].includes(type)){
-        ops = [
-            {id:(Date.now()+1).toString(),text:'',image:null,matchText:'',type:'text'},
-            {id:(Date.now()+2).toString(),text:'',image:null,matchText:'',type:'text'}
-        ];
-    } else if (type === 'fill-in-the-blanks') {
-        ops = [ {id:(Date.now()+1).toString(), text:''} ];
-    }
+    if(['multiple-choice','true-false','discursive-list','matching'].includes(type)){ ops = [ {id:(Date.now()+1).toString(),text:'',image:null,matchText:'',type:'text'}, {id:(Date.now()+2).toString(),text:'',image:null,matchText:'',type:'text'} ]; } 
+    else if (type === 'fill-in-the-blanks') { ops = [ {id:(Date.now()+1).toString(), text:''} ]; }
     
-    const q={
-        id:Date.now().toString(), type,
-        textoApoio:'', enunciado:'', imagem:null, imageWidth:50,
-        opcoes: ops,
-        linhas:4
-    };
+    const q={ id:Date.now().toString(), type, textoApoio:'', enunciado:'', imagem:null, imageWidth:50, opcoes: ops, linhas:4 };
     questions.push(q); renderQuestions();
     setTimeout(()=>{const el=document.getElementById(`enunciado-${q.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
 }
 
-function removeQuestion(id){
-    if(!confirm('Remover esta questão?'))return;
-    questions=questions.filter(q=>q.id!==id); renderQuestions();
-}
+function removeQuestion(id){ if(!confirm('Remover esta questão?'))return; questions=questions.filter(q=>q.id!==id); renderQuestions(); }
 
 function renderQuestions(){
     const container=document.getElementById('questions-container');
@@ -840,17 +727,10 @@ function renderQuestions(){
 
     questions.forEach((q,index)=>{
         const color=TC[q.type]||'blue';
-        let apoioLabel = "Texto de Apoio (opcional)";
-        let apoioPlaceholder = "Texto base ou contexto...";
-        let enunLabel = "Enunciado *";
-        let enunPlaceholder = "Digite a pergunta aqui...";
+        let apoioLabel = "Texto de Apoio (opcional)"; let apoioPlaceholder = "Texto base ou contexto...";
+        let enunLabel = "Enunciado *"; let enunPlaceholder = "Digite a pergunta aqui...";
 
-        if(q.type === 'fill-in-the-blanks') {
-            apoioLabel = "Palavras do Quadro (opcional)";
-            apoioPlaceholder = "Ex: Portugal - donatário - terras";
-            enunLabel = "Instrução *";
-            enunPlaceholder = "Ex: Complete os espaços abaixo:";
-        }
+        if(q.type === 'fill-in-the-blanks') { apoioLabel = "Palavras do Quadro (opcional)"; apoioPlaceholder = "Ex: Portugal - donatário - terras"; enunLabel = "Instrução *"; enunPlaceholder = "Ex: Complete os espaços abaixo:"; }
 
         const card=document.createElement('div');
         card.className="bg-white rounded-[2.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden";
@@ -919,7 +799,6 @@ function renderQuestions(){
             ab.onclick=()=>addOption(q.id);
             optC.appendChild(ab);
         }
-        
         else if (q.type === 'fill-in-the-blanks') {
             q.opcoes.forEach((opt, oi) => {
                 const od = document.createElement('div');
@@ -940,7 +819,6 @@ function renderQuestions(){
                 const lacEditor = document.getElementById(`lacunas-${opt.id}`);
                 lacEditor.oninput = (e) => { opt.text = e.target.innerHTML; };
             });
-
             const ab=document.createElement('button');
             ab.className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-rose-500 font-black text-xs uppercase tracking-widest hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center justify-center gap-3 active:scale-95 mt-2";
             ab.innerHTML=`<i data-lucide="plus" class="w-5 h-5"></i> Adicionar Alternativa`;
@@ -974,7 +852,6 @@ function renderQuestions(){
 function buildImgZone(q){
     const hasValidImg = q.imagem && q.imagem.length > 30;
     if(!hasValidImg)return`<label class="flex items-center gap-4 w-full p-5 border-2 border-dashed border-slate-100 rounded-2xl cursor-pointer hover:bg-blue-50/50 hover:border-blue-200 transition-all bg-slate-50/30"><div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm"><i data-lucide="image" class="w-6 h-6 text-slate-300"></i></div><span class="font-bold text-sm uppercase tracking-widest text-slate-400">Incluir Imagem</span><input type="file" accept="image/*" class="hidden" onchange="startCrop('${q.id}',null,this)"></label>`;
-    
     return`<div class="bg-slate-50 rounded-2xl p-6 space-y-5 border border-slate-100">
         <div class="relative flex justify-center group rounded-xl overflow-hidden border-4 border-white bg-white shadow-md">
             <img src="${q.imagem}" style="width:${q.imageWidth}%" class="object-contain" crossorigin="anonymous">
@@ -993,90 +870,51 @@ function buildImgZone(q){
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // =============================================
-// CROP COM CROPPER.JS
+// CROP E CABEÇALHO (Imagem)
 // =============================================
 function startCrop(qId, oId, input){
-    const file = input.files[0];
-    if(!file) return;
-    const r = new FileReader();
+    const file = input.files[0]; if(!file) return; const r = new FileReader();
     r.onload = (e) => {
-        cropState.questionId = qId;
-        cropState.optionId = oId;
+        cropState.questionId = qId; cropState.optionId = oId;
         const img = document.getElementById('img-to-crop');
-        
         if(cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
-
         img.onload = () => {
             document.getElementById('cropper-modal').classList.remove('hidden');
             cropperInstance = new Cropper(img, { viewMode: 1, dragMode: 'move', autoCropArea: 0.8, restore: false, guides: true, center: true, highlight: false, cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false, });
         };
         img.src = e.target.result;
     };
-    r.readAsDataURL(file);
-    input.value = '';
+    r.readAsDataURL(file); input.value = '';
 }
 
 function applyCrop(full){
-    if(!cropperInstance) return;
-    let canvas;
-    if(full) cropperInstance.clear();
-    
+    if(!cropperInstance) return; let canvas; if(full) cropperInstance.clear();
     canvas = cropperInstance.getCroppedCanvas({ fillColor: '#ffffff', imageSmoothingEnabled: true, imageSmoothingQuality: 'high', });
     if(!canvas) { closeCropper(); return; }
-
-    const MAX_DIM = 1000; 
-    let targetW = canvas.width; let targetH = canvas.height;
-    if(targetW > MAX_DIM || targetH > MAX_DIM) {
-        const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH);
-        targetW *= ratio; targetH *= ratio;
-    }
-
-    const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = targetW; finalCanvas.height = targetH;
-    const ctx = finalCanvas.getContext('2d');
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, targetW, targetH);
-    ctx.drawImage(canvas, 0, 0, targetW, targetH);
-    
+    const MAX_DIM = 1000; let targetW = canvas.width; let targetH = canvas.height;
+    if(targetW > MAX_DIM || targetH > MAX_DIM) { const ratio = Math.min(MAX_DIM/targetW, MAX_DIM/targetH); targetW *= ratio; targetH *= ratio; }
+    const finalCanvas = document.createElement('canvas'); finalCanvas.width = targetW; finalCanvas.height = targetH;
+    const ctx = finalCanvas.getContext('2d'); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, targetW, targetH); ctx.drawImage(canvas, 0, 0, targetW, targetH);
     const data = finalCanvas.toDataURL('image/jpeg', 0.90); 
-    
     const q = questions.find(qu=>qu.id===cropState.questionId);
-    if(cropState.optionId) { q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data; } 
-    else { q.imagem=data; }
-    
+    if(cropState.optionId) { q.opcoes.find(o=>o.id.toString()===cropState.optionId.toString()).image=data; } else { q.imagem=data; }
     closeCropper(); renderQuestions();
 }
 
-function closeCropper(){
-    document.getElementById('cropper-modal').classList.add('hidden');
-    if(cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
-    document.getElementById('img-to-crop').src = '';
-}
+function closeCropper(){ document.getElementById('cropper-modal').classList.add('hidden'); if(cropperInstance) { cropperInstance.destroy(); cropperInstance = null; } document.getElementById('img-to-crop').src = ''; }
 function removeQuestionImage(qId){questions.find(q=>q.id===qId).imagem=null;renderQuestions();}
 function removeOptImage(qId,oId){questions.find(q=>q.id===qId).opcoes.find(o=>o.id.toString()===oId.toString()).image=null;renderQuestions();}
 
-// =============================================
-// CABEÇALHO 
-// =============================================
 function uploadHeader(input){
-    const file=input.files[0];if(!file)return;
-    const r=new FileReader();
+    const file=input.files[0];if(!file)return; const r=new FileReader();
     r.onload=(e)=>{
         const img = new Image();
         img.onload = () => {
-            const c = document.createElement('canvas');
-            const MAX_W = 1200; 
-            let w = img.width, h = img.height;
+            const c = document.createElement('canvas'); const MAX_W = 1200; let w = img.width, h = img.height;
             if(w > MAX_W) { h *= MAX_W/w; w = MAX_W; }
-            
-            c.width = w; c.height = h;
-            const ctx = c.getContext('2d');
-            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h);
-            ctx.drawImage(img, 0, 0, w, h);
-            
+            c.width = w; c.height = h; const ctx = c.getContext('2d'); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, 0, 0, w, h);
             headerData.imagem = c.toDataURL('image/jpeg', 0.90);
-            document.getElementById('header-upload-container').classList.add('hidden');
-            document.getElementById('header-preview-container').classList.remove('hidden');
-            document.getElementById('header-img-preview').src = headerData.imagem;
+            document.getElementById('header-upload-container').classList.add('hidden'); document.getElementById('header-preview-container').classList.remove('hidden'); document.getElementById('header-img-preview').src = headerData.imagem;
             showToast('Cabeçalho carregado!','success');
         };
         img.src = e.target.result;
@@ -1084,12 +922,19 @@ function uploadHeader(input){
     r.readAsDataURL(file);
 }
 function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
+
 function newAssessment(){
     if(!confirm('Criar nova prova? O conteúdo não guardado será perdido.'))return;
     questions=[];
-    headerData={id:null,imagem:null,titulo:'', borda:'none'};
+    headerData={ id:null, imagem:null, titulo:'', borda:'none', layout:'1-col', tipoCabecalho:'imagem', escola:'', professor:'', disciplina:'', bimestre:'' };
     document.getElementById('assessment-title').value='';
     document.getElementById('border-style').value='none';
+    document.getElementById('layout-style').value='1-col';
+    document.getElementById('cab-escola').value='';
+    document.getElementById('cab-professor').value='';
+    document.getElementById('cab-disciplina').value='';
+    document.getElementById('cab-bimestre').value='';
+    setCabecalhoType('imagem');
     removeHeader();
     renderQuestions();
     localStorage.removeItem('last_open_assessment_id');
@@ -1097,22 +942,20 @@ function newAssessment(){
 }
 
 // =============================================
-// SALVAR BLINDADO
+// SALVAR & HISTÓRICO
 // =============================================
 function captureEditorContents(){
     questions.forEach(q=>{
-        const apoio=document.getElementById(`apoio-${q.id}`);
-        const enun=document.getElementById(`enunciado-${q.id}`);
-        if(apoio) q.textoApoio=apoio.innerHTML;
-        if(enun)  q.enunciado=enun.innerHTML;
-        
-        if(q.type === 'fill-in-the-blanks' && q.opcoes) {
-            q.opcoes.forEach(opt => {
-                const lac = document.getElementById(`lacunas-${opt.id}`);
-                if(lac) { opt.text = lac.innerHTML; }
-            });
-        }
+        const apoio=document.getElementById(`apoio-${q.id}`); const enun=document.getElementById(`enunciado-${q.id}`);
+        if(apoio) q.textoApoio=apoio.innerHTML; if(enun) q.enunciado=enun.innerHTML;
+        if(q.type === 'fill-in-the-blanks' && q.opcoes) { q.opcoes.forEach(opt => { const lac = document.getElementById(`lacunas-${opt.id}`); if(lac) { opt.text = lac.innerHTML; } }); }
     });
+    
+    // Capturar dados do cabeçalho manual
+    headerData.escola = document.getElementById('cab-escola').value.trim();
+    headerData.professor = document.getElementById('cab-professor').value.trim();
+    headerData.disciplina = document.getElementById('cab-disciplina').value.trim();
+    headerData.bimestre = document.getElementById('cab-bimestre').value.trim();
 }
 
 async function saveToCloud(){
@@ -1121,91 +964,49 @@ async function saveToCloud(){
     if(!title){showToast('Digite um título para a prova','warning');return;}
     captureEditorContents();
     headerData.titulo=title;
-    
-    // Garantir que salva a borda
     headerData.borda = document.getElementById('border-style').value || 'none';
+    headerData.layout = document.getElementById('layout-style').value || '1-col';
 
-    const btn=document.getElementById('btn-save');
-    btn.disabled=true;
+    const btn=document.getElementById('btn-save'); btn.disabled=true;
     btn.innerHTML=`<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full loader" style="display:inline-block"></div><span class="hidden sm:inline ml-1">A guardar...</span>`;
     const docId=headerData.id||Date.now().toString();
     
     try{
-        const payloadObj = {id:docId, headerData, questions};
-        const payloadString = JSON.stringify(payloadObj);
-        
+        const payloadObj = {id:docId, headerData, questions}; const payloadString = JSON.stringify(payloadObj);
         const sizeMB = new Blob([payloadString]).size / (1024 * 1024);
-        if(sizeMB >= 0.9) {
-            showToast(`Erro: A prova tem ${sizeMB.toFixed(2)} MB. Exclua imagens antigas.`, 'error', 6000);
-            throw new Error('PAYLOAD_TOO_LARGE');
-        }
-
-        const payload = JSON.parse(payloadString);
-        payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-
+        if(sizeMB >= 0.9) { showToast(`Erro: A prova tem ${sizeMB.toFixed(2)} MB. Exclua imagens antigas.`, 'error', 6000); throw new Error('PAYLOAD_TOO_LARGE'); }
+        const payload = JSON.parse(payloadString); payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
+        await Promise.race([ db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload), timeout ]);
         
-        await Promise.race([
-            db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).set(payload),
-            timeout
-        ]);
-        
-        headerData.id=docId;
-        localStorage.setItem('last_open_assessment_id', docId);
+        headerData.id=docId; localStorage.setItem('last_open_assessment_id', docId);
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Guardado!</span>`;
-        btn.style.background='#065f46';
-        showToast('✓ Prova guardada com sucesso!','success');
-        
-        setTimeout(()=>{
-            btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`;
-            btn.style.background='';
-            btn.disabled=false;
-        },2000);
-
+        btn.style.background='#065f46'; showToast('✓ Prova guardada com sucesso!','success');
+        setTimeout(()=>{ btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`; btn.style.background=''; btn.disabled=false; },2000);
     }catch(e){
-        console.error(e);
-        if(e.message === 'TIMEOUT') { showToast('Tempo esgotado. A internet falhou.', 'error'); } 
-        else if (e.message !== 'PAYLOAD_TOO_LARGE') { showToast('Erro ao guardar no servidor. Verifique a internet.', 'error'); }
-        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`;
-        btn.disabled=false;
+        if(e.message === 'TIMEOUT') { showToast('Tempo esgotado. A internet falhou.', 'error'); } else if (e.message !== 'PAYLOAD_TOO_LARGE') { showToast('Erro ao guardar no servidor. Verifique a internet.', 'error'); }
+        btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Guardar</span>`; btn.disabled=false;
     }
 }
 
-// =============================================
-// HISTÓRICO 
-// =============================================
 function toggleSavedModal(){
-    const m=document.getElementById('saved-modal');
-    const h=m.classList.contains('hidden');
-    m.classList.toggle('hidden');
-    if(h) loadSavedAssessments(null, false);
+    const m=document.getElementById('saved-modal'); const h=m.classList.contains('hidden');
+    m.classList.toggle('hidden'); if(h) loadSavedAssessments(null, false);
 }
 
 async function loadSavedAssessments(uid = null, autoOpen = false){
-    const currentUid = uid || (auth.currentUser ? auth.currentUser.uid : null);
-    if(!currentUid) return; 
-    
-    const list=document.getElementById('saved-list');
-    list.innerHTML='<div class="flex justify-center py-8"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent loader"></div></div>';
+    const currentUid = uid || (auth.currentUser ? auth.currentUser.uid : null); if(!currentUid) return; 
+    const list=document.getElementById('saved-list'); list.innerHTML='<div class="flex justify-center py-8"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent loader"></div></div>';
     
     try{
         const snap=await db.collection('artifacts').doc(DB_COL).collection('users').doc(currentUid).collection('avaliacoes').orderBy('updatedAt','desc').get();
         allAssessments=[];list.innerHTML='';
-        
-        if(snap.empty){
-            list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova guardada ainda</p></div>';
-            lucide.createIcons();
-            return;
-        }
+        if(snap.empty){ list.innerHTML='<div class="text-center py-10 text-slate-400"><i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-50"></i><p class="font-bold text-sm">Nenhuma prova guardada ainda</p></div>'; lucide.createIcons(); return; }
         
         document.getElementById('saved-count').innerText=`${snap.size} prova${snap.size>1?'s':''} guardada${snap.size>1?'s':''}`;
-        
         snap.forEach(doc=>{
-            const data=doc.data();
-            const idx=allAssessments.length;
-            allAssessments.push(data);
-            const isA=data.id===headerData.id;
-            const dt=data.updatedAt?.toDate?data.updatedAt.toDate().toLocaleString('pt-BR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+            const data=doc.data(); const idx=allAssessments.length; allAssessments.push(data);
+            const isA=data.id===headerData.id; const dt=data.updatedAt?.toDate?data.updatedAt.toDate().toLocaleString('pt-BR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
             const item=document.createElement('div');
             item.className=`p-5 rounded-2xl border transition-all ${isA?'bg-blue-50 border-blue-200':'bg-slate-50 border-slate-100 hover:bg-white hover:border-slate-200 hover:shadow-md'}`;
             item.innerHTML=`<div class="flex items-start justify-between gap-3">
@@ -1226,91 +1027,75 @@ async function loadSavedAssessments(uid = null, autoOpen = false){
         });
 
         if(autoOpen && allAssessments.length > 0) {
-            const lastId = localStorage.getItem('last_open_assessment_id');
-            const idx = lastId ? allAssessments.findIndex(a => a.id === lastId) : -1;
+            const lastId = localStorage.getItem('last_open_assessment_id'); const idx = lastId ? allAssessments.findIndex(a => a.id === lastId) : -1;
             loadAssessmentByIndex(idx >= 0 ? idx : 0, true); 
         }
-
     }catch{list.innerHTML='<div class="text-center py-8 text-red-400 font-bold text-sm">Erro ao carregar</div>';}
     lucide.createIcons();
 }
+
 function loadAssessmentByIndex(idx, silent = false){
-    const data=allAssessments[idx];
-    if(!data) return;
-    
-    // Carrega dados da prova e a Borda salva
+    const data=allAssessments[idx]; if(!data) return;
     headerData={...data.headerData};
     if(!headerData.borda) headerData.borda = 'none';
+    if(!headerData.layout) headerData.layout = '1-col';
+    if(!headerData.tipoCabecalho) headerData.tipoCabecalho = 'imagem';
+    
     document.getElementById('border-style').value = headerData.borda;
+    document.getElementById('layout-style').value = headerData.layout;
+    
+    document.getElementById('cab-escola').value = headerData.escola || '';
+    document.getElementById('cab-professor').value = headerData.professor || '';
+    document.getElementById('cab-disciplina').value = headerData.disciplina || '';
+    document.getElementById('cab-bimestre').value = headerData.bimestre || '';
+    
+    setCabecalhoType(headerData.tipoCabecalho);
 
     questions=data.questions.map(q=>({...q,opcoes:q.opcoes?q.opcoes.map(o=>({...o})):[]}));
     document.getElementById('assessment-title').value=headerData.titulo||'';
     if(headerData.imagem){document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=headerData.imagem;}
-    else removeHeader();
-    renderQuestions();
-    localStorage.setItem('last_open_assessment_id', headerData.id || '');
-    document.getElementById('saved-modal').classList.add('hidden');
+    else { document.getElementById('header-upload-container').classList.remove('hidden'); document.getElementById('header-preview-container').classList.add('hidden'); }
+    
+    renderQuestions(); localStorage.setItem('last_open_assessment_id', headerData.id || ''); document.getElementById('saved-modal').classList.add('hidden');
     if(!silent) showToast(`"${headerData.titulo}" carregada`,'info');
 }
+
 async function deleteAssessment(docId,idx){
     if(!confirm('Excluir esta prova permanentemente?'))return;
-    try{
-        await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete();
-        showToast('Prova excluída','warning');
-        loadSavedAssessments(null, false);
-    }
+    try{ await db.collection('artifacts').doc(DB_COL).collection('users').doc(auth.currentUser.uid).collection('avaliacoes').doc(docId).delete(); showToast('Prova excluída','warning'); loadSavedAssessments(null, false); }
     catch{showToast('Erro ao excluir','error');}
 }
 
 // =============================================
-// BUILD HTML DA QUESTÃO
+// BUILD HTML DA QUESTÃO E PAGINAÇÃO 
 // =============================================
 function buildQuestaoHTML(q, index) {
     function optLetter(i) { return String.fromCharCode(97 + i) + ')'; }
-
-    function enunciadoRow(num, html, extraClass='') {
-        return `<div class="q-row${extraClass ? ' '+extraClass : ''}"><span class="q-row-num">${num}.</span><span class="q-row-body">${html}</span></div>`;
-    }
+    function enunciadoRow(num, html, extraClass='') { return `<div class="q-row${extraClass ? ' '+extraClass : ''}"><span class="q-row-num">${num}.</span><span class="q-row-body">${html}</span></div>`; }
 
     let h = `<div class="q-block">`;
-
     if (q.type === 'fill-in-the-blanks') {
         h += enunciadoRow(index + 1, q.enunciado || '...');
         if (q.imagem && q.imagem.length > 30) h += `<div style="text-align:center;margin:6px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
         if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim()) h += `<div class="q-wordbank"><div class="q-wordbank-inner">${q.textoApoio}</div></div>`;
-        if (q.opcoes && q.opcoes.length === 1) {
-            const t = q.opcoes[0].text;
-            if (t && t.replace(/<[^>]*>/g, '').trim()) h += `<div style="font-size:14px;line-height:2;text-align:justify;margin-top:4px;">${t}</div>`;
-        } else if (q.opcoes && q.opcoes.length > 1) {
-            h += `<div class="q-options">`;
-            q.opcoes.forEach((opt, i) => { if (opt.text && opt.text.replace(/<[^>]*>/g, '').trim()) h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text" style="line-height:2;text-align:justify;">${opt.text}</span></div>`; });
-            h += `</div>`;
-        }
+        if (q.opcoes && q.opcoes.length === 1) { const t = q.opcoes[0].text; if (t && t.replace(/<[^>]*>/g, '').trim()) h += `<div style="font-size:14px;line-height:2;text-align:justify;margin-top:4px;">${t}</div>`; } 
+        else if (q.opcoes && q.opcoes.length > 1) { h += `<div class="q-options">`; q.opcoes.forEach((opt, i) => { if (opt.text && opt.text.replace(/<[^>]*>/g, '').trim()) h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text" style="line-height:2;text-align:justify;">${opt.text}</span></div>`; }); h += `</div>`; }
     } else {
         if (q.textoApoio && q.textoApoio.replace(/<[^>]*>/g, '').trim()) h += `<div class="q-apoio">${q.textoApoio}</div>`;
         h += enunciadoRow(index + 1, q.enunciado || '...');
         if (q.imagem && q.imagem.length > 30) h += `<div style="text-align:center;margin:5px 0;"><img src="${q.imagem}" style="width:${q.imageWidth}%;max-width:100%;display:inline-block;" crossorigin="anonymous"></div>`;
-
-        if (q.type === 'text') {
-            const n = Math.max(1, parseInt(q.linhas) || 4);
-            h += `<div style="margin-top:4px;">`;
-            for (let i = 0; i < n; i++) h += `<span class="q-line"></span>`;
-            h += `</div>`;
-        }
-
+        if (q.type === 'text') { const n = Math.max(1, parseInt(q.linhas) || 4); h += `<div style="margin-top:4px;">`; for (let i = 0; i < n; i++) h += `<span class="q-line"></span>`; h += `</div>`; }
         if (['multiple-choice', 'true-false', 'discursive-list'].includes(q.type)) {
             h += `<div class="q-options">`;
             q.opcoes.forEach((opt, i) => {
                 const img = opt.type === 'image' && opt.image && opt.image.length > 30;
                 const content = img ? `<img src="${opt.image}" style="max-height:50px;width:auto;object-fit:contain;display:block;" crossorigin="anonymous">` : (opt.text || '');
-
                 if (q.type === 'multiple-choice') { h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-paren">(  )</span><span class="q-opt-text">${content}</span></div>`; } 
                 else if (q.type === 'true-false') { h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-paren">(  )</span><span class="q-opt-text">${content}</span></div>`; } 
                 else { h += `<div class="q-opt"><span class="q-opt-letter">${optLetter(i)}</span><span class="q-opt-text">${content}</span></div><span class="q-line"></span>`; }
             });
             h += `</div>`;
         }
-
         if (q.type === 'matching') {
             h += `<div class="q-options">`;
             q.opcoes.forEach((opt, i) => {
@@ -1321,17 +1106,11 @@ function buildQuestaoHTML(q, index) {
             h += `</div>`;
         }
     }
-
-    h += `</div>`;
-    return h;
+    h += `</div>`; return h;
 }
 
-// =============================================
-// NOVO MOTOR DE PAGINAÇÃO (DOM) COM BORDAS
-// =============================================
 async function waitForImagesToLoad(element) {
-    const images = Array.from(element.querySelectorAll('img'));
-    if (images.length === 0) return;
+    const images = Array.from(element.querySelectorAll('img')); if (images.length === 0) return;
     await Promise.all(images.map(img => {
         if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
         return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
@@ -1342,142 +1121,103 @@ async function waitForImagesToLoad(element) {
 async function createPaginatedDOM() {
     const container = document.createElement('div');
     container.className = 'flex flex-col gap-8 items-start md:items-center w-full min-w-max';
+    const measureWrapper = document.createElement('div'); measureWrapper.style.cssText = 'position:fixed; left:-9999px; top:0; visibility:hidden;'; document.body.appendChild(measureWrapper);
+    const mmDiv = document.createElement('div'); mmDiv.style.height = '250mm'; measureWrapper.appendChild(mmDiv);
+    const safeHeightPx = mmDiv.getBoundingClientRect().height; measureWrapper.removeChild(mmDiv);
 
-    const measureWrapper = document.createElement('div');
-    measureWrapper.style.cssText = 'position:fixed; left:-9999px; top:0; visibility:hidden;';
-    document.body.appendChild(measureWrapper);
-
-    const mmDiv = document.createElement('div');
-    // 1. AJUSTE DA ALTURA SEGURA (Compensando as novas margens para a quebra de página)
-    mmDiv.style.height = '250mm'; 
-    measureWrapper.appendChild(mmDiv);
-    const safeHeightPx = mmDiv.getBoundingClientRect().height;
-    measureWrapper.removeChild(mmDiv);
-
-    let sheets = [];
-    let currentSheet, currentContent;
+    let sheets = []; let currentSheet, currentContent;
 
     function newSheet() {
-        const sheet = document.createElement('div');
-        sheet.className = 'a4-sheet';
+        const sheet = document.createElement('div'); sheet.className = 'a4-sheet'; sheet.style.padding = '22mm 22mm 25mm 22mm';
+        if(headerData.borda && headerData.borda !== 'none') { const borderEl = document.createElement('div'); borderEl.className = 'print-border ' + headerData.borda; sheet.appendChild(borderEl); }
+        const content = document.createElement('div'); content.style.width = '100%'; content.style.position = 'relative'; content.style.zIndex = '20';
         
-        // 2. AJUSTE DO ESPAÇAMENTO INTERNO (Afastando o texto das bordas)
-        sheet.style.padding = '22mm 22mm 25mm 22mm';
+        // Ativa Layout de 2 Colunas se Selecionado
+        if(headerData.layout === '2-col') { content.style.columnCount = '2'; content.style.columnGap = '12mm'; }
         
-        // Aplica a borda decorativa (caso o usuário tenha selecionado)
-        if(headerData.borda && headerData.borda !== 'none') {
-            const borderEl = document.createElement('div');
-            borderEl.className = 'print-border ' + headerData.borda;
-            sheet.appendChild(borderEl);
-        }
-
-        const content = document.createElement('div');
-        content.style.width = '100%';
-        content.style.position = 'relative';
-        content.style.zIndex = '20'; // Garante que fica por cima da borda
-        sheet.appendChild(content);
-        
-        sheets.push({ sheet, content });
-        measureWrapper.appendChild(sheet); 
-        return { sheet, content };
+        sheet.appendChild(content); sheets.push({ sheet, content }); measureWrapper.appendChild(sheet); return { sheet, content };
     }
 
     let { sheet, content } = newSheet();
 
-    if(headerData.imagem){
-        const img = document.createElement('img');
-        img.src = headerData.imagem;
-        img.style.cssText = 'width:100%; display:block; max-height:40mm; object-fit:contain; margin-bottom:8pt;';
-        img.crossOrigin = "anonymous";
-        await new Promise(r => { img.onload=r; img.onerror=r; });
-        content.appendChild(img);
+    // Injeção do Cabeçalho (Imagem ou Manual)
+    if(headerData.tipoCabecalho === 'imagem' && headerData.imagem){
+        const img = document.createElement('img'); img.src = headerData.imagem; img.style.cssText = 'column-span: all; width:100%; display:block; max-height:40mm; object-fit:contain; margin-bottom:8pt;'; img.crossOrigin = "anonymous";
+        await new Promise(r => { img.onload=r; img.onerror=r; }); content.appendChild(img);
+    } else if (headerData.tipoCabecalho === 'manual') {
+        const cabDiv = document.createElement('div');
+        cabDiv.style.cssText = 'column-span: all; margin-bottom: 12pt; border: 1.5px solid #000; padding: 10pt; font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #000; border-radius: 4px;';
+        cabDiv.innerHTML = `
+            <div style="text-align:center; font-weight:900; font-size:14pt; margin-bottom:10pt; text-transform:uppercase;">${headerData.escola || 'NOME DA ESCOLA'}</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4pt;">
+                <span><strong>Professor(a):</strong> ${headerData.professor || '________________________'}</span>
+                <span><strong>Disciplina:</strong> ${headerData.disciplina || '__________________'}</span>
+                <span><strong>Bimestre/Unid:</strong> ${headerData.bimestre || '________'}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4pt;">
+                <span style="flex:1"><strong>Aluno(a):</strong> _________________________________________________________________</span>
+                <span style="margin-left:10pt;"><strong>Nº:</strong> _______</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span><strong>Série/Ano:</strong> ________________</span>
+                <span><strong>Turma:</strong> ________________</span>
+                <span><strong>Data:</strong> ____/____/20____</span>
+            </div>
+        `;
+        content.appendChild(cabDiv);
     }
     
     const titleText = document.getElementById('assessment-title').value.trim();
     if(titleText){
         const h1 = document.createElement('h1');
-        h1.style.cssText = 'text-align:center; font-size:14pt; font-weight:900; text-transform:uppercase; margin:0 0 10pt 0; letter-spacing:.04em; padding-bottom:6pt; border-bottom:2pt solid #000;';
+        h1.style.cssText = 'column-span: all; text-align:center; font-size:14pt; font-weight:900; text-transform:uppercase; margin:0 0 12pt 0; letter-spacing:.04em; padding-bottom:6pt; border-bottom:2pt solid #000;';
         h1.textContent = titleText;
         content.appendChild(h1);
     }
 
     for(let i=0; i<questions.length; i++){
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = buildQuestaoHTML(questions[i], i);
-        const qNode = tempDiv.firstElementChild;
-        content.appendChild(qNode);
-
-        await waitForImagesToLoad(qNode);
-
+        const tempDiv = document.createElement('div'); tempDiv.innerHTML = buildQuestaoHTML(questions[i], i); const qNode = tempDiv.firstElementChild;
+        content.appendChild(qNode); await waitForImagesToLoad(qNode);
         if(content.getBoundingClientRect().height > safeHeightPx) {
             const qCount = content.querySelectorAll('.q-block').length;
             if(qCount > 1) { 
-                content.removeChild(qNode);
-                const next = newSheet();
-                sheet = next.sheet;
-                content = next.content;
-                content.appendChild(qNode);
-                await waitForImagesToLoad(qNode);
+                content.removeChild(qNode); const next = newSheet(); sheet = next.sheet; content = next.content;
+                content.appendChild(qNode); await waitForImagesToLoad(qNode);
             }
         }
     }
 
     const totalPages = sheets.length;
     sheets.forEach((s, index) => {
-        const footer = document.createElement('div');
-        // 3. AJUSTE DO NÚMERO DA PÁGINA (Para não ficar em cima da borda inferior direita)
-        footer.style.cssText = 'position: absolute; bottom: 22mm; right: 22mm; font-size: 9pt; font-weight: 700; color: #000; font-family: Arial, sans-serif; z-index: 30;';
-        footer.textContent = `${index + 1} / ${totalPages}`;
-        s.sheet.appendChild(footer);
-        
-        container.appendChild(s.sheet);
+        const footer = document.createElement('div'); footer.style.cssText = 'position: absolute; bottom: 22mm; right: 22mm; font-size: 9pt; font-weight: 700; color: #000; font-family: Arial, sans-serif; z-index: 30;'; footer.textContent = `${index + 1} / ${totalPages}`;
+        s.sheet.appendChild(footer); container.appendChild(s.sheet);
     });
 
-    document.body.removeChild(measureWrapper);
-    return container;
+    document.body.removeChild(measureWrapper); return container;
 }
 
 // =============================================
-// PREVIEW VISUAL E GERAR PDF
+// PREVIEW VISUAL E IMPRESSÃO
 // =============================================
 async function enterPreviewMode(){
-    document.body.classList.add('preview-mode');
-    window.scrollTo(0,0);
-    
+    captureEditorContents(); // Salvar os dados antes de prever
+    document.body.classList.add('preview-mode'); window.scrollTo(0,0);
     const printContent = document.getElementById('print-content');
     printContent.innerHTML = '<div class="text-white flex flex-col items-center gap-4 mt-20 w-full" style="min-width:100vw"><div class="loader w-10 h-10 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" style="animation: spinner 1s linear infinite"></div><p class="font-bold text-sm uppercase tracking-widest text-slate-400">Processando e paginando prova...</p></div>';
-    
-    const paginatedDOM = await createPaginatedDOM();
-    printContent.innerHTML = '';
-    printContent.appendChild(paginatedDOM);
+    const paginatedDOM = await createPaginatedDOM(); printContent.innerHTML = ''; printContent.appendChild(paginatedDOM);
 }
 
-function exitPreviewMode(){
-    document.body.classList.remove('preview-mode');
-    document.getElementById('print-content').innerHTML = ''; 
-}
+function exitPreviewMode(){ document.body.classList.remove('preview-mode'); document.getElementById('print-content').innerHTML = ''; }
 
 async function generatePDF(fromPreview = false) {
-    captureEditorContents();
-    if (!fromPreview) {
-        showToast('Preparando documento...', 'info', 2000);
-        await enterPreviewMode();
-        await new Promise(r => setTimeout(r, 600));
-    }
-    showToast('Abrindo diálogo de impressão — escolha "Salvar como PDF"', 'info', 5000);
-    await new Promise(r => setTimeout(r, 400));
-    window.print();
+    if (!fromPreview) { showToast('Preparando documento...', 'info', 2000); await enterPreviewMode(); await new Promise(r => setTimeout(r, 600)); }
+    showToast('Abrindo diálogo de impressão — escolha "Salvar como PDF"', 'info', 5000); await new Promise(r => setTimeout(r, 400)); window.print();
 }
 
-async function printDirect() {
-    captureEditorContents();
-    await enterPreviewMode();
-    await new Promise(r => setTimeout(r, 600));
-    window.print();
-}
+async function printDirect() { await enterPreviewMode(); await new Promise(r => setTimeout(r, 600)); window.print(); }
 
 // =============================================
-// HELPERS DAS QUESTÕES
+// HELPERS
 // =============================================
 function updateImageWidth(qId,val){ const q=questions.find(qu=>qu.id===qId);q.imageWidth=parseInt(val); const z=document.getElementById(`img-zone-${qId}`);if(z){z.innerHTML=buildImgZone(q);lucide.createIcons();} }
 function adjustLines(qId,d){const q=questions.find(qu=>qu.id===qId);q.linhas=Math.max(1,Math.min(20,(parseInt(q.linhas)||4)+d));const el=document.getElementById(`lines-d-${qId}`);if(el)el.textContent=q.linhas;}
@@ -1487,22 +1227,10 @@ function updateOptMatch(qId,oId,val){questions.find(qu=>qu.id===qId).opcoes.find
 function removeOption(qId,oId){const q=questions.find(qu=>qu.id===qId);if(q.opcoes.length<=1){showToast('Mínimo de 1 opção','warning');return;}q.opcoes=q.opcoes.filter(o=>o.id.toString()!==oId.toString());renderQuestions();}
 
 function addOption(qId){
-    const q=questions.find(qu=>qu.id===qId);
-    if(!q) return;
-    const newId=(Date.now()+Math.floor(Math.random()*9999)).toString();
-    if(q.type==='matching'){
-        q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'});
-    } else if(q.type==='fill-in-the-blanks'){
-        q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'});
-    } else {
-        q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'});
-    }
-    captureEditorContents();
-    renderQuestions();
-    setTimeout(()=>{
-        const inputs=document.querySelectorAll(`#options-${qId} input[type="text"]`);
-        if(inputs.length>0) inputs[inputs.length-1].focus();
-    },100);
+    const q=questions.find(qu=>qu.id===qId); if(!q) return; const newId=(Date.now()+Math.floor(Math.random()*9999)).toString();
+    if(q.type==='matching'){ q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'}); } else if(q.type==='fill-in-the-blanks'){ q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'}); } else { q.opcoes.push({id:newId,text:'',image:null,matchText:'',type:'text'}); }
+    captureEditorContents(); renderQuestions();
+    setTimeout(()=>{ const inputs=document.querySelectorAll(`#options-${qId} input[type="text"]`); if(inputs.length>0) inputs[inputs.length-1].focus(); },100);
 }
 </script>
 </body>
