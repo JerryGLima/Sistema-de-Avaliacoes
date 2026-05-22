@@ -60,7 +60,7 @@
             margin-bottom: 20px;
         }
         .a4-sheet *{ box-sizing: border-box; }
-        .q-block{ page-break-inside: avoid; break-inside: avoid; margin-bottom: 22px; width: 100%; position: relative; z-index: 20; }
+        .q-block{ margin-bottom: 22px; width: 100%; position: relative; z-index: 20; } /* Removido page-break-inside para permitir quebra */
 
         /* ESTILOS DE BORDAS DECORATIVAS */
         .print-border { position: absolute; top: 10mm; left: 10mm; right: 10mm; bottom: 10mm; pointer-events: none; z-index: 10; }
@@ -285,9 +285,20 @@
                             <input type="file" accept="image/*" class="hidden" onchange="uploadHeader(this)">
                         </label>
                     </div>
-                    <div id="header-preview-container" class="hidden relative group shadow-lg rounded-2xl overflow-hidden border-4 border-white">
-                        <img id="header-img-preview" src="" class="w-full object-contain">
+                    <div id="header-preview-container" class="hidden relative group shadow-lg rounded-2xl overflow-hidden border-4 border-white bg-white">
+                        <img id="header-img-preview" src="" class="block object-contain mx-auto" style="width: 100%;">
                         <button onclick="removeHeader()" class="absolute top-3 right-3 bg-white text-red-500 p-3 rounded-2xl shadow-xl border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                    
+                    <!-- Novo Controle de Tamanho do Cabeçalho -->
+                    <div id="header-size-container" class="hidden mt-6 max-w-xs mx-auto space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div class="flex justify-between font-black text-[9px] text-slate-400 uppercase tracking-widest">
+                            <span>Tamanho da Imagem</span><span id="header-w-lbl">100%</span>
+                        </div>
+                        <input type="range" min="20" max="100" value="100"
+                            oninput="document.getElementById('header-w-lbl').textContent=this.value+'%'; document.getElementById('header-img-preview').style.width=this.value+'%';"
+                            onchange="headerData.imageWidth=parseInt(this.value)"
+                            class="w-full accent-blue-600 cursor-pointer">
                     </div>
                 </div>
 
@@ -347,7 +358,7 @@
 
         <div class="mt-12 pt-8 border-t border-slate-200 flex flex-col items-center justify-center gap-3 pb-4">
             <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Desenvolvido por Jerry Gleydison</p>
-            <a href="https://wa.me/5599981453613" target="_blank" class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
+            <a href="https://wa.me/55SEUNUMEROAQUI" target="_blank" class="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
                 <i data-lucide="message-circle" class="w-4 h-4"></i>
                 <span>Suporte no WhatsApp</span>
             </a>
@@ -499,6 +510,7 @@ let questions=[];
 let headerData={
     id:null, 
     imagem:null, 
+    imageWidth:100, // NOVO: Controle de largura do cabeçalho
     titulo:'', 
     borda:'none', 
     layout:'1-col', 
@@ -631,7 +643,7 @@ function makeToolbar(editorId){
 window.addEventListener('beforeunload', (e) => {
     if(questions.length > 0) {
         e.preventDefault();
-        e.returnValue = ''; // Padrão do navegador para alertar antes de fechar a aba
+        e.returnValue = ''; 
     }
 });
 
@@ -639,7 +651,7 @@ setInterval(() => {
     if(questions.length > 0) {
         showToast('Lembrete: Não se esqueça de salvar sua prova na nuvem!', 'info', 5000);
     }
-}, 3 * 60 * 1000); // Lembrete a cada 3 minutos
+}, 10 * 60 * 1000); 
 
 // =============================================
 // AUTH 
@@ -665,7 +677,7 @@ auth.onAuthStateChanged(user=>{
     }else{
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('app-screen').classList.add('hidden');
-        newAssessment(true); // Parametro silencioso
+        newAssessment(true); 
     }
     lucide.createIcons();
 });
@@ -974,20 +986,35 @@ function uploadHeader(input){
             if(w > MAX_W) { h *= MAX_W/w; w = MAX_W; }
             c.width = w; c.height = h; const ctx = c.getContext('2d'); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, 0, 0, w, h);
             headerData.imagem = c.toDataURL('image/jpeg', 0.90);
-            document.getElementById('header-upload-container').classList.add('hidden'); document.getElementById('header-preview-container').classList.remove('hidden'); document.getElementById('header-img-preview').src = headerData.imagem;
+            headerData.imageWidth = 100; // Reset slider
+            document.querySelector('#header-size-container input').value = 100;
+            document.getElementById('header-w-lbl').textContent = '100%';
+            
+            document.getElementById('header-upload-container').classList.add('hidden'); 
+            document.getElementById('header-preview-container').classList.remove('hidden'); 
+            document.getElementById('header-size-container').classList.remove('hidden');
+            
+            const previewImg = document.getElementById('header-img-preview');
+            previewImg.src = headerData.imagem;
+            previewImg.style.width = '100%';
+            
             showToast('Cabeçalho carregado!','success');
         };
         img.src = e.target.result;
     };
     r.readAsDataURL(file);
 }
-function removeHeader(){headerData.imagem=null;document.getElementById('header-upload-container').classList.remove('hidden');document.getElementById('header-preview-container').classList.add('hidden');}
+function removeHeader(){
+    headerData.imagem=null;
+    document.getElementById('header-upload-container').classList.remove('hidden');
+    document.getElementById('header-preview-container').classList.add('hidden');
+    document.getElementById('header-size-container').classList.add('hidden');
+}
 
-// PARÂMETRO SILENCIOSO (Mudança 1)
 function newAssessment(silent = false){
     if(!silent && !confirm('Criar nova prova? O conteúdo não guardado será perdido.'))return;
     questions=[];
-    headerData={ id:null, imagem:null, titulo:'', borda:'none', layout:'1-col', tipoCabecalho:'imagem', escola:'', professor:'', disciplina:'', bimestre:'' };
+    headerData={ id:null, imagem:null, imageWidth:100, titulo:'', borda:'none', layout:'1-col', tipoCabecalho:'imagem', escola:'', professor:'', disciplina:'', bimestre:'' };
     document.getElementById('assessment-title').value='';
     document.getElementById('border-style').value='none';
     document.getElementById('layout-style').value='1-col';
@@ -1100,6 +1127,7 @@ function loadAssessmentByIndex(idx, silent = false){
     if(!headerData.borda) headerData.borda = 'none';
     if(!headerData.layout) headerData.layout = '1-col';
     if(!headerData.tipoCabecalho) headerData.tipoCabecalho = 'imagem';
+    if(!headerData.imageWidth) headerData.imageWidth = 100;
     
     document.getElementById('border-style').value = headerData.borda;
     document.getElementById('layout-style').value = headerData.layout;
@@ -1113,8 +1141,23 @@ function loadAssessmentByIndex(idx, silent = false){
 
     questions=data.questions.map(q=>({...q,opcoes:q.opcoes?q.opcoes.map(o=>({...o})):[]}));
     document.getElementById('assessment-title').value=headerData.titulo||'';
-    if(headerData.imagem){document.getElementById('header-upload-container').classList.add('hidden');document.getElementById('header-preview-container').classList.remove('hidden');document.getElementById('header-img-preview').src=headerData.imagem;}
-    else { document.getElementById('header-upload-container').classList.remove('hidden'); document.getElementById('header-preview-container').classList.add('hidden'); }
+    
+    if(headerData.imagem){
+        document.getElementById('header-upload-container').classList.add('hidden');
+        document.getElementById('header-preview-container').classList.remove('hidden');
+        document.getElementById('header-size-container').classList.remove('hidden');
+        
+        const previewImg = document.getElementById('header-img-preview');
+        previewImg.src=headerData.imagem;
+        previewImg.style.width = headerData.imageWidth + '%';
+        
+        document.querySelector('#header-size-container input').value = headerData.imageWidth;
+        document.getElementById('header-w-lbl').textContent = headerData.imageWidth + '%';
+    } else { 
+        document.getElementById('header-upload-container').classList.remove('hidden'); 
+        document.getElementById('header-preview-container').classList.add('hidden'); 
+        document.getElementById('header-size-container').classList.add('hidden');
+    }
     
     renderQuestions(); localStorage.setItem('last_open_assessment_id', headerData.id || ''); document.getElementById('saved-modal').classList.add('hidden');
     if(!silent) showToast(`"${headerData.titulo}" carregada`,'info');
@@ -1190,17 +1233,18 @@ async function createPaginatedDOM(showGabarito = false) {
     const mmDiv = document.createElement('div'); mmDiv.style.height = '250mm'; measureWrapper.appendChild(mmDiv);
     const safeHeightPx = mmDiv.getBoundingClientRect().height; measureWrapper.removeChild(mmDiv);
 
-    let sheets = []; let currentSheet, currentContent;
+    let sheets = []; let currentSheet, content;
 
     function newSheet() {
         const sheet = document.createElement('div'); sheet.className = 'a4-sheet'; sheet.style.padding = '22mm 22mm 25mm 22mm';
         if(headerData.borda && headerData.borda !== 'none') { const borderEl = document.createElement('div'); borderEl.className = 'print-border ' + headerData.borda; sheet.appendChild(borderEl); }
-        const content = document.createElement('div'); content.style.width = '100%'; content.style.position = 'relative'; content.style.zIndex = '20';
-        if(headerData.layout === '2-col') { content.style.columnCount = '2'; content.style.columnGap = '12mm'; }
-        sheet.appendChild(content); sheets.push({ sheet, content }); measureWrapper.appendChild(sheet); return { sheet, content };
+        const c = document.createElement('div'); c.style.width = '100%'; c.style.position = 'relative'; c.style.zIndex = '20';
+        if(headerData.layout === '2-col') { c.style.columnCount = '2'; c.style.columnGap = '12mm'; }
+        sheet.appendChild(c); sheets.push({ sheet, content: c }); measureWrapper.appendChild(sheet); return { sheet, content: c };
     }
 
-    let { sheet, content } = newSheet();
+    let initialSheet = newSheet();
+    sheet = initialSheet.sheet; content = initialSheet.content;
 
     if (showGabarito) {
         const warning = document.createElement('div');
@@ -1210,7 +1254,10 @@ async function createPaginatedDOM(showGabarito = false) {
     }
 
     if(headerData.tipoCabecalho === 'imagem' && headerData.imagem){
-        const img = document.createElement('img'); img.src = headerData.imagem; img.style.cssText = 'column-span: all; width:100%; display:block; max-height:40mm; object-fit:contain; margin-bottom:8pt;'; img.crossOrigin = "anonymous";
+        const img = document.createElement('img'); img.src = headerData.imagem; 
+        const hw = headerData.imageWidth || 100;
+        img.style.cssText = `column-span: all; width:${hw}%; display:block; max-height:40mm; object-fit:contain; margin: 0 auto 8pt auto;`; 
+        img.crossOrigin = "anonymous";
         await new Promise(r => { img.onload=r; img.onerror=r; }); content.appendChild(img);
     } else if (headerData.tipoCabecalho === 'manual') {
         const cabDiv = document.createElement('div');
@@ -1243,14 +1290,90 @@ async function createPaginatedDOM(showGabarito = false) {
         content.appendChild(h1);
     }
 
+    // Lógica de Paginação Granular (Permite quebrar as questões ao meio se não couberem)
     for(let i=0; i<questions.length; i++){
-        const tempDiv = document.createElement('div'); tempDiv.innerHTML = buildQuestaoHTML(questions[i], i, showGabarito); const qNode = tempDiv.firstElementChild;
-        content.appendChild(qNode); await waitForImagesToLoad(qNode);
+        const tempDiv = document.createElement('div'); tempDiv.innerHTML = buildQuestaoHTML(questions[i], i, showGabarito); 
+        const qNode = tempDiv.firstElementChild;
+        
+        qNode.style.pageBreakInside = 'auto';
+        qNode.style.breakInside = 'auto';
+
+        content.appendChild(qNode); 
+        await waitForImagesToLoad(qNode);
+
         if(content.getBoundingClientRect().height > safeHeightPx) {
-            const qCount = content.querySelectorAll('.q-block').length;
-            if(qCount > 1) { 
-                content.removeChild(qNode); const next = newSheet(); sheet = next.sheet; content = next.content;
-                content.appendChild(qNode); await waitForImagesToLoad(qNode);
+            content.removeChild(qNode);
+
+            let currentBlock = document.createElement('div');
+            currentBlock.className = 'q-block';
+            content.appendChild(currentBlock);
+
+            const children = Array.from(qNode.children);
+            for(let child of children) {
+                if(child.classList.contains('q-options') || child.classList.contains('q-match-row')) {
+                    let optContainer = document.createElement('div');
+                    optContainer.className = child.className;
+                    currentBlock.appendChild(optContainer);
+
+                    const opts = Array.from(child.children);
+                    for(let opt of opts) {
+                        optContainer.appendChild(opt);
+                        await waitForImagesToLoad(opt);
+
+                        if(content.getBoundingClientRect().height > safeHeightPx) {
+                            const blocks = content.querySelectorAll('.q-block');
+                            const isFirstItemOnPage = (blocks.length === 1 && blocks[0].children.length === 1 && optContainer.children.length === 1);
+
+                            if(!isFirstItemOnPage) {
+                                optContainer.removeChild(opt);
+                                const next = newSheet(); sheet = next.sheet; content = next.content;
+                                currentBlock = document.createElement('div'); currentBlock.className = 'q-block'; content.appendChild(currentBlock);
+                                optContainer = document.createElement('div'); optContainer.className = child.className; currentBlock.appendChild(optContainer);
+                                optContainer.appendChild(opt);
+                            }
+                        }
+                    }
+                    if(optContainer.children.length === 0) optContainer.remove();
+                } else if(child.tagName === 'DIV' && child.children.length > 0 && child.children[0].classList.contains('q-line')) {
+                    let lineContainer = document.createElement('div');
+                    lineContainer.style.cssText = child.style.cssText;
+                    currentBlock.appendChild(lineContainer);
+
+                    const lines = Array.from(child.children);
+                    for(let line of lines) {
+                        lineContainer.appendChild(line);
+                        if(content.getBoundingClientRect().height > safeHeightPx) {
+                             const blocks = content.querySelectorAll('.q-block');
+                             const isFirstItemOnPage = (blocks.length === 1 && blocks[0].children.length === 1 && lineContainer.children.length === 1);
+
+                             if(!isFirstItemOnPage) {
+                                 lineContainer.removeChild(line);
+                                 const next = newSheet(); sheet = next.sheet; content = next.content;
+                                 currentBlock = document.createElement('div'); currentBlock.className = 'q-block'; content.appendChild(currentBlock);
+                                 lineContainer = document.createElement('div'); lineContainer.style.cssText = child.style.cssText; currentBlock.appendChild(lineContainer);
+                                 lineContainer.appendChild(line);
+                             }
+                        }
+                    }
+                    if(lineContainer.children.length === 0) lineContainer.remove();
+                } else {
+                    currentBlock.appendChild(child);
+                    await waitForImagesToLoad(child);
+
+                    if(content.getBoundingClientRect().height > safeHeightPx) {
+                        const blocks = content.querySelectorAll('.q-block');
+                        const isFirstItemOnPage = (blocks.length === 1 && blocks[0].children.length === 1);
+
+                        if(!isFirstItemOnPage) {
+                            currentBlock.removeChild(child);
+                            if(currentBlock.children.length === 0) currentBlock.remove();
+
+                            const next = newSheet(); sheet = next.sheet; content = next.content;
+                            currentBlock = document.createElement('div'); currentBlock.className = 'q-block'; content.appendChild(currentBlock);
+                            currentBlock.appendChild(child);
+                        }
+                    }
+                }
             }
         }
     }
