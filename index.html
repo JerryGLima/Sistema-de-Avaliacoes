@@ -199,6 +199,24 @@
         /* Progresso */
         #form-progress { height:3px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:20px; }
         #form-progress-bar { height:100%; background:linear-gradient(90deg,#2563eb,#7c3aed); border-radius:999px; transition:width .4s ease; }
+
+        /* ── MODAL PROVA COMPLETA IA ── */
+        #full-ai-modal { position:fixed; inset:0; z-index:160; background:rgba(15,23,42,.7); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:20px; }
+        #full-ai-modal.show { display:flex; }
+        .fai-box { background:white; border-radius:2rem; width:100%; max-width:600px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,.3); max-height:90vh; display:flex; flex-direction:column; }
+        .fai-header { padding:24px 28px; background:linear-gradient(135deg,#0f172a,#1e3a5f); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+        .fai-body { padding:24px 28px; overflow-y:auto; display:flex; flex-direction:column; gap:18px; flex:1; }
+        .fai-footer { padding:18px 28px; border-top:1px solid #f1f5f9; background:#f8fafc; flex-shrink:0; }
+        .fai-tipo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+        .fai-tipo-btn { padding:10px 8px; border:2px solid #e2e8f0; border-radius:12px; background:white; cursor:pointer; font-family:inherit; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:#64748b; transition:all .15s; display:flex; flex-direction:column; align-items:center; gap:5px; }
+        .fai-tipo-btn:hover { border-color:#6d28d9; color:#6d28d9; background:#f5f3ff; }
+        .fai-tipo-btn.selected { border-color:#6d28d9; background:#f5f3ff; color:#6d28d9; }
+        .fai-tipo-btn svg { width:18px; height:18px; }
+        .fai-progress-wrap { padding:16px 28px; background:#f8fafc; border-top:1px solid #f1f5f9; flex-shrink:0; display:none; }
+        .fai-progress-wrap.show { display:block; }
+        .fai-progress-bar-outer { height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:8px; }
+        .fai-progress-bar-inner { height:100%; background:linear-gradient(90deg,#6d28d9,#2563eb); border-radius:999px; transition:width .5s ease; width:0%; }
+        .fai-log { font-size:11px; color:#64748b; font-weight:600; margin-top:6px; min-height:18px; }
     </style>
 </head>
 <body class="bg-[#F0F4F8] text-slate-900">
@@ -403,8 +421,11 @@
     <div class="fixed bottom-8 left-0 right-0 z-40 px-4 pointer-events-none">
         <div class="max-w-4xl mx-auto bg-slate-950/95 backdrop-blur-xl border border-white/10 p-2.5 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex justify-between items-center gap-2 overflow-x-auto no-scrollbar pointer-events-auto">
             
-            <button onclick="openAIModal()" class="flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white transition-all px-6 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90 shadow-[0_0_20px_rgba(139,92,246,0.3)]">
-                <i data-lucide="sparkles" class="w-5 h-5"></i><span>Criar c/ IA</span>
+            <button onclick="openAIModal()" class="flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90 shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                <i data-lucide="sparkles" class="w-5 h-5"></i><span>1 Questão</span>
+            </button>
+            <button onclick="openFullAIModal()" class="flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white transition-all px-5 py-4 rounded-[1.5rem] font-black text-[9px] uppercase shrink-0 active:scale-90 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
+                <i data-lucide="zap" class="w-5 h-5"></i><span>Prova Completa</span>
             </button>
 
             <div class="w-px h-10 bg-white/10 mx-1 shrink-0"></div>
@@ -1608,6 +1629,137 @@ function addOption(qId){
     captureEditorContents(); renderQuestions();
     setTimeout(()=>{ const inputs=document.querySelectorAll(`#options-${qId} input[type="text"]`); if(inputs.length>0) inputs[inputs.length-1].focus(); },100);
 }
+
+
+// =============================================
+// PROVA COMPLETA COM IA
+// =============================================
+
+function openFullAIModal() {
+    document.getElementById('full-ai-modal').classList.add('show');
+    lucide.createIcons();
+}
+function closeFullAIModal() {
+    document.getElementById('full-ai-modal').classList.remove('show');
+    const progressWrap = document.getElementById('fai-progress-wrap');
+    if(progressWrap) progressWrap.classList.remove('show');
+}
+function toggleFaiTipo(btn) {
+    btn.classList.toggle('selected');
+    const selected = document.querySelectorAll('.fai-tipo-btn.selected');
+    if(selected.length === 0) btn.classList.add('selected');
+}
+function getSelectedTipos() {
+    return Array.from(document.querySelectorAll('.fai-tipo-btn.selected')).map(b => b.getAttribute('data-tipo'));
+}
+function buildSchemaForType(qType) {
+    const schemas = {
+        'text': '{"enunciado":"Pergunta dissertativa","gabarito":"Resposta esperada completa"}',
+        'multiple-choice': '{"enunciado":"Pergunta objetiva","opcoes":["Alternativa A","Alternativa B","Alternativa C","Alternativa D"],"gabarito":"Letra correta e justificativa"}',
+        'true-false': '{"enunciado":"Afirmação para julgamento","opcoes":["Afirmação 1","Afirmação 2","Afirmação 3"],"gabarito":"Sequência correta ex: V, F, V"}',
+        'discursive-list': '{"enunciado":"Instrução de listagem","opcoes":["Item 1","Item 2","Item 3"],"gabarito":"Respostas esperadas"}',
+        'fill-in-the-blanks': '{"enunciado":"Instrução","quadro_palavras":"Palavra1 - Palavra2 - Palavra3","texto_lacunas":"Texto com ____ para preencher.","gabarito":"Texto completo correto"}',
+        'matching': '{"enunciado":"Instrução para relacionar","pares":[{"esquerda":"Conceito 1","direita":"Definicao 1"},{"esquerda":"Conceito 2","direita":"Definicao 2"}],"gabarito":"Correspondencias corretas"}'
+    };
+    return schemas[qType] || '{"enunciado":"Questao","gabarito":"Resposta"}';
+}
+function buildPromptForType(qType, tema, dificuldade, ano, extra, index, total) {
+    const tipoNomes = {'text':'Escrita Livre Dissertativa','multiple-choice':'Multipla Escolha com EXATAMENTE 4 alternativas','true-false':'Verdadeiro ou Falso com 3 afirmacoes','discursive-list':'Topicos Listagem','fill-in-the-blanks':'Completar Lacunas','matching':'Ligar Colunas com 3 pares'};
+    return `Voce e um professor especialista. Crie a questao ${index} de ${total} de uma prova.
+Tema: "${tema}" | Ano: ${ano} | Dificuldade: ${dificuldade} | Tipo: ${tipoNomes[qType]||qType}
+${extra ? 'Instrucoes: ' + extra : ''}
+RETORNE APENAS JSON VALIDO sem markdown. Estrutura obrigatoria:
+${buildSchemaForType(qType)}`;
+}
+function parseAIResponse(aiText) {
+    aiText = aiText.replace(/```json/g,'').replace(/```/g,'').trim();
+    const start = aiText.indexOf('{');
+    const end = aiText.lastIndexOf('}');
+    if(start === -1 || end === -1) throw new Error('JSON nao encontrado');
+    return JSON.parse(aiText.substring(start, end+1));
+}
+function buildQuestionFromData(qData, qType) {
+    let newOps = [], textoApoio = '';
+    if(['multiple-choice','true-false','discursive-list'].includes(qType)) {
+        newOps = (qData.opcoes||[]).map(opt => ({id:(Date.now()+Math.floor(Math.random()*99999)).toString(),text:typeof opt==='string'?opt:(opt.text||''),image:null,matchText:'',type:'text'}));
+        if(!newOps.length) newOps.push({id:Date.now().toString(),text:'...',image:null,matchText:'',type:'text'});
+    } else if(qType==='fill-in-the-blanks') {
+        textoApoio = qData.quadro_palavras||'';
+        newOps = [{id:(Date.now()+Math.floor(Math.random()*99999)).toString(),text:qData.texto_lacunas||'',image:null,matchText:'',type:'text'}];
+    } else if(qType==='matching') {
+        newOps = (qData.pares||[]).map(par => ({id:(Date.now()+Math.floor(Math.random()*99999)).toString(),text:par.esquerda||'',image:null,matchText:par.direita||'',type:'text'}));
+        if(!newOps.length) newOps.push({id:Date.now().toString(),text:'...',image:null,matchText:'...',type:'text'});
+    }
+    return {id:(Date.now()+Math.floor(Math.random()*99999)).toString(),type:qType,textoApoio,enunciado:qData.enunciado||'',imagem:null,imageWidth:50,opcoes:newOps,linhas:4,gabarito:qData.gabarito||''};
+}
+async function generateFullProva() {
+    const tema = document.getElementById('fai-tema').value.trim();
+    const qtd = parseInt(document.getElementById('fai-qtd').value);
+    const dificuldade = document.getElementById('fai-dificuldade').value;
+    const ano = document.getElementById('fai-ano').value;
+    const extra = document.getElementById('fai-extra').value.trim();
+    const tipos = getSelectedTipos();
+    if(!tema) { showToast('Digite o tema da prova!','warning'); return; }
+    if(!tipos.length) { showToast('Selecione pelo menos um tipo!','warning'); return; }
+
+    const btn = document.getElementById('btn-full-ai');
+    const btnTxt = document.getElementById('fai-btn-txt');
+    const progressWrap = document.getElementById('fai-progress-wrap');
+    const bar = document.getElementById('fai-bar');
+    const log = document.getElementById('fai-log');
+    const counter = document.getElementById('fai-counter');
+
+    btn.disabled = true;
+    btnTxt.textContent = 'Gerando...';
+    progressWrap.classList.add('show');
+    bar.style.width = '0%';
+
+    const tiposDistribuidos = Array.from({length:qtd},(_,i) => tipos[i % tipos.length]);
+    const tipoNomeCurto = {'text':'Escrita Livre','multiple-choice':'Multipla Escolha','true-false':'V ou F','fill-in-the-blanks':'Lacunas','discursive-list':'Topicos','matching':'Ligar Colunas'};
+    let geradas = 0;
+
+    for(let i = 0; i < qtd; i++) {
+        const qType = tiposDistribuidos[i];
+        log.textContent = `Gerando questao ${i+1} de ${qtd}: ${tipoNomeCurto[qType]||qType}...`;
+        counter.textContent = `${i+1}/${qtd}`;
+        bar.style.width = ((i/qtd)*100)+'%';
+        try {
+            const promptText = buildPromptForType(qType, tema, dificuldade, ano, extra, i+1, qtd);
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,{
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({contents:[{parts:[{text:promptText}]}],generationConfig:{temperature:0.75,topK:40}})
+            });
+            const data = await response.json();
+            if(data.error) throw new Error(data.error.message);
+            const aiText = data.candidates[0].content.parts[0].text;
+            const qData = parseAIResponse(aiText);
+            const questao = buildQuestionFromData(qData, qType);
+            questions.push(questao);
+            geradas++;
+            renderQuestions();
+            markDirty();
+        } catch(err) {
+            console.error('Erro questao '+(i+1)+':', err);
+            log.textContent = `Questao ${i+1} falhou, continuando...`;
+            await new Promise(r => setTimeout(r, 600));
+        }
+        if(i < qtd-1) await new Promise(r => setTimeout(r, 350));
+    }
+
+    bar.style.width = '100%';
+    if(geradas > 0) {
+        log.textContent = `Pronta! ${geradas} questoes geradas com sucesso!`;
+        counter.textContent = '';
+        showToast(`Prova gerada! ${geradas} questoes adicionadas.`, 'success', 5000);
+        setTimeout(() => { closeFullAIModal(); }, 1800);
+    } else {
+        log.textContent = 'Nenhuma questao gerada. Tente novamente.';
+        showToast('Erro ao gerar. Verifique sua conexao.', 'error');
+    }
+    btn.disabled = false;
+    btnTxt.textContent = 'Gerar Prova Completa';
+}
+
 </script>
 
 <!-- Contador por tipo (inserido pelo JS dentro do questions-container) -->
@@ -1627,5 +1779,132 @@ function addOption(qId){
     </div>
 </div>
 
+
+<!-- ═══════ MODAL PROVA COMPLETA IA ═══════ -->
+<div id="full-ai-modal">
+  <div class="fai-box">
+    <!-- Header -->
+    <div class="fai-header">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,#6d28d9,#2563eb);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 20px rgba(109,40,217,.4)">
+          <i data-lucide="zap" style="width:24px;height:24px;color:white"></i>
+        </div>
+        <div>
+          <div style="font-size:18px;font-weight:900;color:white;letter-spacing:-.02em">Gerar Prova Completa com IA</div>
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;margin-top:2px">Google Gemini · Geração em lote</div>
+        </div>
+      </div>
+      <button onclick="closeFullAIModal()" style="width:34px;height:34px;background:rgba(255,255,255,.1);border:none;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+        <i data-lucide="x" style="width:16px;height:16px"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="fai-body">
+
+      <!-- Tema -->
+      <div>
+        <label style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:8px">Tema / Assunto da Prova *</label>
+        <textarea id="fai-tema" rows="2" style="width:100%;padding:12px 16px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;outline:none;font-family:inherit;font-size:14px;font-weight:500;color:#0f172a;resize:none;transition:all .2s" placeholder="Ex: Frações para o 5º ano do Ensino Fundamental" onfocus="this.style.borderColor='#6d28d9'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+      </div>
+
+      <!-- Linha: qtd + dificuldade + ano -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:8px">Nº de Questões</label>
+          <select id="fai-qtd" style="width:100%;padding:10px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;outline:none;font-family:inherit;font-size:14px;font-weight:600;color:#0f172a;cursor:pointer">
+            <option value="5">5 questões</option>
+            <option value="8">8 questões</option>
+            <option value="10" selected>10 questões</option>
+            <option value="12">12 questões</option>
+            <option value="15">15 questões</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:8px">Dificuldade</label>
+          <select id="fai-dificuldade" style="width:100%;padding:10px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;outline:none;font-family:inherit;font-size:14px;font-weight:600;color:#0f172a;cursor:pointer">
+            <option value="Fácil">🟢 Fácil</option>
+            <option value="Média" selected>🟡 Média</option>
+            <option value="Difícil">🔴 Difícil</option>
+            <option value="Mista">🎯 Mista</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:8px">Ano / Série</label>
+          <select id="fai-ano" style="width:100%;padding:10px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;outline:none;font-family:inherit;font-size:14px;font-weight:600;color:#0f172a;cursor:pointer">
+            <option value="1º ano EF">1º ano EF</option>
+            <option value="2º ano EF">2º ano EF</option>
+            <option value="3º ano EF">3º ano EF</option>
+            <option value="4º ano EF">4º ano EF</option>
+            <option value="5º ano EF">5º ano EF</option>
+            <option value="6º ano EF">6º ano EF</option>
+            <option value="7º ano EF">7º ano EF</option>
+            <option value="8º ano EF">8º ano EF</option>
+            <option value="9º ano EF" selected>9º ano EF</option>
+            <option value="1º ano EM">1º ano EM</option>
+            <option value="2º ano EM">2º ano EM</option>
+            <option value="3º ano EM">3º ano EM</option>
+            <option value="Superior">Superior</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tipos de questão -->
+      <div>
+        <label style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:8px">Tipos de Questão <span style="font-weight:500;text-transform:none;font-size:10px;color:#cbd5e1">(selecione um ou mais)</span></label>
+        <div class="fai-tipo-grid">
+          <button class="fai-tipo-btn selected" data-tipo="multiple-choice" onclick="toggleFaiTipo(this)">
+            <i data-lucide="check-square" style="width:18px;height:18px"></i>Múltipla Escolha
+          </button>
+          <button class="fai-tipo-btn selected" data-tipo="true-false" onclick="toggleFaiTipo(this)">
+            <i data-lucide="list-checks" style="width:18px;height:18px"></i>Verdadeiro/Falso
+          </button>
+          <button class="fai-tipo-btn" data-tipo="text" onclick="toggleFaiTipo(this)">
+            <i data-lucide="align-left" style="width:18px;height:18px"></i>Escrita Livre
+          </button>
+          <button class="fai-tipo-btn" data-tipo="fill-in-the-blanks" onclick="toggleFaiTipo(this)">
+            <i data-lucide="edit-3" style="width:18px;height:18px"></i>Completar Lacunas
+          </button>
+          <button class="fai-tipo-btn" data-tipo="discursive-list" onclick="toggleFaiTipo(this)">
+            <i data-lucide="file-text" style="width:18px;height:18px"></i>Tópicos
+          </button>
+          <button class="fai-tipo-btn" data-tipo="matching" onclick="toggleFaiTipo(this)">
+            <i data-lucide="link" style="width:18px;height:18px"></i>Ligar Colunas
+          </button>
+        </div>
+      </div>
+
+      <!-- Instruções extras -->
+      <div>
+        <label style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:8px">Instruções Extras <span style="font-weight:500;text-transform:none;font-size:10px;color:#cbd5e1">(opcional)</span></label>
+        <input type="text" id="fai-extra" style="width:100%;padding:10px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;outline:none;font-family:inherit;font-size:14px;font-weight:500;color:#0f172a;transition:all .2s" placeholder="Ex: Foque em interpretação de texto, evite cálculos complexos..." onfocus="this.style.borderColor='#6d28d9'" onblur="this.style.borderColor='#e2e8f0'">
+      </div>
+
+      <!-- Aviso -->
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px">
+        <i data-lucide="info" style="width:16px;height:16px;color:#16a34a;flex-shrink:0;margin-top:1px"></i>
+        <p style="font-size:12px;color:#15803d;font-weight:600;line-height:1.6">A IA vai gerar cada questão individualmente e inserir automaticamente na prova. O processo pode levar de <strong>30 a 90 segundos</strong> dependendo da quantidade.</p>
+      </div>
+
+    </div>
+
+    <!-- Progress (aparece durante geração) -->
+    <div class="fai-progress-wrap" id="fai-progress-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span id="fai-log" class="fai-log">Iniciando...</span>
+        <span id="fai-counter" style="font-size:11px;font-weight:800;color:#6d28d9"></span>
+      </div>
+      <div class="fai-progress-bar-outer"><div class="fai-progress-bar-inner" id="fai-bar"></div></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="fai-footer">
+      <button id="btn-full-ai" onclick="generateFullProva()" style="width:100%;padding:14px;background:linear-gradient(135deg,#6d28d9,#2563eb);color:white;border:none;border-radius:13px;font-family:inherit;font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;text-transform:uppercase;letter-spacing:.06em;transition:all .15s;box-shadow:0 8px 24px rgba(109,40,217,.3)" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+        <i data-lucide="zap" style="width:18px;height:18px"></i>
+        <span id="fai-btn-txt">Gerar Prova Completa</span>
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
