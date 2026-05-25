@@ -167,6 +167,38 @@
             .q-row-num, .q-opt-letter, .q-opt-paren, .q-vf-cell,
             .q-opt-text, .q-row-body, .q-match-left, .q-match-right { display: table-cell !important; }
         }
+
+        /* ── MELHORIAS FUNCIONAIS ── */
+        /* Auto-save indicator */
+        #save-indicator { display:flex; align-items:center; gap:6px; padding:4px 12px; border-radius:999px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; background:#f0fdf4; border:1px solid #bbf7d0; color:#16a34a; transition:all .3s; }
+        #save-dot { width:7px; height:7px; border-radius:50%; background:#10b981; flex-shrink:0; transition:background .3s; }
+        #save-dot.dirty { background:#f59e0b; animation:blink-dot 1.4s ease-in-out infinite; }
+        #save-indicator.dirty { background:#fffbeb; border-color:#fde68a; color:#d97706; }
+        @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        /* Botões mover questão */
+        .move-q-btn { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; color:#94a3b8; transition:all .15s; flex-shrink:0; padding:0; }
+        .move-q-btn:hover { background:#2563eb; color:white; border-color:#2563eb; }
+        .move-q-btn:active { transform:scale(.88); }
+        .move-q-btn:disabled { opacity:.3; pointer-events:none; }
+
+        /* Botão duplicar */
+        .dup-q-btn { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; color:#64748b; transition:all .15s; flex-shrink:0; padding:0; }
+        .dup-q-btn:hover { background:#e0f2fe; color:#0284c7; border-color:#bae6fd; }
+        .dup-q-btn:active { transform:scale(.88); }
+
+        /* Contador por tipo */
+        #type-counter { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; padding:0 4px; }
+        .type-count-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+
+        /* Modal confirmação */
+        #confirm-modal { position:fixed; inset:0; z-index:9000; background:rgba(15,23,42,.6); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:20px; }
+        #confirm-modal.show { display:flex; }
+        #confirm-box { background:white; border-radius:24px; padding:28px; max-width:340px; width:100%; box-shadow:0 40px 80px rgba(0,0,0,.25); }
+
+        /* Progresso */
+        #form-progress { height:3px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:20px; }
+        #form-progress-bar { height:100%; background:linear-gradient(90deg,#2563eb,#7c3aed); border-radius:999px; transition:width .4s ease; }
     </style>
 </head>
 <body class="bg-[#F0F4F8] text-slate-900">
@@ -240,13 +272,14 @@
             <div class="flex items-center gap-3 shrink-0">
                 <div class="w-11 h-11 bg-blue-600 rounded-[1.1rem] flex items-center justify-center shadow-xl rotate-3"><i data-lucide="file-text" class="text-white w-5 h-5"></i></div>
                 <div class="hidden sm:block">
-                    <h1 class="text-base font-black text-slate-900 tracking-tight leading-none">Prova Fácil V.01</h1>
+                    <h1 class="text-base font-black text-slate-900 tracking-tight leading-none">Editor de Avaliações</h1>
                     <p id="user-display" class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1"></p>
                 </div>
             </div>
             <div class="flex items-center gap-1.5 flex-wrap justify-end">
                 <button onclick="toggleSavedModal()" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="folder-open" class="w-4 h-4"></i><span class="hidden sm:inline">Arquivos</span></button>
                 <button onclick="newAssessment(false)" class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 btn-active text-xs font-bold uppercase"><i data-lucide="plus-circle" class="w-4 h-4"></i><span class="hidden sm:inline">Novo</span></button>
+                <div id="save-indicator"><div id="save-dot"></div><span id="save-txt">Salvo</span></div>
                 <button id="btn-save" onclick="saveToCloud()" class="flex items-center gap-1.5 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-emerald-600 btn-active"><i data-lucide="save" class="w-4 h-4"></i><span class="hidden sm:inline">Salvar</span></button>
                 <button onclick="enterPreviewMode(false)" class="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2.5 rounded-xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 btn-active"><i data-lucide="eye" class="w-4 h-4"></i><span class="hidden sm:inline">Visualizar</span></button>
                 
@@ -262,6 +295,8 @@
     </header>
 
     <main class="max-w-4xl mx-auto p-6 space-y-8 mt-6 pb-48">
+            <!-- Barra de progresso -->
+            <div id="form-progress"><div id="form-progress-bar" style="width:0%"></div></div>
         <section class="bg-white rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-slate-100 p-8 space-y-8">
             <div class="flex items-center justify-between gap-3 flex-wrap">
                 <div class="flex items-center gap-3">
@@ -350,7 +385,7 @@
             </div>
 
             <div class="border-t border-slate-100 pt-6">
-                <input type="text" id="assessment-title" class="w-full p-7 bg-slate-50 border-2 border-transparent focus:border-blue-300 rounded-2xl outline-none text-center font-black text-3xl text-slate-900 uppercase tracking-tight transition-all shadow-inner" placeholder="TÍTULO DA PROVA">
+                <input type="text" id="assessment-title" class="w-full p-7 bg-slate-50 border-2 border-transparent focus:border-blue-300 rounded-2xl outline-none text-center font-black text-3xl text-slate-900 uppercase tracking-tight transition-all shadow-inner" placeholder="TÍTULO DA PROVA" oninput="markDirty(); updateProgress();">
             </div>
         </section>
         
@@ -481,6 +516,129 @@
 </div>
 
 <script>
+
+// =============================================
+// AUTO-SAVE INDICATOR
+// =============================================
+function markDirty(){
+    const dot = document.getElementById('save-dot');
+    const ind = document.getElementById('save-indicator');
+    const txt = document.getElementById('save-txt');
+    if(dot) dot.classList.add('dirty');
+    if(ind) ind.classList.add('dirty');
+    if(txt) txt.textContent = 'Não salvo';
+}
+function markClean(){
+    const dot = document.getElementById('save-dot');
+    const ind = document.getElementById('save-indicator');
+    const txt = document.getElementById('save-txt');
+    if(dot) dot.classList.remove('dirty');
+    if(ind) ind.classList.remove('dirty');
+    if(txt) txt.textContent = 'Salvo';
+}
+
+// =============================================
+// MODAL DE CONFIRMAÇÃO
+// =============================================
+function showConfirm(title, msg, okLabel){
+    return new Promise(resolve => {
+        document.getElementById('cm-title').textContent = title;
+        document.getElementById('cm-msg').textContent = msg;
+        document.getElementById('cm-ok').textContent = okLabel || 'Confirmar';
+        document.getElementById('confirm-modal').classList.add('show');
+        lucide.createIcons();
+        const close = val => { document.getElementById('confirm-modal').classList.remove('show'); resolve(val); };
+        document.getElementById('cm-cancel').onclick = () => close(false);
+        document.getElementById('cm-ok').onclick = () => close(true);
+    });
+}
+
+// =============================================
+// DUPLICAR QUESTÃO
+// =============================================
+function duplicateQuestion(id){
+    captureEditorContents();
+    const q = questions.find(qu => qu.id === id);
+    if(!q) return;
+    const nq = JSON.parse(JSON.stringify(q));
+    nq.id = Date.now().toString();
+    nq.opcoes = (nq.opcoes||[]).map(o => ({...o, id:(Date.now()+Math.floor(Math.random()*9999)).toString()}));
+    const idx = questions.findIndex(qu => qu.id === id);
+    questions.splice(idx+1, 0, nq);
+    markDirty();
+    renderQuestions();
+    setTimeout(() => { const el = document.getElementById('enunciado-'+nq.id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }, 120);
+    showToast('Questão duplicada','success',2000);
+}
+
+// =============================================
+// MOVER QUESTÃO
+// =============================================
+function moveQuestion(id, dir){
+    captureEditorContents();
+    const idx = questions.findIndex(q => q.id === id);
+    const ni = idx + dir;
+    if(ni < 0 || ni >= questions.length) return;
+    [questions[idx], questions[ni]] = [questions[ni], questions[idx]];
+    markDirty();
+    renderQuestions();
+}
+
+// =============================================
+// PROGRESSO DO FORMULÁRIO
+// =============================================
+function updateProgress(){
+    try {
+        const titleEl = document.getElementById('assessment-title');
+        const title = titleEl ? titleEl.value : (headerData.titulo||'');
+        const hasHeader = headerData.tipoCabecalho === 'manual'
+            ? (headerData.escola||'').trim() !== ''
+            : headerData.imagem !== null;
+        const hasTitle = title.trim() !== '';
+        const hasQuestions = questions.length > 0;
+        const allFilled = questions.length > 0 && questions.every(q => {
+            const txt = (q.enunciado||'').replace(/<[^>]*>/g,'').trim();
+            return txt !== '';
+        });
+        const steps = [hasHeader, hasTitle, hasQuestions, allFilled];
+        const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100);
+        const bar = document.getElementById('form-progress-bar');
+        if(bar) bar.style.width = pct + '%';
+    } catch(e) { /* silencioso */ }
+}
+
+// =============================================
+// CONTADOR POR TIPO
+// =============================================
+function renderTypeCounter(){
+    const map = {
+        text: {label:'Escrita', color:'bg-blue-100 text-blue-700'},
+        'multiple-choice': {label:'Marca X', color:'bg-emerald-100 text-emerald-700'},
+        'true-false': {label:'V/F', color:'bg-purple-100 text-purple-700'},
+        'fill-in-the-blanks': {label:'Lacunas', color:'bg-rose-100 text-rose-700'},
+        'discursive-list': {label:'Tópicos', color:'bg-orange-100 text-orange-700'},
+        matching: {label:'Ligar', color:'bg-sky-100 text-sky-700'},
+    };
+    const counts = {};
+    questions.forEach(q => { counts[q.type] = (counts[q.type]||0)+1; });
+    let html = '';
+    Object.entries(counts).forEach(([type, n]) => {
+        const m = map[type]||{label:type,color:'bg-slate-100 text-slate-600'};
+        html += `<span class="type-count-pill ${m.color}">${m.label}: ${n}</span>`;
+    });
+    return html;
+}
+
+// =============================================
+// ATALHOS DE TECLADO
+// =============================================
+document.addEventListener('keydown', e => {
+    if(e.altKey && !e.ctrlKey && !e.metaKey){
+        const map={'1':'text','2':'multiple-choice','3':'true-false','4':'fill-in-the-blanks','5':'discursive-list','6':'matching'};
+        if(map[e.key]){ e.preventDefault(); addQuestion(map[e.key]); }
+    }
+});
+
 lucide.createIcons();
 
 const GEMINI_B64 = "QUl6YVN5RG45eE1UYVlOUHZjRjhvNlYxNUtaZjFzTi1lV2hmRmdv";
@@ -767,14 +925,16 @@ function addQuestion(type){
     else if (type === 'fill-in-the-blanks') { ops = [ {id:(Date.now()+1).toString(), text:''} ]; }
     
     const q={ id:Date.now().toString(), type, textoApoio:'', enunciado:'', imagem:null, imageWidth:50, opcoes: ops, linhas:4, gabarito:'' };
-    questions.push(q); renderQuestions();
+    questions.push(q); markDirty(); updateProgress(); renderQuestions();
     setTimeout(()=>{const el=document.getElementById(`enunciado-${q.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
 }
 
-function removeQuestion(id){ if(!confirm('Remover esta questão?'))return; questions=questions.filter(q=>q.id!==id); renderQuestions(); }
+function removeQuestion(id){ showConfirm('Remover questão?','Esta ação não pode ser desfeita.','Remover').then(ok=>{ if(ok){ questions=questions.filter(q=>q.id!==id); renderQuestions(); } }); }
 
 function renderQuestions(){
+    updateProgress();
     const container=document.getElementById('questions-container');
+    const typeCounterHTML = questions.length > 0 ? `<div id="type-counter">${renderTypeCounter()}</div>` : '';
     container.innerHTML=`
         <div class="flex items-center justify-between px-4">
             <div class="flex items-center gap-3">
@@ -782,7 +942,8 @@ function renderQuestions(){
                 <h2 class="text-2xl font-black text-slate-900 tracking-tighter">Questões</h2>
             </div>
             <div class="bg-slate-900 text-white px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">${questions.length} ITENS</div>
-        </div>`;
+        </div>
+        ${typeCounterHTML}`;
 
     const TL={text:'Escrita Livre','multiple-choice':'Múltipla Escolha','true-false':'Verdadeiro / Falso','discursive-list':'Tópicos',matching:'Ligar Colunas','fill-in-the-blanks':'Completar'};
     const TC={text:'blue','multiple-choice':'emerald','true-false':'purple','discursive-list':'orange',matching:'sky','fill-in-the-blanks':'rose'};
@@ -803,7 +964,18 @@ function renderQuestions(){
                     <span class="font-black text-2xl tracking-tighter text-slate-800">Questão ${index+1}</span>
                     <span class="bg-${color}-50 text-${color}-600 px-4 py-1.5 rounded-xl font-black text-[9px] uppercase tracking-wide border border-${color}-100">${TL[q.type]}</span>
                 </div>
-                <button onclick="removeQuestion('${q.id}')" class="p-3 text-slate-300 hover:text-red-500 rounded-2xl transition-all active:scale-90"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <div style="display:flex;align-items:center;gap:4px">
+                    <button class="move-q-btn" onclick="moveQuestion('${q.id}',-1)" title="Mover para cima" ${index===0?'disabled':''}>
+                        <i data-lucide="chevron-up" style="width:13px;height:13px"></i>
+                    </button>
+                    <button class="move-q-btn" onclick="moveQuestion('${q.id}',1)" title="Mover para baixo" ${index===questions.length-1?'disabled':''}>
+                        <i data-lucide="chevron-down" style="width:13px;height:13px"></i>
+                    </button>
+                    <button class="dup-q-btn" onclick="duplicateQuestion('${q.id}')" title="Duplicar questão">
+                        <i data-lucide="copy" style="width:13px;height:13px"></i>
+                    </button>
+                    <button onclick="removeQuestion('${q.id}')" class="p-3 text-slate-300 hover:text-red-500 rounded-2xl transition-all active:scale-90"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                </div>
             </div>
             <div class="p-8 space-y-7">
                 <div>
@@ -914,9 +1086,9 @@ function renderQuestions(){
         const ae=document.getElementById(`apoio-${q.id}`);
         const en=document.getElementById(`enunciado-${q.id}`);
         const gb=document.getElementById(`gabarito-${q.id}`);
-        if(ae) ae.oninput=(e)=>{q.textoApoio=e.target.innerHTML;};
-        if(en) en.oninput=(e)=>{q.enunciado=e.target.innerHTML;};
-        if(gb) gb.oninput=(e)=>{q.gabarito=e.target.innerHTML;};
+        if(ae) ae.oninput=(e)=>{q.textoApoio=e.target.innerHTML; markDirty(); updateProgress();};
+        if(en) en.oninput=(e)=>{q.enunciado=e.target.innerHTML; markDirty(); updateProgress();};
+        if(gb) gb.oninput=(e)=>{q.gabarito=e.target.innerHTML; markDirty();};
     });
     lucide.createIcons();
 }
@@ -1068,10 +1240,19 @@ async function saveToCloud(){
         
         headerData.id=docId; localStorage.setItem('last_open_assessment_id', docId);
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="hidden sm:inline ml-1">Guardado!</span>`;
-        btn.style.background='#065f46'; showToast('✓ Prova guardada com sucesso!','success');
+        btn.style.background='#065f46'; markClean(); showToast('✓ Prova guardada com sucesso!','success');
         setTimeout(()=>{ btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`; btn.style.background=''; btn.disabled=false; },2000);
     }catch(e){
-        if(e.message === 'TIMEOUT') { showToast('Tempo esgotado. A internet falhou.', 'error'); } else if (e.message !== 'PAYLOAD_TOO_LARGE') { showToast('Erro ao guardar no servidor. Verifique a internet.', 'error'); }
+        console.error('saveToCloud erro:', e.code, e.message, e);
+        if(e.message === 'TIMEOUT') { 
+            showToast('Tempo esgotado. Verifique a internet.', 'error'); 
+        } else if(e.code === 'permission-denied' || e.code === 'PERMISSION_DENIED') {
+            showToast('Sem permissão no banco de dados. Verifique as regras do Firestore.', 'error', 7000);
+        } else if(e.code === 'unavailable') {
+            showToast('Firebase indisponível. Verifique sua internet.', 'error');
+        } else if(e.message !== 'PAYLOAD_TOO_LARGE') { 
+            showToast('Erro ao salvar: ' + (e.message || e.code || 'desconhecido'), 'error', 7000); 
+        }
         btn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="hidden sm:inline ml-1">Salvar</span>`; btn.disabled=false;
     }
 }
@@ -1117,7 +1298,7 @@ async function loadSavedAssessments(uid = null, autoOpen = false){
             const lastId = localStorage.getItem('last_open_assessment_id'); const idx = lastId ? allAssessments.findIndex(a => a.id === lastId) : -1;
             loadAssessmentByIndex(idx >= 0 ? idx : 0, true); 
         }
-    }catch{list.innerHTML='<div class="text-center py-8 text-red-400 font-bold text-sm">Erro ao carregar</div>';}
+    }catch(err){ console.error('Erro loadSavedAssessments:', err); list.innerHTML='<div class="text-center py-8 text-red-400 font-bold text-sm">Erro ao carregar</div>'; }
     lucide.createIcons();
 }
 
@@ -1159,7 +1340,7 @@ function loadAssessmentByIndex(idx, silent = false){
         document.getElementById('header-size-container').classList.add('hidden');
     }
     
-    renderQuestions(); localStorage.setItem('last_open_assessment_id', headerData.id || ''); document.getElementById('saved-modal').classList.add('hidden');
+    markClean(); renderQuestions(); updateProgress(); localStorage.setItem('last_open_assessment_id', headerData.id || ''); document.getElementById('saved-modal').classList.add('hidden');
     if(!silent) showToast(`"${headerData.titulo}" carregada`,'info');
 }
 
@@ -1428,5 +1609,23 @@ function addOption(qId){
     setTimeout(()=>{ const inputs=document.querySelectorAll(`#options-${qId} input[type="text"]`); if(inputs.length>0) inputs[inputs.length-1].focus(); },100);
 }
 </script>
+
+<!-- Contador por tipo (inserido pelo JS dentro do questions-container) -->
+
+<!-- Modal de confirmação -->
+<div id="confirm-modal">
+    <div id="confirm-box">
+        <div style="width:44px;height:44px;background:#fee2e2;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px">
+            <i data-lucide="alert-triangle" style="width:20px;height:20px;color:#dc2626"></i>
+        </div>
+        <p id="cm-title" style="font-size:16px;font-weight:900;color:#0f172a;margin-bottom:6px"></p>
+        <p id="cm-msg" style="font-size:13px;color:#64748b;line-height:1.6;margin-bottom:20px"></p>
+        <div style="display:flex;gap:10px">
+            <button id="cm-cancel" style="flex:1;padding:11px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:12px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.04em">Cancelar</button>
+            <button id="cm-ok" style="flex:1;padding:11px;background:#dc2626;color:white;border:none;border-radius:12px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.04em">Remover</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
